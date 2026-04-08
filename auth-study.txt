@@ -1,0 +1,139 @@
+SIGNED, ENCRYPTED, DOUBLE-KEYED COOKIES — "THE MACAROON IDEA"
+================================================================
+
+Forget JWT vs Sessions. There's a third approach that solves the core problems of both.
+
+
+THE PROBLEM WITH BOTH CAMPS
+----------------------------
+
+JWTs: Can't revoke them. Payload is readable by anyone (just base64). Typically stored in localStorage where XSS can steal them.
+
+Sessions: Every request hits your session store (database/Redis). That's a bottleneck. Your DB goes down? Nobody's authenticated.
+
+What if you could have a token that:
+- Is opaque (unreadable by the client, unlike JWT)
+- Is self-contained (server doesn't need a DB lookup on every request, like JWT)
+- Can be revoked instantly (like sessions)
+- Is safe from XSS (httpOnly)
+- Is safe from CSRF (SameSite + bound to context)
+
+
+THE METHOD: ENCRYPTED STATELESS TOKENS WITH A VERSION COUNTER
+--------------------------------------------------------------
+
+Step 1 — Two keys, not one.
+
+You have two server-side secrets:
+- Signing key — proves the token wasn't tampered with (like JWT does)
+- Encryption key — makes the token completely unreadable to the client
+
+JWT only signs. It doesn't encrypt. Anyone can decode a JWT and read {"user_id": 42, "role": "admin"}. With encryption, the token is just meaningless bytes to anyone who doesn't hold the encryption key. No information leakage whatsoever.
+
+
+Step 2 — The payload includes a version number.
+
+{
+  user_id: 42,
+  role: "admin",
+  v: 7          <-- this is the key innovation
+}
+
+In your database, each user has a single integer column: token_version.
+
+When you create the token, you stamp the current version (7). When you validate it, you do ONE cheap check: is the version in the token still current?
+
+But here's the trick — you don't check the DB on every request. You cache the version in memory with a short TTL (say 30 seconds). So:
+
+- 99.9% of requests: validate encryption + signature (no DB hit, like JWT) + check in-memory cache
+- When you need to revoke: increment token_version in the DB. Within 30 seconds, the cache refreshes, and ALL existing tokens for that user are instantly invalid.
+
+You get JWT-like statelessness for normal operations, but session-like revocation when you need it. The 30-second window is the tradeoff — and for most apps, that's perfectly acceptable.
+
+
+Step 3 — Stored as httpOnly + Secure + SameSite=Lax cookie.
+
+The client never reads, stores, or sends this token manually. The browser handles everything. JavaScript can't touch it. XSS can't steal it. CSRF is blocked by SameSite.
+
+No Authorization: Bearer header gymnastics. No localStorage. No frontend token management code at all.
+
+
+WHY THIS IS BETTER THAN STANDARD APPROACHES
+---------------------------------------------
+
+Concern              | Standard JWT          | Standard Session       | This Method
+---------------------|-----------------------|------------------------|---------------------------
+DB hit per request   | No                    | Yes (every request)    | No (cached)
+Revocable            | No (until expiry)     | Yes (instant)          | Yes (~30s delay)
+Payload readable     | Yes (base64)          | N/A (just an ID)       | No (encrypted)
+XSS can steal token  | If in localStorage    | If httpOnly, no        | No (httpOnly cookie)
+CSRF risk            | None (manual header)  | Yes (auto-sent cookie) | Mitigated (SameSite)
+Server goes down     | Still works           | Auth breaks            | Still works (stateless)
+Scales horizontally  | Yes                   | Needs shared store     | Yes
+
+
+IN PRACTICE — LIBRARIES THAT DO THIS
+--------------------------------------
+
+- PASETO (Platform-Agnostic Security Tokens) — designed as "JWT done right." Version 4 uses XChaCha20 encryption + Ed25519 signing. The payload is encrypted, not just signed. It's what JWT should have been.
+
+- Macaroons (Google Research) — tokens with caveats that can be attenuated (you can add restrictions to a token without the server, like "this token only works for the next 5 minutes" or "only for read operations").
+
+- iron (from the Hapi.js ecosystem) — encrypted + signed + sealed tokens. Used by Auth.js (NextAuth) internally for session cookies.
+
+The version counter trick isn't from any library — it's a pattern you layer on top.
+
+
+THE MENTAL MODEL
+-----------------
+
+Think of it as a sealed envelope with a serial number.
+
+- Sealed — nobody can read what's inside except your server (encryption)
+- Tamper-evident — if someone modifies it, the seal breaks (signature)
+- Serial numbered — if you report it stolen, the bank invalidates that serial number (version counter)
+- Carried by the postman automatically — the browser handles transport, the letter never touches JavaScript (httpOnly cookie)
+
+JWT is a postcard — anyone in the mail chain can read it, and you can't recall it once sent.
+Sessions are a phone call — secure, but the line has to stay open (DB connection).
+This method is the sealed envelope — private, portable, and recallable.
+
+
+BACKGROUND CONCEPTS (STUDY THESE FIRST)
+-----------------------------------------
+
+HTTP is stateless. Every request is independent. The server has no memory.
+
+Sessions: Server creates a record (session) and gives the browser a session ID. Browser sends it back every time. Server looks it up.
+  - Hotel analogy: room key card. The card means nothing — the hotel's system knows what room it maps to.
+
+JWT (JSON Web Token): Server creates a self-contained token with user info baked in, signed with a secret key. Server doesn't store anything. It just verifies the signature.
+  - Passport analogy: the document itself says who you are. Border control reads the passport, doesn't call your country.
+
+Cookies: A storage + transport mechanism. The browser stores it and sends it automatically with every request to that domain.
+  - httpOnly flag: blocks JavaScript from reading the cookie. Prevents XSS token theft.
+  - Secure flag: only sent over HTTPS.
+  - SameSite flag: prevents the cookie from being sent on cross-origin requests (stops CSRF).
+
+XSS (Cross-Site Scripting): Attacker injects their JavaScript into your page. Can steal anything JS can access (localStorage, non-httpOnly cookies, DOM content).
+
+CSRF (Cross-Site Request Forgery): Attacker tricks the browser into making requests to your site using the user's cookies (since cookies are sent automatically).
+
+Access Token vs Refresh Token pattern:
+  - Access token: short-lived (minutes/hours), used on every request
+  - Refresh token: long-lived (days/weeks), used ONLY to get a new access token
+
+bcrypt: One-way password hashing. You never store the actual password. You store a scrambled version. When someone logs in, you scramble their input the same way and compare the outputs.
+
+
+REFERENCE — THE GO MDM BACKEND (remote/android-mdm/backend)
+-------------------------------------------------------------
+
+That project uses: JWT in Authorization header (Pattern 2 — no cookies).
+- Two tokens: access (hours) + refresh (days)
+- Token payload contains: user_id, org_id, email, role, token_type
+- Signed with HS256 using a secret from .env (JWT_SECRET)
+- Middleware extracts Bearer token from header, validates, stashes user info in request context
+- Password hashed with bcrypt
+- Separate device auth track (DeviceClaims) for Android tablets
+- No revocation mechanism, no encryption, no httpOnly cookies
