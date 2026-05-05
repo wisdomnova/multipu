@@ -3,6 +3,7 @@ import { apiLimiter } from "@/lib/rate-limit";
 import { assertTrustedOrigin } from "@/lib/request-security";
 import { createAdminSupabase } from "@/lib/supabase/server";
 import { getAdminWallets, getLaunchControls, isAdminWallet } from "@/lib/admin";
+import { isAdminPanelLoggedIn } from "@/lib/admin-session";
 import { z } from "zod";
 
 const launchControlsSchema = z.object({
@@ -14,7 +15,6 @@ const launchControlsSchema = z.object({
     bags: z.boolean(),
     pumpfun: z.boolean(),
     fourmeme: z.boolean(),
-    basememe: z.boolean(),
   }),
 });
 
@@ -25,10 +25,9 @@ export async function GET(request: Request) {
   }
 
   const auth = await getAuth();
-  if (!auth.isLoggedIn) {
-    return Response.json({ error: "Unauthorized" }, { status: 401 });
-  }
-  if (!isAdminWallet(auth.walletAddress)) {
+  const hasWalletAdmin = auth.isLoggedIn && isAdminWallet(auth.walletAddress);
+  const hasPasswordAdmin = await isAdminPanelLoggedIn();
+  if (!hasWalletAdmin && !hasPasswordAdmin) {
     return Response.json({ error: "Forbidden" }, { status: 403 });
   }
 
@@ -51,10 +50,9 @@ export async function PATCH(request: Request) {
   }
 
   const auth = await getAuth();
-  if (!auth.isLoggedIn) {
-    return Response.json({ error: "Unauthorized" }, { status: 401 });
-  }
-  if (!isAdminWallet(auth.walletAddress)) {
+  const hasWalletAdmin = auth.isLoggedIn && isAdminWallet(auth.walletAddress);
+  const hasPasswordAdmin = await isAdminPanelLoggedIn();
+  if (!hasWalletAdmin && !hasPasswordAdmin) {
     return Response.json({ error: "Forbidden" }, { status: 403 });
   }
 
@@ -78,7 +76,7 @@ export async function PATCH(request: Request) {
       {
         key: "launch_controls",
         value: controls,
-        updated_by_wallet: auth.walletAddress,
+        updated_by_wallet: hasWalletAdmin ? auth.walletAddress : "admin-password",
       },
       { onConflict: "key" }
     );
@@ -86,7 +84,7 @@ export async function PATCH(request: Request) {
     if (upsertError) throw upsertError;
 
     const { error: auditError } = await supabase.from("admin_audit_logs").insert({
-      wallet_address: auth.walletAddress,
+      wallet_address: hasWalletAdmin ? auth.walletAddress : "admin-password",
       action: "update_launch_controls",
       payload: controls,
     });

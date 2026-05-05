@@ -1,7 +1,7 @@
 import type { LaunchpadId } from "@/lib/supabase/database.types";
 
 export function isEvmLaunchpad(launchpad: LaunchpadId) {
-  return launchpad === "fourmeme" || launchpad === "basememe";
+  return launchpad === "fourmeme";
 }
 
 export function isSolanaLaunchpad(launchpad: LaunchpadId) {
@@ -10,6 +10,5 @@ export function isSolanaLaunchpad(launchpad: LaunchpadId) {
 
 export function getLaunchpadChainNetwork(launchpad: LaunchpadId) {
   if (launchpad === "fourmeme") return "bsc";
-  if (launchpad === "basememe") return "base";
   return null;
 }

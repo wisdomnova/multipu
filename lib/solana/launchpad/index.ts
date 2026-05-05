@@ -9,7 +9,6 @@ import { meteoraService } from "./meteora";
 import { bagsService } from "./bags";
 import { pumpfunService } from "./pumpfun";
 import { fourmemeService } from "./fourmeme";
-import { basememeService } from "./basememe";
 import type { LaunchpadService } from "./types";
 
 export type { LaunchConfig, LaunchResult, LaunchpadService } from "./types";
@@ -19,7 +18,6 @@ export const launchpads: Record<string, LaunchpadService> = {
   bags: bagsService,
   pumpfun: pumpfunService,
   fourmeme: fourmemeService,
-  basememe: basememeService,
 };
 
 export function getLaunchpad(id: string): LaunchpadService | null {
@@ -58,18 +56,9 @@ export const LAUNCHPAD_META = [
     id: "fourmeme" as const,
     name: "Four.meme",
     description: "BNB Chain meme launchpad with fair-launch mechanics.",
-    image: "/bags.png",
+    image: "/four-meme.png",
     estimatedFee: "~0.005 BNB",
     network: "BNB Smart Chain",
-    ready: true,
-  },
-  {
-    id: "basememe" as const,
-    name: "Base.meme",
-    description: "Community launch platform in the Base ecosystem.",
-    image: "/pumpfun.png",
-    estimatedFee: "~network gas",
-    network: "Base",
     ready: true,
   },
 ] as const;

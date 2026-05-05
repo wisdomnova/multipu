@@ -2,7 +2,7 @@ import "server-only";
 
 import { JsonRpcProvider, getAddress, id } from "ethers";
 
-type EvmNetwork = "bsc" | "base";
+type EvmNetwork = "bsc";
 
 const providers = new Map<EvmNetwork, JsonRpcProvider>();
 
@@ -11,18 +11,15 @@ export function areEvmLaunchAdaptersEnabled() {
 }
 
 function getRpcUrl(network: EvmNetwork) {
-  if (network === "bsc") return process.env.BSC_RPC_URL;
-  return process.env.BASE_RPC_URL;
+  return process.env.BSC_RPC_URL;
 }
 
 function getExpectedLauncherAddress(network: EvmNetwork) {
-  if (network === "bsc") return process.env.NEXT_PUBLIC_FOURMEME_LAUNCHER_ADDRESS;
-  return process.env.NEXT_PUBLIC_BASEMEME_LAUNCHER_ADDRESS;
+  return process.env.NEXT_PUBLIC_FOURMEME_LAUNCHER_ADDRESS;
 }
 
 function getExpectedFunctionSignature(network: EvmNetwork) {
-  if (network === "bsc") return process.env.NEXT_PUBLIC_FOURMEME_LAUNCH_FUNCTION_SIGNATURE;
-  return process.env.NEXT_PUBLIC_BASEMEME_LAUNCH_FUNCTION_SIGNATURE;
+  return process.env.NEXT_PUBLIC_FOURMEME_LAUNCH_FUNCTION_SIGNATURE;
 }
 
 function getEvmProvider(network: EvmNetwork) {

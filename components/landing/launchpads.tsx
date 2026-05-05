@@ -51,30 +51,16 @@ const launchpads = [
   {
     name: "Four.meme",
     description:
-      "BNB Smart Chain meme launchpad. Integrated into policy controls and queued for non-Solana execution.",
-    status: "Queued",
-    statusColor: "text-warning" as const,
+      "BNB Smart Chain meme launchpad with live wallet-based execution and policy controls.",
+    status: "Supported",
+    statusColor: "text-success" as const,
     features: [
       "BNB Chain target",
       "Launchpad policy controls",
       "Schema + analytics mapping",
-      "Execution adapter pending",
+      "ABI-verified launch execution",
     ],
-    image: "/bags.png",
-  },
-  {
-    name: "Base.meme",
-    description:
-      "Base ecosystem launchpad. Added to backend controls with execution rollout behind safety gates.",
-    status: "Queued",
-    statusColor: "text-warning" as const,
-    features: [
-      "Base network target",
-      "Admin allow/deny support",
-      "Unified launchpad IDs",
-      "Execution adapter pending",
-    ],
-    image: "/pumpfun.png",
+    image: "/four-meme.png",
   },
 ];
 

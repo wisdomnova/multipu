@@ -2,6 +2,7 @@ import { getAuth, getClientIp } from "@/lib/auth";
 import { apiLimiter } from "@/lib/rate-limit";
 import { getAdminWallets, getLaunchControls, isAdminWallet } from "@/lib/admin";
 import { getEnvironmentScope } from "@/lib/env-scope.server";
+import { isAdminPanelLoggedIn } from "@/lib/admin-session";
 import {
   isEvmLaunchAllowedOnServer,
   isMainnetLaunchAllowedOnServer,
@@ -21,10 +22,9 @@ export async function GET(request: Request) {
   }
 
   const auth = await getAuth();
-  if (!auth.isLoggedIn) {
-    return Response.json({ error: "Unauthorized" }, { status: 401 });
-  }
-  if (!isAdminWallet(auth.walletAddress)) {
+  const hasWalletAdmin = auth.isLoggedIn && isAdminWallet(auth.walletAddress);
+  const hasPasswordAdmin = await isAdminPanelLoggedIn();
+  if (!hasWalletAdmin && !hasPasswordAdmin) {
     return Response.json({ error: "Forbidden" }, { status: 403 });
   }
 
@@ -64,8 +64,8 @@ export async function GET(request: Request) {
   return Response.json({
     scope,
     auth: {
-      wallet: auth.walletAddress,
-      walletKind: auth.walletKind,
+      wallet: hasWalletAdmin ? auth.walletAddress : "admin-password",
+      walletKind: hasWalletAdmin ? auth.walletKind : "password",
       adminWalletsConfigured: getAdminWallets().length,
     },
     gates: {
