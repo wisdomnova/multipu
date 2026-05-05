@@ -43,3 +43,5 @@ next-env.d.ts
 
 #my article
 auth-study.txt
+# Supabase local CLI state
+supabase/.temp/
