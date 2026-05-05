@@ -15,8 +15,7 @@ export type LaunchpadId =
   | "meteora"
   | "bags"
   | "pumpfun"
-  | "fourmeme"
-  | "basememe";
+  | "fourmeme";
 export type LaunchStatus = "pending" | "confirming" | "live" | "failed";
 export type TokenStatus = "active" | "pending" | "failed";
 export type ChainNetwork = "devnet" | "testnet" | "mainnet-beta" | "bsc" | "base";

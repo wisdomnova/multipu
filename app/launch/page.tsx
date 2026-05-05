@@ -102,7 +102,7 @@ export default function LaunchPage() {
       return;
     }
     if (session.walletKind === "solana" && isEvmPad(pad)) {
-      toast.error("Use SIWB (EVM wallet) for Base/Four launchpads.");
+      toast.error("Use SIWB (EVM wallet) for Four.meme.");
       return;
     }
     if (session.walletKind === "evm" && !isEvmPad(pad)) {
@@ -293,7 +293,7 @@ export default function LaunchPage() {
           if (isEvmPad(padId)) {
             if (!evmAddress) throw new Error("EVM wallet not connected");
             const evmResult = await executeEvmLaunch({
-              launchpad: padId as "fourmeme" | "basememe",
+              launchpad: padId as "fourmeme",
               walletAddress: evmAddress,
               token: {
                 name: tokenData.name,

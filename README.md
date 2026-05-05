@@ -30,13 +30,9 @@ Multipu ships with a mainnet safety lock for testnet rollout phases.
 - `ENABLE_EVM_LAUNCH_ADAPTERS`: server-side gate for EVM launch verification paths
 - `NEXT_PUBLIC_ENABLE_EVM_LAUNCH_ADAPTERS`: client-side gate for EVM launch execution
 - `BSC_RPC_URL`: BNB Smart Chain RPC for `four.meme` adapter verification
-- `BASE_RPC_URL`: Base RPC for `base.meme` adapter verification
 - `NEXT_PUBLIC_FOURMEME_LAUNCHER_ADDRESS`: launcher contract used by wallet tx for four.meme
-- `NEXT_PUBLIC_BASEMEME_LAUNCHER_ADDRESS`: launcher contract used by wallet tx for base.meme
 - `NEXT_PUBLIC_FOURMEME_LAUNCH_FUNCTION_SIGNATURE`: ABI signature to encode and verify (e.g. `createToken(string,string,string,string)`)
-- `NEXT_PUBLIC_BASEMEME_LAUNCH_FUNCTION_SIGNATURE`: ABI signature to encode and verify
 - `NEXT_PUBLIC_FOURMEME_LAUNCH_ARG_TEMPLATE`: JSON array template for function args (`$name`, `$symbol`, `$description`, `$imageUrl`, `$supply`, `$decimals`, `$supplyWei`)
-- `NEXT_PUBLIC_BASEMEME_LAUNCH_ARG_TEMPLATE`: JSON array template for function args
 - `ADMIN_WALLETS`: comma-separated wallet addresses allowed to change admin controls
 
 Mainnet launches are only allowed when both phase and gate flags are explicitly enabled.
@@ -69,9 +65,8 @@ Use `GET /api/health/launch-policies` (admin wallets only) to inspect effective 
 
 - `Meteora`, `Bags`, `Pump.fun`: Solana
 - `Four.meme`: BNB Smart Chain (BSC)
-- `Base.meme`: Base network
 
-`Four.meme` and `Base.meme` IDs are integrated into backend controls and schemas. Execution remains disabled by default until dedicated non-Solana launch adapters are implemented.
+`Four.meme` is fully integrated in launch flows and remains protected by env/admin safety gates.
 
 EVM adapter verification framework is now in place and guarded by `ENABLE_EVM_LAUNCH_ADAPTERS`.
 

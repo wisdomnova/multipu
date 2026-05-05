@@ -5,6 +5,7 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { useAuth } from "@/hooks/use-auth";
 import { Wallet, LogOut, Loader2, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 /**
  * Wallet connect / auth button.
@@ -103,8 +104,10 @@ export function WalletButton({ className }: { className?: string }) {
           setIsSigningIn(true);
           try {
             await signIn();
-          } catch {
-            // Error already logged in hook
+          } catch (err) {
+            const message =
+              err instanceof Error ? err.message : "Sign in failed";
+            toast.error(message);
           } finally {
             setIsSigningIn(false);
           }
@@ -136,6 +139,12 @@ export function WalletButton({ className }: { className?: string }) {
       <div className="flex items-center gap-2">
         <button
           onClick={() => {
+            if (wallets.length === 0) {
+              toast.error(
+                "No Solana wallet detected. Install Phantom or another compatible wallet."
+              );
+              return;
+            }
             if (wallets.length === 1) {
               select(wallets[0].adapter.name);
             } else {
@@ -164,8 +173,11 @@ export function WalletButton({ className }: { className?: string }) {
           onClick={async () => {
             try {
               await connectEvmWallet();
-            } catch {
-              // handled by provider throw; keep UI stable
+              toast.success("Base wallet connected");
+            } catch (err) {
+              const message =
+                err instanceof Error ? err.message : "Failed to connect Base wallet";
+              toast.error(message);
             }
           }}
           className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold border border-border hover:border-border-hover text-text-primary rounded-full transition-all"

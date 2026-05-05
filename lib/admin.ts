@@ -11,8 +11,7 @@ const DEFAULT_LAUNCH_CONTROLS = {
     meteora: true,
     bags: true,
     pumpfun: true,
-    fourmeme: false,
-    basememe: false,
+    fourmeme: true,
   } as Record<LaunchpadId, boolean>,
 };
 

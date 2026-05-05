@@ -31,6 +31,21 @@ export function middleware(request: NextRequest) {
     }
   }
 
+  // ─── Admin Guard (password session cookie) ─────────
+  const isAdminLogin = pathname === "/admin/login";
+  const isAdminArea = pathname.startsWith("/admin");
+  const adminSessionCookie = request.cookies.get("multipu_admin_session");
+
+  if (isAdminArea && !isAdminLogin && !adminSessionCookie?.value) {
+    const loginUrl = new URL("/admin/login", request.url);
+    return NextResponse.redirect(loginUrl);
+  }
+
+  if (isAdminLogin && adminSessionCookie?.value) {
+    const adminUrl = new URL("/admin", request.url);
+    return NextResponse.redirect(adminUrl);
+  }
+
   // ─── API Rate-limit headers (actual limiting in route handlers) ─
   const response = NextResponse.next();
 

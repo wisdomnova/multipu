@@ -2,7 +2,7 @@
 
 import { Interface, id } from "ethers";
 
-type EvmLaunchpadId = "fourmeme" | "basememe";
+type EvmLaunchpadId = "fourmeme";
 
 const EVM_CHAIN_CONFIG = {
   fourmeme: {
@@ -14,16 +14,6 @@ const EVM_CHAIN_CONFIG = {
     launcherAddress: process.env.NEXT_PUBLIC_FOURMEME_LAUNCHER_ADDRESS,
     functionSignature: process.env.NEXT_PUBLIC_FOURMEME_LAUNCH_FUNCTION_SIGNATURE,
     argTemplate: process.env.NEXT_PUBLIC_FOURMEME_LAUNCH_ARG_TEMPLATE,
-  },
-  basememe: {
-    chainId: "0x2105", // 8453
-    chainName: "Base",
-    nativeCurrency: { name: "Ethereum", symbol: "ETH", decimals: 18 },
-    rpcUrls: [process.env.NEXT_PUBLIC_BASE_RPC_URL ?? "https://mainnet.base.org"],
-    blockExplorerUrls: ["https://basescan.org"],
-    launcherAddress: process.env.NEXT_PUBLIC_BASEMEME_LAUNCHER_ADDRESS,
-    functionSignature: process.env.NEXT_PUBLIC_BASEMEME_LAUNCH_FUNCTION_SIGNATURE,
-    argTemplate: process.env.NEXT_PUBLIC_BASEMEME_LAUNCH_ARG_TEMPLATE,
   },
 } as const;
 
@@ -102,9 +92,7 @@ function buildLaunchCallData(params: {
 }) {
   const config = EVM_CHAIN_CONFIG[params.launchpad];
   if (!config.functionSignature) {
-    throw new Error(
-      `${params.launchpad} function signature is not configured. Set NEXT_PUBLIC_${params.launchpad === "fourmeme" ? "FOURMEME" : "BASEMEME"}_LAUNCH_FUNCTION_SIGNATURE.`
-    );
+    throw new Error("fourmeme function signature is not configured. Set NEXT_PUBLIC_FOURMEME_LAUNCH_FUNCTION_SIGNATURE.");
   }
 
   const functionName = getFunctionName(config.functionSignature);
