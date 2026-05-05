@@ -2,6 +2,13 @@ import { getAuth, getClientIp } from "@/lib/auth";
 import { apiLimiter } from "@/lib/rate-limit";
 import { createAdminSupabase } from "@/lib/supabase/server";
 import { createLaunchSchema, confirmLaunchSchema } from "@/lib/validations";
+import { assertTrustedOrigin } from "@/lib/request-security";
+import { getEvmLaunchPolicyError, getLaunchPolicyError } from "@/lib/runtime-config.server";
+import { verifyLaunchConfirmationOnChain } from "@/lib/solana/server";
+import { getEnvironmentScope } from "@/lib/env-scope.server";
+import { getLaunchControls } from "@/lib/admin";
+import { isEvmLaunchpad, isSolanaLaunchpad, getLaunchpadChainNetwork } from "@/lib/launchpad-network";
+import { verifyEvmLaunchTransaction } from "@/lib/evm/server";
 
 /**
  * GET /api/launches — List the current user's launches.
@@ -19,10 +26,12 @@ export async function GET(request: Request) {
 
   try {
     const supabase = createAdminSupabase();
+    const scope = getEnvironmentScope();
     const { data: launches, error } = await supabase
       .from("launches")
       .select("*, tokens(name, symbol, mint_address)")
       .eq("wallet_address", auth.walletAddress)
+      .eq("app_phase", scope.appPhase)
       .order("created_at", { ascending: false });
 
     if (error) throw error;
@@ -40,6 +49,11 @@ export async function GET(request: Request) {
  * Returns: { launch } with status: pending.
  */
 export async function POST(request: Request) {
+  const originError = assertTrustedOrigin(request);
+  if (originError) {
+    return Response.json({ error: originError }, { status: 403 });
+  }
+
   const ip = getClientIp(request);
   if (!apiLimiter.check(ip)) {
     return Response.json({ error: "Rate limited" }, { status: 429 });
@@ -53,6 +67,7 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
     const parsed = createLaunchSchema.safeParse(body);
+    const walletKind = String(auth.walletKind ?? "solana");
 
     if (!parsed.success) {
       return Response.json(
@@ -61,14 +76,69 @@ export async function POST(request: Request) {
       );
     }
 
+    if (isSolanaLaunchpad(parsed.data.launchpad) && walletKind !== "solana") {
+      return Response.json(
+        { error: "Solana launchpads require a Solana-authenticated wallet." },
+        { status: 400 }
+      );
+    }
+
+    if (isEvmLaunchpad(parsed.data.launchpad) && walletKind !== "evm") {
+      return Response.json(
+        { error: "EVM launchpads require an EVM-authenticated wallet (SIWB)." },
+        { status: 400 }
+      );
+    }
+
+    if (isSolanaLaunchpad(parsed.data.launchpad)) {
+      const launchPolicyError = getLaunchPolicyError();
+      if (launchPolicyError) {
+        return Response.json({ error: launchPolicyError }, { status: 403 });
+      }
+    } else {
+      const evmPolicyError = getEvmLaunchPolicyError();
+      if (evmPolicyError) {
+        return Response.json({ error: evmPolicyError }, { status: 403 });
+      }
+    }
+
     const supabase = createAdminSupabase();
+    const scope = getEnvironmentScope();
+    const controls = await getLaunchControls();
+    const launchNetwork =
+      getLaunchpadChainNetwork(parsed.data.launchpad) ?? scope.network;
+
+    if (controls.launchesPaused) {
+      return Response.json(
+        { error: "Launches are currently paused by admin policy" },
+        { status: 403 }
+      );
+    }
+
+    if (!controls.launchpadsEnabled[parsed.data.launchpad]) {
+      return Response.json(
+        { error: `Launchpad ${parsed.data.launchpad} is currently disabled` },
+        { status: 403 }
+      );
+    }
+
+    if (
+      controls.allowlistMode &&
+      !controls.allowedWallets.includes(auth.walletAddress)
+    ) {
+      return Response.json(
+        { error: "Wallet is not allowlisted for launches in current phase" },
+        { status: 403 }
+      );
+    }
 
     // Verify the token belongs to this user and is minted
     const { data: token } = await supabase
       .from("tokens")
-      .select("id, user_id, status")
+      .select("id, user_id, status, network, app_phase")
       .eq("id", parsed.data.tokenId)
       .eq("wallet_address", auth.walletAddress)
+      .eq("app_phase", scope.appPhase)
       .single();
 
     if (!token) {
@@ -88,6 +158,7 @@ export async function POST(request: Request) {
       .select("id")
       .eq("token_id", parsed.data.tokenId)
       .eq("launchpad", parsed.data.launchpad)
+      .eq("app_phase", scope.appPhase)
       .single();
 
     if (existing) {
@@ -105,6 +176,8 @@ export async function POST(request: Request) {
         wallet_address: auth.walletAddress,
         launchpad: parsed.data.launchpad,
         initial_liquidity: parsed.data.initialLiquidity || null,
+        network: launchNetwork,
+        app_phase: scope.appPhase,
         status: "pending",
       })
       .select()
@@ -124,6 +197,11 @@ export async function POST(request: Request) {
  * Body: { launchId, poolAddress, launchTx, initialLiquidity? }
  */
 export async function PATCH(request: Request) {
+  const originError = assertTrustedOrigin(request);
+  if (originError) {
+    return Response.json({ error: originError }, { status: 403 });
+  }
+
   const ip = getClientIp(request);
   if (!apiLimiter.check(ip)) {
     return Response.json({ error: "Rate limited" }, { status: 429 });
@@ -137,6 +215,7 @@ export async function PATCH(request: Request) {
   try {
     const body = await request.json();
     const parsed = confirmLaunchSchema.safeParse(body);
+    const walletKind = String(auth.walletKind ?? "solana");
 
     if (!parsed.success) {
       return Response.json(
@@ -146,17 +225,60 @@ export async function PATCH(request: Request) {
     }
 
     const supabase = createAdminSupabase();
+    const scope = getEnvironmentScope();
 
     // Verify ownership
     const { data: launch } = await supabase
       .from("launches")
-      .select("id")
+      .select("id, launchpad, network")
       .eq("id", parsed.data.launchId)
       .eq("wallet_address", auth.walletAddress)
+      .eq("app_phase", scope.appPhase)
       .single();
 
     if (!launch) {
       return Response.json({ error: "Launch not found" }, { status: 404 });
+    }
+
+    if (isSolanaLaunchpad(launch.launchpad) && walletKind !== "solana") {
+      return Response.json(
+        { error: "Solana launch confirmations require a Solana-authenticated wallet." },
+        { status: 400 }
+      );
+    }
+    if (isEvmLaunchpad(launch.launchpad) && walletKind !== "evm") {
+      return Response.json(
+        { error: "EVM launch confirmations require an EVM-authenticated wallet." },
+        { status: 400 }
+      );
+    }
+
+    if (isSolanaLaunchpad(launch.launchpad)) {
+      const launchPolicyError = getLaunchPolicyError();
+      if (launchPolicyError) {
+        return Response.json({ error: launchPolicyError }, { status: 403 });
+      }
+      await verifyLaunchConfirmationOnChain({
+        walletAddress: auth.walletAddress,
+        signature: parsed.data.launchTx,
+      });
+    } else {
+      const evmPolicyError = getEvmLaunchPolicyError();
+      if (evmPolicyError) {
+        return Response.json({ error: evmPolicyError }, { status: 403 });
+      }
+      const evmNetwork = getLaunchpadChainNetwork(launch.launchpad);
+      if (!evmNetwork) {
+        return Response.json(
+          { error: "Unable to determine EVM network for launchpad." },
+          { status: 400 }
+        );
+      }
+      await verifyEvmLaunchTransaction({
+        network: evmNetwork,
+        walletAddress: auth.walletAddress,
+        txHash: parsed.data.launchTx,
+      });
     }
 
     const { data: updated, error } = await supabase

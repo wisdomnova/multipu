@@ -2,6 +2,7 @@ import { getAuth, getClientIp } from "@/lib/auth";
 import { apiLimiter } from "@/lib/rate-limit";
 import { createAdminSupabase } from "@/lib/supabase/server";
 import type { LaunchpadId } from "@/lib/supabase/database.types";
+import { getEnvironmentScope } from "@/lib/env-scope.server";
 
 /**
  * GET /api/earnings — Get the current user's earnings with breakdowns.
@@ -27,12 +28,14 @@ export async function GET(request: Request) {
     const launchpadFilter = searchParams.get("launchpad");
 
     const supabase = createAdminSupabase();
+    const scope = getEnvironmentScope();
 
     // Build query
     let query = supabase
       .from("earnings")
       .select("*, tokens(name, symbol), launches(launchpad, pool_address)")
       .eq("wallet_address", auth.walletAddress)
+      .eq("app_phase", scope.appPhase)
       .order("recorded_at", { ascending: false });
 
     // Period filter

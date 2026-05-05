@@ -2,6 +2,7 @@ import { getAuth, getClientIp } from "@/lib/auth";
 import { uploadLimiter } from "@/lib/rate-limit";
 import { MAX_IMAGE_SIZE, ALLOWED_IMAGE_TYPES } from "@/lib/validations";
 import { createAdminSupabase } from "@/lib/supabase/server";
+import { assertTrustedOrigin } from "@/lib/request-security";
 
 /**
  * POST /api/upload — Upload a token image.
@@ -13,6 +14,11 @@ import { createAdminSupabase } from "@/lib/supabase/server";
  * Production: replace with Arweave upload via Irys for permanent storage.
  */
 export async function POST(request: Request) {
+  const originError = assertTrustedOrigin(request);
+  if (originError) {
+    return Response.json({ error: originError }, { status: 403 });
+  }
+
   const ip = getClientIp(request);
   if (!uploadLimiter.check(ip)) {
     return Response.json(

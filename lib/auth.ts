@@ -21,6 +21,7 @@ export async function getAuth(): Promise<SessionData> {
     }
     return {
       walletAddress: session.walletAddress,
+      walletKind: session.walletKind ?? "solana",
       isLoggedIn: session.isLoggedIn,
       v: session.v,
     };

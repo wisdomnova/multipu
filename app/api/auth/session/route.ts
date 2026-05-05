@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { getIronSession } from "iron-session";
 import { sessionOptions, SessionData, defaultSession } from "@/lib/session";
+import { assertTrustedOrigin } from "@/lib/request-security";
 
 /**
  * GET /api/auth/session
@@ -20,6 +21,7 @@ export async function GET() {
 
   return Response.json({
     walletAddress: session.walletAddress,
+    walletKind: session.walletKind ?? "solana",
     isLoggedIn: session.isLoggedIn,
     v: session.v,
   });
@@ -31,7 +33,12 @@ export async function GET() {
  * Destroys the session (logs out).
  * The encrypted cookie is removed.
  */
-export async function DELETE() {
+export async function DELETE(request: Request) {
+  const originError = assertTrustedOrigin(request);
+  if (originError) {
+    return Response.json({ error: originError }, { status: 403 });
+  }
+
   const session = await getIronSession<SessionData>(
     await cookies(),
     sessionOptions

@@ -24,6 +24,13 @@ import { WalletButton } from "@/components/wallet-button";
 import { createMintTransaction } from "@/lib/solana/token";
 import { LAUNCHPAD_META, getLaunchpad } from "@/lib/solana/launchpad";
 import { toast } from "sonner";
+import {
+  APP_PHASE,
+  SOLANA_NETWORK,
+  areEvmLaunchesEnabledOnClient,
+  isMainnetLaunchAllowedOnClient,
+} from "@/lib/runtime-config";
+import { executeEvmLaunch } from "@/lib/evm/client";
 
 type Step = "connect" | "create" | "launchpads" | "confirm" | "success";
 
@@ -37,7 +44,7 @@ const stepsMeta: { id: Step; label: string; number: string }[] = [
 export default function LaunchPage() {
   const { connection } = useConnection();
   const { publicKey, signTransaction, connected } = useWallet();
-  const { session } = useAuth();
+  const { session, evmAddress } = useAuth();
 
   const [currentStep, setCurrentStep] = useState<Step>("connect");
   const [selectedPads, setSelectedPads] = useState<string[]>([]);
@@ -63,6 +70,11 @@ export default function LaunchPage() {
   });
 
   const currentIndex = stepsMeta.findIndex((s) => s.id === currentStep);
+  const launchRestricted = !isMainnetLaunchAllowedOnClient();
+  const evmLaunchesEnabled = areEvmLaunchesEnabledOnClient();
+
+  const isEvmPad = (padId: string) =>
+    LAUNCHPAD_META.find((m) => m.id === padId)?.network !== "Solana";
 
   const goNext = () => {
     setError(null);
@@ -80,17 +92,38 @@ export default function LaunchPage() {
   };
 
   const togglePad = (pad: string) => {
+    const launchpadMeta = LAUNCHPAD_META.find((m) => m.id === pad);
+    if (!launchpadMeta?.ready) {
+      toast.error(`${launchpadMeta?.name ?? pad} integration is not live yet`);
+      return;
+    }
+    if (isEvmPad(pad) && !evmLaunchesEnabled) {
+      toast.error("EVM launch adapters are disabled for this deployment.");
+      return;
+    }
+    if (session.walletKind === "solana" && isEvmPad(pad)) {
+      toast.error("Use SIWB (EVM wallet) for Base/Four launchpads.");
+      return;
+    }
+    if (session.walletKind === "evm" && !isEvmPad(pad)) {
+      toast.error("Use SIWS (Solana wallet) for Solana launchpads.");
+      return;
+    }
     setSelectedPads((prev) =>
       prev.includes(pad) ? prev.filter((p) => p !== pad) : [...prev, pad]
     );
   };
 
   const canProceed = () => {
-    if (currentStep === "connect") return session.isLoggedIn && connected;
+    if (currentStep === "connect") {
+      if (!session.isLoggedIn) return false;
+      if (session.walletKind === "evm") return Boolean(evmAddress);
+      return connected;
+    }
     if (currentStep === "create")
       return tokenData.name && tokenData.symbol && tokenData.supply;
     if (currentStep === "launchpads") return selectedPads.length > 0;
-    if (currentStep === "confirm") return true;
+    if (currentStep === "confirm") return !launchRestricted;
     return false;
   };
 
@@ -115,8 +148,22 @@ export default function LaunchPage() {
 
   // ─── Deploy Flow ───────────────────────────────────
   const handleDeploy = useCallback(async () => {
-    if (!publicKey || !signTransaction || !connection) {
-      setError("Wallet not connected");
+    const isSolanaAuth = session.walletKind === "solana";
+    const isEvmAuth = session.walletKind === "evm";
+
+    if (isSolanaAuth && (!publicKey || !signTransaction || !connection)) {
+      setError("Solana wallet not connected");
+      return;
+    }
+    if (isEvmAuth && !evmAddress) {
+      setError("EVM wallet not connected");
+      return;
+    }
+
+    if (launchRestricted) {
+      setError(
+        "Mainnet launches are currently disabled while Multipu runs in a testnet security phase."
+      );
       return;
     }
 
@@ -165,48 +212,50 @@ export default function LaunchPage() {
         tokenId = token.id;
       }
 
-      // Step 3: Build + sign + send mint transaction
-      setDeployProgress("Creating token on Solana...");
-      const mintResult = await createMintTransaction(connection, publicKey, {
-        name: tokenData.name,
-        symbol: tokenData.symbol,
-        decimals: parseInt(tokenData.decimals),
-        supply: tokenData.supply,
-        description: tokenData.description,
-        imageUrl: imageUrl || undefined,
-      });
-
-      const signed = await signTransaction(mintResult.transaction);
-      const rawTx = signed.serialize();
-
-      setDeployProgress("Confirming mint transaction...");
-      const sig = await connection.sendRawTransaction(rawTx, {
-        skipPreflight: false,
-        preflightCommitment: "confirmed",
-      });
-
-      const { blockhash, lastValidBlockHeight } =
-        await connection.getLatestBlockhash("confirmed");
-      await connection.confirmTransaction(
-        { signature: sig, blockhash, lastValidBlockHeight },
-        "confirmed"
-      );
-
-      const mintAddr = mintResult.mintKeypair.publicKey.toBase58();
-      setMintAddress(mintAddr);
-      setMintTx(sig);
-
-      // Step 4: Confirm token in DB
-      if (tokenId) {
-        await fetch("/api/tokens", {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            tokenId,
-            mintAddress: mintAddr,
-            mintTx: sig,
-          }),
+      let mintedTokenAddress: string | null = null;
+      if (isSolanaAuth && publicKey && signTransaction && connection) {
+        setDeployProgress("Creating token on Solana...");
+        const mintResult = await createMintTransaction(connection, publicKey, {
+          name: tokenData.name,
+          symbol: tokenData.symbol,
+          decimals: parseInt(tokenData.decimals),
+          supply: tokenData.supply,
+          description: tokenData.description,
+          imageUrl: imageUrl || undefined,
         });
+
+        const signed = await signTransaction(mintResult.transaction);
+        const rawTx = signed.serialize();
+
+        setDeployProgress("Confirming mint transaction...");
+        const sig = await connection.sendRawTransaction(rawTx, {
+          skipPreflight: false,
+          preflightCommitment: "confirmed",
+        });
+
+        const { blockhash, lastValidBlockHeight } =
+          await connection.getLatestBlockhash("confirmed");
+        await connection.confirmTransaction(
+          { signature: sig, blockhash, lastValidBlockHeight },
+          "confirmed"
+        );
+
+        const mintAddr = mintResult.mintKeypair.publicKey.toBase58();
+        mintedTokenAddress = mintAddr;
+        setMintAddress(mintAddr);
+        setMintTx(sig);
+
+        if (tokenId) {
+          await fetch("/api/tokens", {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              tokenId,
+              mintAddress: mintAddr,
+              mintTx: sig,
+            }),
+          });
+        }
       }
 
       // Step 5: Launch on selected launchpads
@@ -238,37 +287,59 @@ export default function LaunchPage() {
             }
           }
 
-          // Build launch transaction
-          const launchResult = await launchpad.createLaunchTransaction(
-            connection,
-            {
-              mintAddress: new PublicKey(mintAddr),
-              walletPublicKey: publicKey,
-              initialLiquiditySol: 1,
-              tokenAmount:
-                (BigInt(tokenData.supply) *
-                  BigInt(10 ** parseInt(tokenData.decimals))) /
-                10n,
+          let launchSig = "";
+          let poolAddr = "";
+
+          if (isEvmPad(padId)) {
+            if (!evmAddress) throw new Error("EVM wallet not connected");
+            const evmResult = await executeEvmLaunch({
+              launchpad: padId as "fourmeme" | "basememe",
+              walletAddress: evmAddress,
+              token: {
+                name: tokenData.name,
+                symbol: tokenData.symbol,
+                description: tokenData.description,
+                imageUrl,
+                supply: tokenData.supply,
+                decimals: parseInt(tokenData.decimals),
+              },
+            });
+            launchSig = evmResult.txHash;
+            poolAddr = evmResult.poolAddress;
+          } else {
+            if (!connection || !publicKey || !signTransaction || !mintedTokenAddress) {
+              throw new Error("Missing Solana launch prerequisites");
             }
-          );
+            const launchResult = await launchpad.createLaunchTransaction(
+              connection,
+              {
+                mintAddress: new PublicKey(mintedTokenAddress),
+                walletPublicKey: publicKey,
+                initialLiquiditySol: 1,
+                tokenAmount:
+                  (BigInt(tokenData.supply) *
+                    BigInt(10 ** parseInt(tokenData.decimals))) /
+                  10n,
+              }
+            );
 
-          const signedLaunch = await signTransaction(launchResult.transaction);
-          const launchSig = await connection.sendRawTransaction(
-            signedLaunch.serialize(),
-            { skipPreflight: false, preflightCommitment: "confirmed" }
-          );
+            const signedLaunch = await signTransaction(launchResult.transaction);
+            launchSig = await connection.sendRawTransaction(
+              signedLaunch.serialize(),
+              { skipPreflight: false, preflightCommitment: "confirmed" }
+            );
 
-          const launchBlock = await connection.getLatestBlockhash("confirmed");
-          await connection.confirmTransaction(
-            {
-              signature: launchSig,
-              blockhash: launchBlock.blockhash,
-              lastValidBlockHeight: launchBlock.lastValidBlockHeight,
-            },
-            "confirmed"
-          );
-
-          const poolAddr = launchResult.poolAddress.toBase58();
+            const launchBlock = await connection.getLatestBlockhash("confirmed");
+            await connection.confirmTransaction(
+              {
+                signature: launchSig,
+                blockhash: launchBlock.blockhash,
+                lastValidBlockHeight: launchBlock.lastValidBlockHeight,
+              },
+              "confirmed"
+            );
+            poolAddr = launchResult.poolAddress.toBase58();
+          }
 
           if (launchId) {
             await fetch("/api/launches", {
@@ -310,10 +381,13 @@ export default function LaunchPage() {
     publicKey,
     signTransaction,
     connection,
+    session.walletKind,
+    evmAddress,
     tokenData,
     selectedPads,
     imageFile,
     launchResults,
+    launchRestricted,
   ]);
 
   // ─── Cost Estimate ─────────────────────────────────
@@ -442,8 +516,23 @@ export default function LaunchPage() {
                 variants={fadeUp}
                 className="mt-3 text-text-secondary"
               >
-                Link your Solana wallet to deploy tokens and manage launches.
+                Link your Solana or EVM wallet to deploy tokens and manage launches.
               </motion.p>
+              <motion.div
+                variants={fadeUp}
+                className="mt-3 inline-flex items-center gap-2 border border-accent/30 bg-accent/5 px-3 py-1.5"
+              >
+                <span className="font-mono text-[10px] uppercase tracking-wider text-accent">
+                  Network
+                </span>
+                <span className="font-mono text-xs text-text-primary">
+                  {SOLANA_NETWORK}
+                </span>
+                <span className="text-text-dim">/</span>
+                <span className="font-mono text-xs text-text-primary">
+                  {APP_PHASE}
+                </span>
+              </motion.div>
 
               <motion.div variants={fadeUp} className="mt-10 space-y-4">
                 {!session.isLoggedIn ? (
@@ -660,7 +749,9 @@ export default function LaunchPage() {
                       "relative text-left p-6 border transition-all duration-200 group",
                       selectedPads.includes(pad.id)
                         ? "border-accent/40 bg-accent/5"
-                        : "border-border hover:border-border-hover hover:bg-elevated"
+                        : pad.ready
+                        ? "border-border hover:border-border-hover hover:bg-elevated"
+                        : "border-border opacity-60 cursor-not-allowed"
                     )}
                   >
                     {selectedPads.includes(pad.id) && (
@@ -685,11 +776,19 @@ export default function LaunchPage() {
                         <span className="font-mono text-[10px] text-text-dim">
                           Est. fee: {pad.estimatedFee}
                         </span>
+                        <div className="font-mono text-[10px] text-text-dim mt-0.5">
+                          {pad.network}
+                        </div>
                       </div>
                     </div>
                     <p className="text-sm text-text-secondary leading-relaxed">
                       {pad.description}
                     </p>
+                    {!pad.ready && (
+                      <p className="text-[10px] font-mono text-text-dim mt-2 uppercase tracking-wider">
+                        Coming soon
+                      </p>
+                    )}
                   </button>
                 ))}
               </motion.div>
@@ -750,6 +849,19 @@ export default function LaunchPage() {
                 variants={fadeUp}
                 className="mt-10 border border-border divide-y divide-border"
               >
+                {launchRestricted && (
+                  <div className="p-6 bg-error/5 border-b border-error/20">
+                    <p className="text-sm text-error font-medium">
+                      Mainnet safety lock is enabled
+                    </p>
+                    <p className="text-xs text-text-secondary mt-1">
+                      This deployment only allows testnet-phase usage until
+                      `NEXT_PUBLIC_APP_PHASE=mainnet` and
+                      `NEXT_PUBLIC_ENABLE_MAINNET_LAUNCHES=true` are explicitly
+                      enabled.
+                    </p>
+                  </div>
+                )}
                 <div className="p-6">
                   <span className="font-mono text-[0.65rem] text-text-dim uppercase tracking-[0.15em]">
                     // Token Details

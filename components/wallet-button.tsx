@@ -17,7 +17,7 @@ import { cn } from "@/lib/utils";
 export function WalletButton({ className }: { className?: string }) {
   const { select, wallets, publicKey, connected, connecting, disconnect } =
     useWallet();
-  const { session, isLoading, signIn, signOut } = useAuth();
+  const { session, isLoading, signIn, signOut, evmAddress, evmConnected, connectEvmWallet } = useAuth();
   const [showMenu, setShowMenu] = useState(false);
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [showWalletList, setShowWalletList] = useState(false);
@@ -37,7 +37,7 @@ export function WalletButton({ className }: { className?: string }) {
   }
 
   // State 3: signed in
-  if (session.isLoggedIn && connected) {
+  if (session.isLoggedIn) {
     const addr = session.walletAddress;
     const short = `${addr.slice(0, 4)}...${addr.slice(-4)}`;
 
@@ -72,7 +72,7 @@ export function WalletButton({ className }: { className?: string }) {
             <div className="absolute right-0 top-full mt-2 w-48 border border-border bg-background rounded-sm shadow-lg z-50 overflow-hidden">
               <div className="px-3 py-2 border-b border-border">
                 <div className="font-mono text-xs text-text-muted">
-                  Connected
+                  Connected ({session.walletKind.toUpperCase()})
                 </div>
                 <div className="font-mono text-xs text-text-primary truncate mt-0.5">
                   {addr}
@@ -96,7 +96,7 @@ export function WalletButton({ className }: { className?: string }) {
   }
 
   // State 2: wallet connected but not signed in
-  if (connected && publicKey) {
+  if ((connected && publicKey) || evmConnected) {
     return (
       <button
         onClick={async () => {
@@ -123,7 +123,7 @@ export function WalletButton({ className }: { className?: string }) {
         ) : (
           <>
             <Wallet size={14} />
-            Sign In
+            Sign In ({connected && publicKey ? "SIWS" : "SIWB"})
           </>
         )}
       </button>
@@ -133,34 +133,47 @@ export function WalletButton({ className }: { className?: string }) {
   // State 1: no wallet connected
   return (
     <div className="relative">
-      <button
-        onClick={() => {
-          // If there are wallets available, try connecting the first one
-          // otherwise show the wallet list
-          if (wallets.length === 1) {
-            select(wallets[0].adapter.name);
-          } else {
-            setShowWalletList(!showWalletList);
-          }
-        }}
-        disabled={connecting}
-        className={cn(
-          "inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold bg-accent hover:bg-accent-hover text-white rounded-full transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(139,92,246,0.3)] disabled:opacity-50",
-          className
-        )}
-      >
-        {connecting ? (
-          <>
-            <Loader2 size={14} className="animate-spin" />
-            Connecting...
-          </>
-        ) : (
-          <>
-            <Wallet size={14} />
-            Connect Wallet
-          </>
-        )}
-      </button>
+      <div className="flex items-center gap-2">
+        <button
+          onClick={() => {
+            if (wallets.length === 1) {
+              select(wallets[0].adapter.name);
+            } else {
+              setShowWalletList(!showWalletList);
+            }
+          }}
+          disabled={connecting}
+          className={cn(
+            "inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold bg-accent hover:bg-accent-hover text-white rounded-full transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(139,92,246,0.3)] disabled:opacity-50",
+            className
+          )}
+        >
+          {connecting ? (
+            <>
+              <Loader2 size={14} className="animate-spin" />
+              Connecting...
+            </>
+          ) : (
+            <>
+              <Wallet size={14} />
+              Connect Solana
+            </>
+          )}
+        </button>
+        <button
+          onClick={async () => {
+            try {
+              await connectEvmWallet();
+            } catch {
+              // handled by provider throw; keep UI stable
+            }
+          }}
+          className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold border border-border hover:border-border-hover text-text-primary rounded-full transition-all"
+        >
+          <Wallet size={14} />
+          {evmAddress ? "Base Connected" : "Connect Base"}
+        </button>
+      </div>
 
       {/* Wallet selection dropdown */}
       {showWalletList && wallets.length > 1 && (
