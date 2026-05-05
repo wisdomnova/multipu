@@ -1,9 +1,22 @@
 import { z } from "zod";
 
+const launchpadIds = ["meteora", "bags", "pumpfun", "fourmeme", "basememe"] as const;
+
 // ─── Solana Address Validator ──────────────────────
 const solanaAddress = z
   .string()
   .regex(/^[1-9A-HJ-NP-Za-km-z]{32,44}$/, "Invalid Solana address");
+const evmAddress = z
+  .string()
+  .regex(/^0x[a-fA-F0-9]{40}$/, "Invalid EVM address");
+const txHash = z
+  .string()
+  .regex(/^0x([A-Fa-f0-9]{64})$/, "Invalid EVM tx hash");
+const solanaSignature = z
+  .string()
+  .regex(/^[1-9A-HJ-NP-Za-km-z]{32,128}$/, "Invalid Solana signature");
+const launchAddress = z.union([solanaAddress, evmAddress]);
+const chainTx = z.union([solanaSignature, txHash]);
 
 // ─── Token Creation ────────────────────────────────
 export const createTokenSchema = z.object({
@@ -45,7 +58,7 @@ export type ConfirmTokenInput = z.infer<typeof confirmTokenSchema>;
 // ─── Create Launch ─────────────────────────────────
 export const createLaunchSchema = z.object({
   tokenId: z.string().uuid(),
-  launchpad: z.enum(["meteora", "bags", "pumpfun"]),
+  launchpad: z.enum(launchpadIds),
   initialLiquidity: z.coerce.number().positive().optional(),
 });
 
@@ -54,8 +67,8 @@ export type CreateLaunchInput = z.infer<typeof createLaunchSchema>;
 // ─── Confirm Launch ────────────────────────────────
 export const confirmLaunchSchema = z.object({
   launchId: z.string().uuid(),
-  poolAddress: solanaAddress,
-  launchTx: z.string().min(1),
+  poolAddress: launchAddress,
+  launchTx: chainTx,
   initialLiquidity: z.coerce.number().nonnegative().optional(),
 });
 
@@ -65,7 +78,7 @@ export type ConfirmLaunchInput = z.infer<typeof confirmLaunchSchema>;
 export const recordEarningSchema = z.object({
   tokenId: z.string().uuid(),
   launchId: z.string().uuid(),
-  launchpad: z.enum(["meteora", "bags", "pumpfun"]),
+  launchpad: z.enum(launchpadIds),
   amountSol: z.coerce.number().positive(),
   feeType: z.enum(["creator_fee", "lp_fee", "referral"]).default("creator_fee"),
   txSignature: z.string().optional(),

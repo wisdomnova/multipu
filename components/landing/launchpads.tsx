@@ -11,7 +11,7 @@ const launchpads = [
     description:
       "Solana's premier liquidity layer. Dynamic pools, DLMM, and capital-efficient token launches.",
     status: "Supported",
-    statusColor: "success" as const,
+    statusColor: "text-success" as const,
     features: [
       "Dynamic liquidity pools",
       "DLMM integration",
@@ -25,7 +25,7 @@ const launchpads = [
     description:
       "Community-driven degen launchpad. Fast launches, meme-friendly, and built for the culture.",
     status: "Supported",
-    statusColor: "success" as const,
+    statusColor: "text-success" as const,
     features: [
       "Quick launch setup",
       "Meme-token optimized",
@@ -39,12 +39,40 @@ const launchpads = [
     description:
       "The viral token launcher. Dead-simple bonding curves, instant tradability, and massive reach.",
     status: "Supported",
-    statusColor: "success" as const,
+    statusColor: "text-success" as const,
     features: [
       "Bonding curve launches",
       "Instant tradability",
       "Viral distribution",
       "Low barrier to entry",
+    ],
+    image: "/pumpfun.png",
+  },
+  {
+    name: "Four.meme",
+    description:
+      "BNB Smart Chain meme launchpad. Integrated into policy controls and queued for non-Solana execution.",
+    status: "Queued",
+    statusColor: "text-warning" as const,
+    features: [
+      "BNB Chain target",
+      "Launchpad policy controls",
+      "Schema + analytics mapping",
+      "Execution adapter pending",
+    ],
+    image: "/bags.png",
+  },
+  {
+    name: "Base.meme",
+    description:
+      "Base ecosystem launchpad. Added to backend controls with execution rollout behind safety gates.",
+    status: "Queued",
+    statusColor: "text-warning" as const,
+    features: [
+      "Base network target",
+      "Admin allow/deny support",
+      "Unified launchpad IDs",
+      "Execution adapter pending",
     ],
     image: "/pumpfun.png",
   },
@@ -77,7 +105,7 @@ export function Launchpads() {
             variants={fadeUp}
             className="mt-4 text-text-secondary max-w-xl text-lg"
           >
-            Three battle-tested platforms. One deploy.
+            Multi-launchpad control plane with staged integrations.
           </motion.p>
         </motion.div>
 
@@ -114,10 +142,10 @@ export function Launchpads() {
                       </h3>
                       <div className="flex items-center gap-2 mt-1">
                         <span
-                          className={`w-1.5 h-1.5 rounded-full bg-${pad.statusColor}`}
+                          className={`w-1.5 h-1.5 rounded-full ${pad.statusColor.replace("text-", "bg-")}`}
                           style={{ animation: "pulse-dot 2s ease-in-out infinite" }}
                         />
-                        <span className="font-mono text-xs text-success">
+                        <span className={pad.statusColor + " font-mono text-xs"}>
                           {pad.status}
                         </span>
                       </div>

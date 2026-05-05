@@ -11,9 +11,16 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[];
 
-export type LaunchpadId = "meteora" | "bags" | "pumpfun";
+export type LaunchpadId =
+  | "meteora"
+  | "bags"
+  | "pumpfun"
+  | "fourmeme"
+  | "basememe";
 export type LaunchStatus = "pending" | "confirming" | "live" | "failed";
 export type TokenStatus = "active" | "pending" | "failed";
+export type ChainNetwork = "devnet" | "testnet" | "mainnet-beta" | "bsc" | "base";
+export type AppPhase = "testnet" | "mainnet";
 
 export interface Database {
   public: {
@@ -52,6 +59,8 @@ export interface Database {
           supply: string;
           description: string | null;
           image_url: string | null;
+          network: ChainNetwork;
+          app_phase: AppPhase;
           mint_address: string | null;
           mint_tx: string | null;
           status: TokenStatus;
@@ -68,6 +77,8 @@ export interface Database {
           supply: string;
           description?: string | null;
           image_url?: string | null;
+          network?: ChainNetwork;
+          app_phase?: AppPhase;
           mint_address?: string | null;
           mint_tx?: string | null;
           status?: TokenStatus;
@@ -81,6 +92,8 @@ export interface Database {
           supply?: string;
           description?: string | null;
           image_url?: string | null;
+          network?: ChainNetwork;
+          app_phase?: AppPhase;
           mint_address?: string | null;
           mint_tx?: string | null;
           status?: TokenStatus;
@@ -104,6 +117,8 @@ export interface Database {
           user_id: string;
           wallet_address: string;
           launchpad: LaunchpadId;
+          network: ChainNetwork;
+          app_phase: AppPhase;
           status: LaunchStatus;
           pool_address: string | null;
           launch_tx: string | null;
@@ -118,6 +133,8 @@ export interface Database {
           user_id: string;
           wallet_address: string;
           launchpad: LaunchpadId;
+          network?: ChainNetwork;
+          app_phase?: AppPhase;
           status?: LaunchStatus;
           pool_address?: string | null;
           launch_tx?: string | null;
@@ -128,6 +145,8 @@ export interface Database {
         };
         Update: {
           status?: LaunchStatus;
+          network?: ChainNetwork;
+          app_phase?: AppPhase;
           pool_address?: string | null;
           launch_tx?: string | null;
           initial_liquidity?: number | null;
@@ -160,6 +179,8 @@ export interface Database {
           token_id: string;
           launch_id: string;
           launchpad: LaunchpadId;
+          network: ChainNetwork;
+          app_phase: AppPhase;
           amount_sol: number;
           fee_type: string;
           tx_signature: string | null;
@@ -173,6 +194,8 @@ export interface Database {
           token_id: string;
           launch_id: string;
           launchpad: LaunchpadId;
+          network?: ChainNetwork;
+          app_phase?: AppPhase;
           amount_sol: number;
           fee_type?: string;
           tx_signature?: string | null;
@@ -180,6 +203,8 @@ export interface Database {
           created_at?: string;
         };
         Update: {
+          network?: ChainNetwork;
+          app_phase?: AppPhase;
           amount_sol?: number;
           tx_signature?: string | null;
         };
@@ -207,6 +232,46 @@ export interface Database {
           },
         ];
       };
+      admin_settings: {
+        Row: {
+          key: string;
+          value: Json;
+          updated_by_wallet: string | null;
+          updated_at: string;
+        };
+        Insert: {
+          key: string;
+          value?: Json;
+          updated_by_wallet?: string | null;
+          updated_at?: string;
+        };
+        Update: {
+          value?: Json;
+          updated_by_wallet?: string | null;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      admin_audit_logs: {
+        Row: {
+          id: string;
+          wallet_address: string;
+          action: string;
+          payload: Json;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          wallet_address: string;
+          action: string;
+          payload?: Json;
+          created_at?: string;
+        };
+        Update: {
+          payload?: Json;
+        };
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
@@ -214,6 +279,8 @@ export interface Database {
       launchpad_id: LaunchpadId;
       launch_status: LaunchStatus;
       token_status: TokenStatus;
+      chain_network: ChainNetwork;
+      app_phase: AppPhase;
     };
     CompositeTypes: Record<string, never>;
   };

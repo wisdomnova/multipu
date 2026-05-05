@@ -6,6 +6,7 @@ import { SessionOptions } from "iron-session";
  */
 export interface SessionData {
   walletAddress: string;
+  walletKind: "solana" | "evm";
   v: number; // token version — increment in DB to revoke all sessions
   isLoggedIn: boolean;
 }
@@ -34,6 +35,7 @@ export const sessionOptions: SessionOptions = {
  */
 export const defaultSession: SessionData = {
   walletAddress: "",
+  walletKind: "solana",
   v: 0,
   isLoggedIn: false,
 };

@@ -7,6 +7,9 @@ import { SessionData, defaultSession } from "@/lib/session";
 interface AuthContextType {
   session: SessionData;
   isLoading: boolean;
+  evmAddress: string | null;
+  evmConnected: boolean;
+  connectEvmWallet: () => Promise<string>;
   signIn: () => Promise<void>;
   signOut: () => Promise<void>;
 }
@@ -14,6 +17,9 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType>({
   session: defaultSession,
   isLoading: true,
+  evmAddress: null,
+  evmConnected: false,
+  connectEvmWallet: async () => "",
   signIn: async () => {},
   signOut: async () => {},
 });
@@ -33,6 +39,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { publicKey, signMessage, connected, disconnect } = useWallet();
   const [session, setSession] = useState<SessionData>(defaultSession);
   const [isLoading, setIsLoading] = useState(true);
+  const [evmAddress, setEvmAddress] = useState<string | null>(null);
 
   // Fetch session on mount
   const fetchSession = useCallback(async () => {
@@ -51,54 +58,114 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     fetchSession();
   }, [fetchSession]);
 
+  const connectEvmWallet = useCallback(async () => {
+    if (typeof window === "undefined" || !window.ethereum) {
+      throw new Error("No EVM wallet detected. Install MetaMask or a compatible wallet.");
+    }
+    const ethereum = (window as Window & { ethereum?: { request: (args: { method: string; params?: unknown[] | object }) => Promise<unknown> } }).ethereum;
+    if (!ethereum) {
+      throw new Error("No EVM wallet detected. Install MetaMask or a compatible wallet.");
+    }
+    const accounts = (await ethereum.request({
+      method: "eth_requestAccounts",
+    })) as string[];
+
+    const address = accounts[0];
+    if (!address) {
+      throw new Error("No EVM wallet account available.");
+    }
+    setEvmAddress(address);
+    return address;
+  }, []);
+
   // Sign in: challenge → sign → verify
   const signIn = useCallback(async () => {
-    if (!publicKey || !signMessage) {
-      throw new Error("Wallet not connected or doesn't support message signing");
-    }
-
     try {
-      // 1. Get challenge nonce
-      const challengeRes = await fetch("/api/auth/challenge");
-      const { nonce } = await challengeRes.json();
+      // Prefer SIWS when Solana wallet signing is available.
+      if (publicKey && signMessage) {
+        const challengeRes = await fetch("/api/auth/challenge");
+        const { nonce } = await challengeRes.json();
 
-      // 2. Sign the nonce with wallet
-      const message = new TextEncoder().encode(nonce);
-      const signatureBytes = await signMessage(message);
+        const message = new TextEncoder().encode(nonce);
+        const signatureBytes = await signMessage(message);
 
-      // 3. Encode signature as base58
-      // Import bs58 dynamically to avoid SSR issues
-      const bs58 = await import("bs58");
-      const signature = bs58.default.encode(signatureBytes);
+        const bs58 = await import("bs58");
+        const signature = bs58.default.encode(signatureBytes);
 
-      // 4. Verify with server
-      const verifyRes = await fetch("/api/auth/verify", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          walletAddress: publicKey.toBase58(),
-          signature,
-        }),
-      });
+        const verifyRes = await fetch("/api/auth/verify", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            walletAddress: publicKey.toBase58(),
+            signature,
+          }),
+        });
 
-      if (!verifyRes.ok) {
-        const err = await verifyRes.json();
-        throw new Error(err.error || "Verification failed");
+        if (!verifyRes.ok) {
+          const err = await verifyRes.json();
+          throw new Error(err.error || "Verification failed");
+        }
+      } else {
+        // Fallback to SIWB using EVM wallet.
+        const walletAddress = evmAddress ?? (await connectEvmWallet());
+        const ethereum = (window as Window & { ethereum?: { request: (args: { method: string; params?: unknown[] | object }) => Promise<unknown> } }).ethereum;
+        if (typeof window === "undefined" || !ethereum) {
+          throw new Error("No EVM wallet provider available.");
+        }
+
+        const challengeRes = await fetch("/api/auth/challenge-evm");
+        const challenge = await challengeRes.json();
+        if (!challengeRes.ok) {
+          throw new Error(challenge.error || "Failed to get EVM challenge");
+        }
+
+        const message = [
+          `${challenge.domain} wants you to sign in with your Ethereum account:`,
+          walletAddress,
+          "",
+          challenge.statement,
+          "",
+          `URI: ${challenge.uri}`,
+          "Version: 1",
+          `Chain ID: ${challenge.chainId}`,
+          `Nonce: ${challenge.nonce}`,
+        ].join("\n");
+
+        const signature = (await ethereum.request({
+          method: "personal_sign",
+          params: [message, walletAddress],
+        })) as string;
+
+        const verifyRes = await fetch("/api/auth/verify-evm", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            walletAddress,
+            message,
+            signature,
+          }),
+        });
+
+        if (!verifyRes.ok) {
+          const err = await verifyRes.json();
+          throw new Error(err.error || "EVM verification failed");
+        }
       }
 
-      // 5. Refresh session state
+      // Refresh session state
       await fetchSession();
     } catch (error) {
       console.error("[AUTH] Sign-in error:", error);
       throw error;
     }
-  }, [publicKey, signMessage, fetchSession]);
+  }, [publicKey, signMessage, fetchSession, evmAddress, connectEvmWallet]);
 
   // Sign out: destroy session + disconnect wallet
   const signOut = useCallback(async () => {
     try {
       await fetch("/api/auth/session", { method: "DELETE" });
       setSession(defaultSession);
+      setEvmAddress(null);
       await disconnect();
     } catch (error) {
       console.error("[AUTH] Sign-out error:", error);
@@ -106,7 +173,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [disconnect]);
 
   return (
-    <AuthContext.Provider value={{ session, isLoading, signIn, signOut }}>
+    <AuthContext.Provider
+      value={{
+        session,
+        isLoading,
+        evmAddress,
+        evmConnected: Boolean(evmAddress),
+        connectEvmWallet,
+        signIn,
+        signOut,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

@@ -1,6 +1,7 @@
 import { getAuth, getClientIp } from "@/lib/auth";
 import { apiLimiter } from "@/lib/rate-limit";
 import { createAdminSupabase } from "@/lib/supabase/server";
+import { getEnvironmentScope } from "@/lib/env-scope.server";
 
 /**
  * GET /api/dashboard — Aggregated dashboard stats for the current user.
@@ -24,6 +25,7 @@ export async function GET(request: Request) {
   try {
     const supabase = createAdminSupabase();
     const wallet = auth.walletAddress;
+    const scope = getEnvironmentScope();
 
     // Run queries in parallel for performance
     const [tokensRes, launchesRes, earningsRes, recentEarningsRes] =
@@ -32,17 +34,20 @@ export async function GET(request: Request) {
           .from("tokens")
           .select("*, launches(id, launchpad, status, pool_address)")
           .eq("wallet_address", wallet)
+          .eq("app_phase", scope.appPhase)
           .order("created_at", { ascending: false }),
 
         supabase
           .from("launches")
           .select("id, status")
-          .eq("wallet_address", wallet),
+          .eq("wallet_address", wallet)
+          .eq("app_phase", scope.appPhase),
 
         supabase
           .from("earnings")
           .select("amount_sol, recorded_at, launchpad")
-          .eq("wallet_address", wallet),
+          .eq("wallet_address", wallet)
+          .eq("app_phase", scope.appPhase),
 
         supabase
           .from("earnings")
@@ -50,6 +55,7 @@ export async function GET(request: Request) {
             "amount_sol, fee_type, recorded_at, launchpad, tokens(name, symbol)"
           )
           .eq("wallet_address", wallet)
+          .eq("app_phase", scope.appPhase)
           .order("recorded_at", { ascending: false })
           .limit(10),
       ]);

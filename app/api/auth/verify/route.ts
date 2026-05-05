@@ -7,6 +7,7 @@ import bs58 from "bs58";
 import { createAdminSupabase } from "@/lib/supabase/server";
 import { authLimiter } from "@/lib/rate-limit";
 import { getClientIp } from "@/lib/auth";
+import { assertTrustedOrigin } from "@/lib/request-security";
 
 /**
  * POST /api/auth/verify
@@ -25,6 +26,11 @@ import { getClientIp } from "@/lib/auth";
  */
 export async function POST(request: Request) {
   try {
+    const originError = assertTrustedOrigin(request);
+    if (originError) {
+      return Response.json({ error: originError }, { status: 403 });
+    }
+
     // Rate limit auth attempts
     const ip = getClientIp(request);
     if (!authLimiter.check(ip)) {
@@ -94,6 +100,7 @@ export async function POST(request: Request) {
 
     // Create the authenticated session
     session.walletAddress = walletAddress;
+    session.walletKind = "solana";
     session.isLoggedIn = true;
     session.v = sessionVersion;
 

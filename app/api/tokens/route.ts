@@ -2,6 +2,9 @@ import { getAuth, getClientIp } from "@/lib/auth";
 import { apiLimiter } from "@/lib/rate-limit";
 import { createAdminSupabase } from "@/lib/supabase/server";
 import { createTokenSchema, confirmTokenSchema } from "@/lib/validations";
+import { assertTrustedOrigin } from "@/lib/request-security";
+import { verifyMintConfirmationOnChain } from "@/lib/solana/server";
+import { getEnvironmentScope } from "@/lib/env-scope.server";
 
 /**
  * GET /api/tokens — List the current user's tokens.
@@ -19,10 +22,12 @@ export async function GET(request: Request) {
 
   try {
     const supabase = createAdminSupabase();
+    const scope = getEnvironmentScope();
     const { data: tokens, error } = await supabase
       .from("tokens")
       .select("*, launches(*)")
       .eq("wallet_address", auth.walletAddress)
+      .eq("app_phase", scope.appPhase)
       .order("created_at", { ascending: false });
 
     if (error) throw error;
@@ -42,6 +47,11 @@ export async function GET(request: Request) {
  * After the client mints on-chain, call PATCH to confirm.
  */
 export async function POST(request: Request) {
+  const originError = assertTrustedOrigin(request);
+  if (originError) {
+    return Response.json({ error: originError }, { status: 403 });
+  }
+
   const ip = getClientIp(request);
   if (!apiLimiter.check(ip)) {
     return Response.json({ error: "Rate limited" }, { status: 429 });
@@ -64,6 +74,7 @@ export async function POST(request: Request) {
     }
 
     const supabase = createAdminSupabase();
+    const scope = getEnvironmentScope();
 
     // Get user ID
     const { data: user } = await supabase
@@ -76,6 +87,7 @@ export async function POST(request: Request) {
       return Response.json({ error: "User not found" }, { status: 404 });
     }
 
+    const isSolanaTokenFlow = auth.walletKind === "solana";
     const { data: token, error } = await supabase
       .from("tokens")
       .insert({
@@ -87,7 +99,9 @@ export async function POST(request: Request) {
         decimals: parsed.data.decimals,
         description: parsed.data.description || null,
         image_url: parsed.data.imageUrl || null,
-        status: "pending",
+        network: scope.network,
+        app_phase: scope.appPhase,
+        status: isSolanaTokenFlow ? "pending" : "active",
       })
       .select()
       .single();
@@ -107,6 +121,11 @@ export async function POST(request: Request) {
  * Updates the token record with on-chain data and sets status to active.
  */
 export async function PATCH(request: Request) {
+  const originError = assertTrustedOrigin(request);
+  if (originError) {
+    return Response.json({ error: originError }, { status: 403 });
+  }
+
   const ip = getClientIp(request);
   if (!apiLimiter.check(ip)) {
     return Response.json({ error: "Rate limited" }, { status: 429 });
@@ -115,6 +134,12 @@ export async function PATCH(request: Request) {
   const auth = await getAuth();
   if (!auth.isLoggedIn) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  if (auth.walletKind !== "solana") {
+    return Response.json(
+      { error: "Token confirmation currently supports Solana-authenticated wallets only." },
+      { status: 400 }
+    );
   }
 
   try {
@@ -128,7 +153,14 @@ export async function PATCH(request: Request) {
       );
     }
 
+    await verifyMintConfirmationOnChain({
+      walletAddress: auth.walletAddress,
+      mintAddress: parsed.data.mintAddress,
+      signature: parsed.data.mintTx,
+    });
+
     const supabase = createAdminSupabase();
+    const scope = getEnvironmentScope();
 
     // Verify ownership
     const { data: token } = await supabase
@@ -136,6 +168,7 @@ export async function PATCH(request: Request) {
       .select("id")
       .eq("id", parsed.data.tokenId)
       .eq("wallet_address", auth.walletAddress)
+      .eq("app_phase", scope.appPhase)
       .single();
 
     if (!token) {
