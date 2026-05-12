@@ -19,6 +19,21 @@ export function SignInModal({ isOpen, onClose }: SignInModalProps) {
   const [selectedMethod, setSelectedMethod] = useState<string | null>(null);
   const [isConnecting, setIsConnecting] = useState(false);
 
+  // Prevent scroll when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+      document.body.style.paddingRight = "var(--scrollbar-gutter, 0px)";
+    } else {
+      document.body.style.overflow = "";
+      document.body.style.paddingRight = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+      document.body.style.paddingRight = "";
+    };
+  }, [isOpen]);
+
   // Close modal when successfully signed in
   useEffect(() => {
     if (session.isLoggedIn) {
@@ -165,24 +180,24 @@ export function SignInModal({ isOpen, onClose }: SignInModalProps) {
   return (
     <AnimatePresence>
       {isOpen && (
-        <>
+        <div className="fixed inset-0 z-[100] w-screen h-screen overflow-hidden">
           {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 z-[60] bg-black/80 backdrop-blur-md"
+            className="absolute inset-0 bg-black/80 backdrop-blur-md"
           />
 
-          {/* Modal */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 10 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 10 }}
-            className="fixed inset-0 z-[70] flex items-center justify-center p-4 pointer-events-none"
-          >
-            <div className="relative w-full max-w-[400px] pointer-events-auto">
+          {/* Modal Container */}
+          <div className="absolute inset-0 flex items-center justify-center p-4 pointer-events-none">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              className="relative w-full max-w-[400px] pointer-events-auto"
+            >
               {/* Outer Glow */}
               <div className="absolute -inset-1 bg-gradient-to-r from-accent/20 to-accent/10 rounded-[28px] blur-2xl opacity-50" />
               
@@ -222,7 +237,7 @@ export function SignInModal({ isOpen, onClose }: SignInModalProps) {
                           {isConnecting && selectedMethod === method.id ? (
                             <Loader2 size={20} className="animate-spin text-accent" />
                           ) : (
-                            method.icon
+                             method.icon
                           )}
                         </div>
                         
@@ -253,9 +268,9 @@ export function SignInModal({ isOpen, onClose }: SignInModalProps) {
                   </p>
                 </div>
               </div>
-            </div>
-          </motion.div>
-        </>
+            </motion.div>
+          </div>
+        </div>
       )}
     </AnimatePresence>
   );
