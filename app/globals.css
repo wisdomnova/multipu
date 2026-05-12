@@ -52,6 +52,13 @@ body {
   font-family: var(--font-sans);
 }
 
+/* Ensure buttons have cursor pointer across the entire website */
+button, 
+[role="button"],
+a {
+  cursor: pointer;
+}
+
 /* Dot grid background pattern */
 .dot-grid {
   background-image: radial-gradient(

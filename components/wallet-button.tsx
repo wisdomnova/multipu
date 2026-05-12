@@ -6,7 +6,8 @@ import { useAuth } from "@/hooks/use-auth";
 import { Wallet, LogOut, Loader2, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-
+import { SignInModal } from "@/components/signin-modal";
+ 
 /**
  * Wallet connect / auth button.
  *
@@ -22,6 +23,7 @@ export function WalletButton({ className }: { className?: string }) {
   const [showMenu, setShowMenu] = useState(false);
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [showWalletList, setShowWalletList] = useState(false);
+  const [showSignInModal, setShowSignInModal] = useState(false);
 
   // Loading state
   if (isLoading) {
@@ -135,93 +137,18 @@ export function WalletButton({ className }: { className?: string }) {
 
   // State 1: no wallet connected
   return (
-    <div className="relative">
-      <div className="flex items-center gap-2">
-        <button
-          onClick={() => {
-            if (wallets.length === 0) {
-              toast.error(
-                "No Solana wallet detected. Install Phantom or another compatible wallet."
-              );
-              return;
-            }
-            if (wallets.length === 1) {
-              select(wallets[0].adapter.name);
-            } else {
-              setShowWalletList(!showWalletList);
-            }
-          }}
-          disabled={connecting}
-          className={cn(
-            "inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold bg-accent hover:bg-accent-hover text-white rounded-full transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(139,92,246,0.3)] disabled:opacity-50",
-            className
-          )}
-        >
-          {connecting ? (
-            <>
-              <Loader2 size={14} className="animate-spin" />
-              Connecting...
-            </>
-          ) : (
-            <>
-              <Wallet size={14} />
-              Connect Solana
-            </>
-          )}
-        </button>
-        <button
-          onClick={async () => {
-            try {
-              await connectEvmWallet();
-              toast.success("Base wallet connected");
-            } catch (err) {
-              const message =
-                err instanceof Error ? err.message : "Failed to connect Base wallet";
-              toast.error(message);
-            }
-          }}
-          className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold border border-border hover:border-border-hover text-text-primary rounded-full transition-all"
-        >
-          <Wallet size={14} />
-          {evmAddress ? "Base Connected" : "Connect Base"}
-        </button>
-      </div>
-
-      {/* Wallet selection dropdown */}
-      {showWalletList && wallets.length > 1 && (
-        <>
-          <div
-            className="fixed inset-0 z-40"
-            onClick={() => setShowWalletList(false)}
-          />
-          <div className="absolute right-0 top-full mt-2 w-56 border border-border bg-background rounded-sm shadow-lg z-50 overflow-hidden">
-            <div className="px-3 py-2 border-b border-border">
-              <div className="font-mono text-xs text-text-muted">
-                Select wallet
-              </div>
-            </div>
-            {wallets.map((wallet) => (
-              <button
-                key={wallet.adapter.name}
-                onClick={() => {
-                  select(wallet.adapter.name);
-                  setShowWalletList(false);
-                }}
-                className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-text-secondary hover:text-text-primary hover:bg-elevated transition-colors"
-              >
-                {wallet.adapter.icon && (
-                  <img
-                    src={wallet.adapter.icon}
-                    alt=""
-                    className="w-5 h-5 rounded-sm"
-                  />
-                )}
-                {wallet.adapter.name}
-              </button>
-            ))}
-          </div>
-        </>
-      )}
-    </div>
+    <>
+      <button
+        onClick={() => setShowSignInModal(true)}
+        className={cn(
+          "inline-flex items-center gap-2 px-7 py-2.5 text-sm font-semibold bg-accent hover:bg-accent-hover text-white rounded-full transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(139,92,246,0.3)]",
+          className
+        )}
+      >
+        <Wallet size={14} />
+        Sign In
+      </button>
+      <SignInModal isOpen={showSignInModal} onClose={() => setShowSignInModal(false)} />
+    </>
   );
 }
