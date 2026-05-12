@@ -3,6 +3,7 @@ import { getClientIp } from "@/lib/auth";
 import { adminAuthLimiter } from "@/lib/rate-limit";
 import { assertTrustedOrigin } from "@/lib/request-security";
 import { getAdminSession, setAdminPanelLogin } from "@/lib/admin-session";
+import { isIpWhitelisted, logAdminAudit } from "@/lib/security";
 
 function safeCompare(a: string, b: string) {
   const aBuf = Buffer.from(a);
@@ -18,7 +19,24 @@ export async function POST(request: Request) {
   }
 
   const ip = getClientIp(request);
+  
+  // Check IP whitelist
+  if (!isIpWhitelisted(ip)) {
+    await logAdminAudit("system", "suspicious_activity", {
+      reason: "IP not whitelisted",
+      ip,
+    }, ip);
+    return Response.json(
+      { error: "Access denied. IP not authorized." },
+      { status: 403 }
+    );
+  }
+
   if (!adminAuthLimiter.check(ip)) {
+    await logAdminAudit("system", "suspicious_activity", {
+      reason: "Rate limit exceeded",
+      ip,
+    }, ip);
     return Response.json(
       { error: "Too many attempts. Try again shortly." },
       { status: 429 }
@@ -40,10 +58,18 @@ export async function POST(request: Request) {
   }
 
   if (!safeCompare(provided, configured)) {
+    await logAdminAudit("system", "suspicious_activity", {
+      reason: "Invalid admin password attempt",
+      ip,
+    }, ip);
     return Response.json({ error: "Invalid password." }, { status: 401 });
   }
 
   const session = await getAdminSession();
   await setAdminPanelLogin(session, true);
+  
+  // Log successful login
+  await logAdminAudit("admin-password", "admin_login", { ip }, ip);
+  
   return Response.json({ ok: true, isAdminLoggedIn: true });
 }

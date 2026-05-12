@@ -4,6 +4,7 @@ import { assertTrustedOrigin } from "@/lib/request-security";
 import { createAdminSupabase } from "@/lib/supabase/server";
 import { getAdminWallets, getLaunchControls, isAdminWallet } from "@/lib/admin";
 import { isAdminPanelLoggedIn } from "@/lib/admin-session";
+import { logAdminAudit } from "@/lib/security";
 import { z } from "zod";
 
 const launchControlsSchema = z.object({
