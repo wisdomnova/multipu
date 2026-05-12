@@ -2,71 +2,48 @@
 
 import { motion } from "framer-motion";
 import { fadeUp, stagger } from "@/components/motion";
-import {
-  Layers,
-  Rocket,
-  BarChart3,
-  Shield,
-  Globe,
-  Zap,
-} from "lucide-react";
 
-const features = [
+const featureGroups = [
   {
-    icon: Layers,
-    label: "// Token Deploy",
+    label: "Token Deploy",
     title: "One-Click Token Creation",
-    description:
-      "Deploy your SPL token with custom name, symbol, supply, and metadata. No CLI needed.",
-    wide: true,
+    description: "Deploy your SPL token with custom name, symbol, supply, and metadata. No CLI needed.",
+    link: "EXPLORE TOKENROOM >"
   },
   {
-    icon: Rocket,
-    label: "// Multi-Launch",
+    label: "Multi-Launch",
     title: "Multi-Launchpad Push",
-    description:
-      "Select Meteora, Bags, Pump.fun, or all three. Auto-fill details and launch simultaneously.",
+    description: "Select Meteora, Bags, Pump.fun, or all three. Auto-fill details and launch simultaneously.",
+    link: "EXPLORE POLARIS >"
   },
   {
-    icon: BarChart3,
-    label: "// Earnings",
-    title: "Revenue Tracking",
-    description:
-      "Track creator fees and earnings from each launchpad in real-time.",
+    label: "Earnings & Security",
+    title: "Revenue & Wallet Auth",
+    description: "Track creator fees and earnings in real-time. Secure wallet-native auth, no passwords.",
+    link: "EXPLORE REFERRAL NETWORK >"
   },
   {
-    icon: Shield,
-    label: "// Security",
-    title: "Wallet-Native Auth",
-    description: "Connect your Solana wallet. No accounts, no passwords. Your keys, your tokens.",
-  },
-  {
-    icon: Globe,
-    label: "// Status",
-    title: "Live Deployment Status",
-    description:
-      "Monitor every launch - see what's live, pending, or completed across all platforms.",
-  },
-  {
-    icon: Zap,
-    label: "// Speed",
-    title: "Fast Execution",
-    description:
-      "Optimized for Solana's speed. Deploy and launch in seconds, not minutes.",
-    wide: true,
-  },
+    label: "Status & Speed",
+    title: "Live Speed Execution",
+    description: "Monitor every launch cross-platform. Optimized for Solana's speed and execution.",
+    items: [
+      { label: "LIVE DEPLOYMENT STATUS >" },
+      { label: "FAST EXECUTION >" },
+      { label: "REAL-TIME MONITORING >" }
+    ]
+  }
 ];
 
 export function Features() {
   return (
-    <section id="features" className="relative py-24 md:py-32">
+    <section id="features" className="relative py-24 md:py-32 border-t border-white/[0.05]">
       <div className="mx-auto max-w-[1400px] px-6 md:px-10">
         <motion.div
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: "-100px" }}
           variants={stagger}
-          className="mb-16"
+          className="mb-20"
         >
           <motion.span
             variants={fadeUp}
@@ -76,13 +53,13 @@ export function Features() {
           </motion.span>
           <motion.h2
             variants={fadeUp}
-            className="mt-4 text-[clamp(1.75rem,4vw,3rem)] font-bold tracking-tight"
+            className="mt-4 text-[clamp(1.75rem,4vw,3rem)] font-bold tracking-tight text-white mb-2"
           >
             Everything you need to launch
           </motion.h2>
           <motion.p
             variants={fadeUp}
-            className="mt-4 text-text-secondary max-w-xl text-lg"
+            className="text-text-secondary max-w-xl text-lg font-light leading-relaxed"
           >
             From token creation to multi-platform distribution - all from one
             dashboard.
@@ -94,37 +71,64 @@ export function Features() {
           whileInView="visible"
           viewport={{ once: true, margin: "-50px" }}
           variants={stagger}
-          className="grid grid-cols-1 md:grid-cols-3 gap-px bg-border border border-border"
+          className="grid grid-cols-1 md:grid-cols-4 border-l border-white/10"
         >
-          {features.map((feature) => (
+          {featureGroups.map((group, idx) => (group.items ? (
             <motion.div
-              key={feature.title}
+              key={idx}
               variants={fadeUp}
-              className={`group relative p-8 md:p-10 bg-background hover:bg-elevated transition-colors duration-300 ${
-                feature.wide ? "md:col-span-2" : ""
-              }`}
+              className="px-8 py-12 border-r border-white/10 flex flex-col min-h-[460px] bg-white/[0.01] hover:bg-white/[0.02] transition-colors"
             >
-              {/* Hover glow */}
-              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none bg-gradient-to-br from-accent/[0.03] to-transparent" />
-
-              <span className="relative font-mono text-[0.65rem] text-text-dim uppercase tracking-[0.15em]">
-                {feature.label}
-              </span>
-              <div className="relative mt-4 flex items-start gap-4">
-                <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-accent/10 border border-accent/20 flex items-center justify-center group-hover:border-accent/40 transition-colors">
-                  <feature.icon size={18} className="text-accent" />
-                </div>
-                <div>
-                  <h3 className="text-base font-semibold text-text-primary">
-                    {feature.title}
-                  </h3>
-                  <p className="mt-2 text-sm text-text-secondary leading-relaxed max-w-sm">
-                    {feature.description}
-                  </p>
-                </div>
+              <div className="flex-1">
+                <h3 className="text-3xl font-normal text-white mb-6 leading-snug tracking-tight">
+                  {group.label}
+                </h3>
+                <p className="text-text-secondary text-[15px] leading-relaxed mb-10 pr-4 font-light opacity-80">
+                  {group.description}
+                </p>
+                <div className="h-px w-full bg-white/10 mb-10" />
+              </div>
+              
+              <div className="flex flex-col gap-4">
+                {group.items.map((item, i) => (
+                  <button 
+                    key={i} 
+                    className="text-left font-mono text-[10px] tracking-[0.25em] text-white/60 hover:text-accent transition-colors uppercase whitespace-nowrap"
+                  >
+                    {item.label}
+                  </button>
+                ))}
               </div>
             </motion.div>
-          ))}
+          ) : (
+            <motion.div
+              key={idx}
+              variants={fadeUp}
+              className="px-8 py-12 border-r border-white/10 flex flex-col min-h-[460px] bg-white/[0.01] hover:bg-white/[0.02] transition-colors"
+            >
+              <div className="flex-1">
+                <div className="flex justify-between items-start mb-6">
+                  <h3 className="text-3xl font-normal text-white leading-snug tracking-tight">
+                    {group.label}
+                  </h3>
+                  <div className="w-10 h-10 border border-white/10 rounded-sm relative flex items-center justify-center scale-90 opacity-40">
+                    {idx === 0 && <div className="absolute inset-1 border border-white/10" />}
+                    {idx === 1 && <div className="w-4 h-4 bg-white/5 rounded-full border border-white/20" />}
+                    {idx === 2 && <div className="w-6 h-3 border border-white/20 rotate-45" />}
+                  </div>
+                </div>
+                
+                <p className="text-text-secondary text-[15px] leading-relaxed mb-10 pr-4 font-light opacity-80">
+                  {group.description}
+                </p>
+                <div className="h-px w-full bg-white/10 mb-10" />
+              </div>
+
+              <button className="text-left font-mono text-[10px] tracking-[0.25em] text-white/60 hover:text-accent transition-colors uppercase">
+                {group.link || `EXPLORE ${group.label.split(' ')[0]} >`}
+              </button>
+            </motion.div>
+          )))}
         </motion.div>
       </div>
     </section>

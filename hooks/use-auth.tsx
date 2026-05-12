@@ -11,6 +11,8 @@ interface AuthContextType {
   evmConnected: boolean;
   connectEvmWallet: () => Promise<string>;
   signIn: () => Promise<void>;
+  signInWithSolana: () => Promise<void>;
+  signInWithEvm: () => Promise<void>;
   signOut: () => Promise<void>;
 }
 
@@ -21,6 +23,8 @@ const AuthContext = createContext<AuthContextType>({
   evmConnected: false,
   connectEvmWallet: async () => "",
   signIn: async () => {},
+  signInWithSolana: async () => {},
+  signInWithEvm: async () => {},
   signOut: async () => {},
 });
 
@@ -78,87 +82,114 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return address;
   }, []);
 
-  // Sign in: challenge → sign → verify
-  const signIn = useCallback(async () => {
+  // Sign in with Solana (SIWS)
+  const signInWithSolana = useCallback(async () => {
+    if (!publicKey || !signMessage) {
+      throw new Error("Solana wallet not connected");
+    }
+
     try {
-      // Prefer SIWS when Solana wallet signing is available.
-      if (publicKey && signMessage) {
-        const challengeRes = await fetch("/api/auth/challenge");
-        const { nonce } = await challengeRes.json();
+      const challengeRes = await fetch("/api/auth/challenge");
+      if (!challengeRes.ok) {
+        throw new Error("Failed to get challenge");
+      }
+      const { nonce } = await challengeRes.json();
 
-        const message = new TextEncoder().encode(nonce);
-        const signatureBytes = await signMessage(message);
+      const message = new TextEncoder().encode(nonce);
+      const signatureBytes = await signMessage(message);
 
-        const bs58 = await import("bs58");
-        const signature = bs58.default.encode(signatureBytes);
+      const bs58 = await import("bs58");
+      const signature = bs58.default.encode(signatureBytes);
 
-        const verifyRes = await fetch("/api/auth/verify", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            walletAddress: publicKey.toBase58(),
-            signature,
-          }),
-        });
+      const verifyRes = await fetch("/api/auth/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          walletAddress: publicKey.toBase58(),
+          signature,
+        }),
+      });
 
-        if (!verifyRes.ok) {
-          const err = await verifyRes.json();
-          throw new Error(err.error || "Verification failed");
-        }
-      } else {
-        // Fallback to SIWB using EVM wallet.
-        const walletAddress = evmAddress ?? (await connectEvmWallet());
-        const ethereum = (window as Window & { ethereum?: { request: (args: { method: string; params?: unknown[] | object }) => Promise<unknown> } }).ethereum;
-        if (typeof window === "undefined" || !ethereum) {
-          throw new Error("No EVM wallet provider available.");
-        }
-
-        const challengeRes = await fetch("/api/auth/challenge-evm");
-        const challenge = await challengeRes.json();
-        if (!challengeRes.ok) {
-          throw new Error(challenge.error || "Failed to get EVM challenge");
-        }
-
-        const message = [
-          `${challenge.domain} wants you to sign in with your Ethereum account:`,
-          walletAddress,
-          "",
-          challenge.statement,
-          "",
-          `URI: ${challenge.uri}`,
-          "Version: 1",
-          `Chain ID: ${challenge.chainId}`,
-          `Nonce: ${challenge.nonce}`,
-        ].join("\n");
-
-        const signature = (await ethereum.request({
-          method: "personal_sign",
-          params: [message, walletAddress],
-        })) as string;
-
-        const verifyRes = await fetch("/api/auth/verify-evm", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            walletAddress,
-            message,
-            signature,
-          }),
-        });
-
-        if (!verifyRes.ok) {
-          const err = await verifyRes.json();
-          throw new Error(err.error || "EVM verification failed");
-        }
+      if (!verifyRes.ok) {
+        const err = await verifyRes.json();
+        throw new Error(err.error || "Verification failed");
       }
 
       // Refresh session state
       await fetchSession();
     } catch (error) {
-      console.error("[AUTH] Sign-in error:", error);
+      console.error("[AUTH] Solana sign-in error:", error);
       throw error;
     }
-  }, [publicKey, signMessage, fetchSession, evmAddress, connectEvmWallet]);
+  }, [publicKey, signMessage, fetchSession]);
+
+  // Sign in with EVM (SIWB)
+  const signInWithEvm = useCallback(async () => {
+    try {
+      const walletAddress = evmAddress ?? (await connectEvmWallet());
+      const ethereum = (window as Window & { ethereum?: { request: (args: { method: string; params?: unknown[] | object }) => Promise<unknown> } }).ethereum;
+      if (typeof window === "undefined" || !ethereum) {
+        throw new Error("No EVM wallet provider available.");
+      }
+
+      const challengeRes = await fetch("/api/auth/challenge-evm");
+      if (!challengeRes.ok) {
+        const challenge = await challengeRes.json();
+        throw new Error(challenge.error || "Failed to get EVM challenge");
+      }
+      const challenge = await challengeRes.json();
+
+      const message = [
+        `${challenge.domain} wants you to sign in with your Ethereum account:`,
+        walletAddress,
+        "",
+        challenge.statement,
+        "",
+        `URI: ${challenge.uri}`,
+        "Version: 1",
+        `Chain ID: ${challenge.chainId}`,
+        `Nonce: ${challenge.nonce}`,
+      ].join("\n");
+
+      const signature = (await ethereum.request({
+        method: "personal_sign",
+        params: [message, walletAddress],
+      })) as string;
+
+      const verifyRes = await fetch("/api/auth/verify-evm", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          walletAddress,
+          message,
+          signature,
+        }),
+      });
+
+      if (!verifyRes.ok) {
+        const err = await verifyRes.json();
+        throw new Error(err.error || "EVM verification failed");
+      }
+
+      // Refresh session state
+      await fetchSession();
+    } catch (error) {
+      console.error("[AUTH] EVM sign-in error:", error);
+      throw error;
+    }
+  }, [evmAddress, connectEvmWallet, fetchSession]);
+
+  // Sign in: auto-detect wallet and sign
+  const signIn = useCallback(async () => {
+    // Prefer SIWS when Solana wallet signing is available
+    if (publicKey && signMessage) {
+      await signInWithSolana();
+    } else if (evmAddress) {
+      await signInWithEvm();
+    } else {
+      throw new Error("No wallet connected. Please connect a wallet first.");
+    }
+  }, [publicKey, signMessage, evmAddress, signInWithSolana, signInWithEvm]);
 
   // Sign out: destroy session + disconnect wallet
   const signOut = useCallback(async () => {
@@ -181,6 +212,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         evmConnected: Boolean(evmAddress),
         connectEvmWallet,
         signIn,
+        signInWithSolana,
+        signInWithEvm,
         signOut,
       }}
     >

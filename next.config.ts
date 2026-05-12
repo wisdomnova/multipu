@@ -1,6 +1,11 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // ─── Turbopack Configuration ────────────────────────
+  turbopack: {
+    root: __dirname,
+  },
+
   // ─── Security Headers ──────────────────────────────
   async headers() {
     return [

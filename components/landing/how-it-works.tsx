@@ -2,101 +2,87 @@
 
 import { motion } from "framer-motion";
 import { fadeUp, stagger } from "@/components/motion";
-import { Wallet, Coins, Rocket, BarChart3 } from "lucide-react";
 
 const steps = [
   {
-    number: "01",
-    icon: Wallet,
-    title: "Connect Wallet",
-    description: "Link your Solana wallet to get started. Phantom, Solflare, or any compatible wallet.",
+    id: "01",
+    title: "Link Wallet & Authenticate",
+    description: "Connect your Solana or EVM wallet via our secure directory. Authenticate with Google or X to bridge your cross-chain assets into a unified launch environment.",
   },
   {
-    number: "02",
-    icon: Coins,
-    title: "Create Token",
-    description: "Set your token name, symbol, supply, and metadata. We handle the on-chain deployment.",
+    id: "02",
+    title: "Define Token Parameters",
+    description: "Specify supply, liquidity locks, and distribution logic. Our engine validates against the target launchpad's policy constraints in real-time.",
   },
   {
-    number: "03",
-    icon: Rocket,
-    title: "Select Launchpads",
-    description: "Choose Meteora, Bags, Pump.fun, or all three. Token details auto-fill. Confirm and launch.",
+    id: "03",
+    title: "Execute Multi-Launch",
+    description: "Deploy to Meteora, Bags, or Pump.fun with a single transaction. The protocol handles the complex routing and pool initialization automatically.",
   },
   {
-    number: "04",
-    icon: BarChart3,
-    title: "Track Everything",
-    description: "Monitor deployment status, live launchpads, and earnings - all from your dashboard.",
+    id: "04",
+    title: "Monitor Distribution",
+    description: "Track performance across all venues from a central dashboard. Manage creator fees, liquidity health, and secondary market growth metrics.",
   },
 ];
 
 export function HowItWorks() {
   return (
-    <section id="how-it-works" className="relative py-24 md:py-32 dot-grid">
+    <section id="process" className="relative py-24 md:py-32 border-t border-white/[0.05]">
       <div className="mx-auto max-w-[1400px] px-6 md:px-10">
-        <motion.div
+        <motion.div 
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: "-100px" }}
           variants={stagger}
-          className="mb-16 text-center"
+          className="mb-20"
         >
-          <motion.span
+          <motion.span 
             variants={fadeUp}
             className="font-mono text-xs text-accent uppercase tracking-widest"
           >
-            How it works
+            Workflow
           </motion.span>
-          <motion.h2
+          <motion.h2 
             variants={fadeUp}
-            className="mt-4 text-[clamp(1.75rem,4vw,3rem)] font-bold tracking-tight"
+            className="mt-4 text-[clamp(1.75rem,4vw,3rem)] font-bold tracking-tight text-white mb-2"
           >
-            Four steps to launch
+            The Launch Lifecycle
           </motion.h2>
           <motion.p
             variants={fadeUp}
-            className="mt-4 text-text-secondary max-w-xl mx-auto text-lg"
+            className="text-text-secondary max-w-xl text-lg font-light leading-relaxed"
           >
-            From wallet connection to live tracking in under 5 minutes.
+            A streamlined directory for deploying and managing liquid assets.
           </motion.p>
         </motion.div>
 
-        <motion.div
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-50px" }}
-          variants={stagger}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
-        >
-          {steps.map((step, i) => (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-0 border-l border-white/10">
+          {steps.map((step, idx) => (
             <motion.div
-              key={step.number}
-              variants={fadeUp}
-              className="group relative"
+              key={step.id}
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: idx * 0.1 }}
+              className="group p-8 md:p-12 border-r border-t lg:border-t-0 border-white/10 hover:bg-white/[0.01] transition-all flex flex-col justify-between min-h-[400px]"
             >
-              <div className="relative p-8 rounded-none border border-border bg-background hover:bg-elevated transition-all duration-300">
-                {/* Connecting line */}
-                {i < steps.length - 1 && (
-                  <div className="hidden lg:block absolute top-1/2 -right-3 w-6 h-px bg-border" />
-                )}
-
-                <span className="font-mono text-3xl font-bold text-accent/20 group-hover:text-accent/40 transition-colors">
-                  {step.number}
-                </span>
-                <div className="mt-4 w-10 h-10 rounded-lg bg-accent/10 border border-accent/20 flex items-center justify-center group-hover:border-accent/40 transition-colors">
-                  <step.icon size={18} className="text-accent" />
+              <div>
+                <div className="text-4xl font-serif text-white/10 group-hover:text-accent/20 transition-colors duration-500 mb-12">
+                  {step.id}
                 </div>
-                <h3 className="mt-5 text-base font-semibold text-text-primary">
+                <h3 className="text-xl font-normal text-white mb-6 leading-snug tracking-tight group-hover:text-accent transition-colors">
                   {step.title}
                 </h3>
-                <p className="mt-2 text-sm text-text-secondary leading-relaxed">
+                <p className="text-text-secondary text-[15px] leading-relaxed font-light opacity-80 decoration-white/0">
                   {step.description}
                 </p>
               </div>
+              
+              <div className="mt-12 h-[1px] w-8 bg-white/20 group-hover:w-full group-hover:bg-accent/40 transition-all duration-700" />
             </motion.div>
           ))}
-        </motion.div>
+        </div>
       </div>
     </section>
   );
