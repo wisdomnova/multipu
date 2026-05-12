@@ -6,6 +6,7 @@ import {
   getAdminSession,
   isAdminPanelLoggedIn,
 } from "@/lib/admin-session";
+import { logAdminAudit } from "@/lib/security";
 
 export async function GET(request: Request) {
   const ip = getClientIp(request);
@@ -29,6 +30,7 @@ export async function DELETE(request: Request) {
   }
 
   const session = await getAdminSession();
+  await logAdminAudit("admin-password", "admin_logout", { ip }, ip);
   session.destroy();
   return Response.json(defaultAdminSession);
 }
