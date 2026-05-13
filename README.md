@@ -26,7 +26,7 @@ Multipu ships with a mainnet safety lock for testnet rollout phases.
 - `NEXT_PUBLIC_APP_PHASE`: deployment phase (`testnet` or `mainnet`)
 - `NEXT_PUBLIC_ENABLE_MAINNET_LAUNCHES`: client-side gate for launch UI
 - `ENABLE_MAINNET_LAUNCHES`: server-side hard gate for launch APIs
-- `NEXT_PUBLIC_BASE_CHAIN_ID`: EVM chain ID for SIWB challenge defaults (Base mainnet = `8453`)
+
 - `ENABLE_EVM_LAUNCH_ADAPTERS`: server-side gate for EVM launch verification paths
 - `NEXT_PUBLIC_ENABLE_EVM_LAUNCH_ADAPTERS`: client-side gate for EVM launch execution
 - `BSC_RPC_URL`: BNB Smart Chain RPC for `four.meme` adapter verification

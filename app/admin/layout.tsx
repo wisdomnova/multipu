@@ -3,13 +3,14 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { Lock, Zap, DollarSign, AlertCircle, LogOut, Globe } from "lucide-react";
+import { Lock, Zap, DollarSign, AlertCircle, LogOut, Globe, Wallet } from "lucide-react";
 import { useState } from "react";
 
 const items = [
   { href: "/admin", label: "Overview", icon: Zap },
   { href: "/admin/protocol-fee", label: "Protocol Fee", icon: DollarSign },
   { href: "/admin/launch-controls", label: "Launch Controls", icon: Lock },
+  { href: "/admin/treasury", label: "Treasury", icon: Wallet },
   { href: "/admin/network-settings", label: "Network Settings", icon: Globe },
   { href: "/admin/security", label: "Security Logs", icon: AlertCircle },
 ];

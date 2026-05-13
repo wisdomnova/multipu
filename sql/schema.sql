@@ -118,6 +118,32 @@ CREATE TABLE admin_audit_logs (
 
 CREATE INDEX idx_admin_audit_created_at ON admin_audit_logs (created_at DESC);
 
+-- ─── Treasury Transfers (Fee Collection) ────────────
+-- Multi-chain: Solana (SOL) and BSC (BNB)
+-- Server-side only: all transfers signed and executed server-side.
+-- Client NEVER signs or initiates treasury transfers.
+CREATE TABLE treasury_transfers (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  chain TEXT NOT NULL, -- 'solana' or 'bsc'
+  from_wallet TEXT NOT NULL,
+  to_wallet TEXT NOT NULL,
+  amount_native DECIMAL(20, 9) NOT NULL, -- SOL or BNB
+  amount_lamports BIGINT, -- for Solana only
+  signature TEXT,
+  fee_type TEXT NOT NULL, -- 'manual_withdrawal', 'protocol_fee_collection', 'refund'
+  status TEXT NOT NULL DEFAULT 'pending', -- 'pending', 'confirmed', 'failed'
+  reason TEXT,
+  error_message TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  confirmed_at TIMESTAMPTZ
+);
+
+CREATE INDEX idx_treasury_created_at ON treasury_transfers (created_at DESC);
+CREATE INDEX idx_treasury_chain ON treasury_transfers (chain);
+CREATE INDEX idx_treasury_from_wallet ON treasury_transfers (from_wallet);
+CREATE INDEX idx_treasury_to_wallet ON treasury_transfers (to_wallet);
+CREATE INDEX idx_treasury_status ON treasury_transfers (status);
+
 -- ─── RLS Policies ──────────────────────────────────
 -- We use wallet_address matching since auth is via iron-session,
 -- not Supabase Auth. API routes pass the wallet from the session.
@@ -128,6 +154,7 @@ ALTER TABLE launches ENABLE ROW LEVEL SECURITY;
 ALTER TABLE earnings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE admin_settings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE admin_audit_logs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE treasury_transfers ENABLE ROW LEVEL SECURITY;
 
 -- Users: can only read own profile
 CREATE POLICY users_own ON users FOR ALL USING (true) WITH CHECK (true);
@@ -142,6 +169,7 @@ CREATE POLICY launches_own ON launches FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY earnings_own ON earnings FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY admin_settings_locked ON admin_settings FOR ALL USING (false) WITH CHECK (false);
 CREATE POLICY admin_audit_logs_locked ON admin_audit_logs FOR ALL USING (false) WITH CHECK (false);
+CREATE POLICY treasury_transfers_locked ON treasury_transfers FOR ALL USING (false) WITH CHECK (false);
 
 -- ─── Updated_at Trigger ────────────────────────────
 CREATE OR REPLACE FUNCTION update_updated_at()

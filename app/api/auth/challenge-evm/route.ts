@@ -16,7 +16,8 @@ export async function GET(request: Request) {
   const nonce = randomBytes(16).toString("hex");
   const url = new URL(request.url);
   const host = request.headers.get("x-forwarded-host") ?? url.host;
-  const chainId = Number(process.env.NEXT_PUBLIC_BASE_CHAIN_ID ?? 8453);
+  // BSC only - chainId 56 (0x38)
+  const chainId = 56;
 
   (session as SessionData & { evmNonce?: string }).evmNonce = nonce;
   await session.save();

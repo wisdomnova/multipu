@@ -30,7 +30,8 @@ export async function GET(request: Request) {
       .eq("key", "app_phase_override")
       .maybeSingle();
 
-    const appPhase = override?.value?.appPhase || APP_PHASE;
+    const overrideValue = override?.value as { appPhase?: string } | undefined;
+    const appPhase = overrideValue?.appPhase || APP_PHASE;
 
     const settings = {
       appPhase,
