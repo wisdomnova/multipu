@@ -44,6 +44,11 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       { protocol: "https", hostname: "arweave.net" },
       { protocol: "https", hostname: "**.ipfs.dweb.link" },
+      { protocol: "https", hostname: "dd.dexscreener.com" },
+      { protocol: "https", hostname: "raw.githubusercontent.com" },
+      { protocol: "https", hostname: "assets.coingecko.com" },
+      { protocol: "https", hostname: "coin-images.coingecko.com" },
+      { protocol: "https", hostname: "ipfs.io" },
     ],
   },
 
