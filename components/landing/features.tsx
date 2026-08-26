@@ -7,28 +7,28 @@ const featureGroups = [
   {
     label: "Token Deploy",
     title: "One-Click Token Creation",
-    description: "Deploy your SPL token with custom name, symbol, supply, and metadata. No CLI needed.",
+    description: "Deploy your SPL or EVM token with custom name, symbol, supply, and metadata. No CLI needed.",
     link: "EXPLORE TOKENROOM >"
   },
   {
     label: "Multi-Launch",
     title: "Multi-Launchpad Push",
-    description: "Select Meteora, Bags, Pump.fun, or all three. Auto-fill details and launch simultaneously.",
+    description: "Select Meteora, Bags, Pump.fun, Four.meme or Sherwood. Auto-fill details and launch simultaneously.",
     link: "EXPLORE POLARIS >"
+  },
+  {
+    label: "Meme Swaps",
+    title: "Instant Meme Swapping",
+    description: "Manually trade any live token on Solana and BSC directly with client wallets, featuring minimal price chart feeds.",
+    link: "EXPLORE EXPLORER >"
   },
   {
     label: "Earnings & Security",
     title: "Revenue & Wallet Auth",
-    description: "Track creator fees and earnings in real-time. Secure wallet-native auth, no passwords.",
-    link: "EXPLORE REFERRAL NETWORK >"
-  },
-  {
-    label: "Status & Speed",
-    title: "Live Speed Execution",
-    description: "Monitor every launch cross-platform. Optimized for Solana's speed and execution.",
+    description: "Track creator fees, protocol earnings, and secure wallet-native login with zero password requirements.",
     items: [
       { label: "LIVE DEPLOYMENT STATUS >" },
-      { label: "FAST EXECUTION >" },
+      { label: "FAST SWAP EXECUTION >" },
       { label: "REAL-TIME MONITORING >" }
     ]
   }

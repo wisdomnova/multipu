@@ -32,16 +32,16 @@ export function Hero() {
                 variants={fadeUp}
                 className="text-[clamp(2.5rem,7vw,5.5rem)] font-normal leading-[1.0] tracking-tight text-white mb-10 max-w-4xl"
               >
-                Deploy once. <br/> Launch everywhere.
+                Deploy once. <br/> Launch & Trade everywhere.
               </motion.h1>
 
               <motion.p
                 variants={fadeUp}
                 className="text-lg md:text-xl text-text-secondary max-w-xl leading-relaxed font-light mb-12 opacity-80"
               >
-                The multi-launchpad control plane for Solana tokens. 
-                Create locally, distribute globally across the ecosystem&apos;s 
-                premier liquidity layers.
+                The multi-launchpad control plane and trading hub for Web3 memes. 
+                Deploy across Solana, BSC, and Robinhood Chain, search live markets, 
+                and manually swap tokens instantly.
               </motion.p>
 
               <motion.div
@@ -55,10 +55,10 @@ export function Hero() {
                   Start Launching {">"}
                 </Link>
                 <Link
-                  href="/dashboard"
+                  href="/explore"
                   className="px-8 py-4 border border-white/20 text-white text-[11px] font-mono tracking-[0.2em] hover:bg-white/5 transition-all text-center uppercase"
                 >
-                  Access Dashboard
+                  Explore & Trade
                 </Link>
               </motion.div>
             </motion.div>
