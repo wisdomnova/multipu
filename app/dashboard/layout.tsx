@@ -8,6 +8,7 @@ import {
   Coins,
   Rocket,
   LayoutGrid,
+  Search,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
@@ -18,6 +19,7 @@ const navItems = [
   { label: "Tokens", icon: Coins, href: "/dashboard/tokens" },
   { label: "Launches", icon: Rocket, href: "/dashboard/launches" },
   { label: "Earnings", icon: TrendingUp, href: "/dashboard/earnings" },
+  { label: "Explore", icon: Search, href: "/explore" },
 ];
 
 export default function DashboardLayout({

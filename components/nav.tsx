@@ -9,9 +9,10 @@ import { cn } from "@/lib/utils";
 import { WalletButton } from "@/components/wallet-button";
 
 const navLinks = [
-  { href: "#features", label: "Features" },
-  { href: "#how-it-works", label: "How it works" },
-  { href: "#launchpads", label: "Launchpads" },
+  { href: "/#features", label: "Features" },
+  { href: "/#how-it-works", label: "How it works" },
+  { href: "/#launchpads", label: "Launchpads" },
+  { href: "/explore", label: "Explore" },
 ]; 
 
 export function Nav() {

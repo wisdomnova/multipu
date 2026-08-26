@@ -58,6 +58,19 @@ const launchpads = [
       "ABI-verified launch execution",
     ],
   },
+  {
+    name: "Sherwood",
+    chain: "Robinhood Chain",
+    description: "Robinhood Chain L2 meme launchpad featuring time-prioritized sequencing and 24/7 liquidity trading.",
+    status: "Supported",
+    image: "/sherwood.png",
+    features: [
+      "Robinhood Chain target",
+      "Arbitrum Orbit stack speed",
+      "Time-prioritized sequencing",
+      "24/7 liquidity trading",
+    ],
+  },
 ];
 
 export function Launchpads() {
