@@ -401,6 +401,14 @@ export default function DashboardPage() {
                                       </span>
                                     </div>
                                     <div className="flex items-center gap-3">
+                                      {launch.status === "live" && (
+                                        <Link
+                                          href={`/trade/${launch.id}`}
+                                          className="text-xs font-mono text-accent hover:text-accent-hover transition-colors font-normal"
+                                        >
+                                          Trade
+                                        </Link>
+                                      )}
                                       <span className="font-mono text-xs text-text-dim">
                                         {formatAddress(launch.pool_address)}
                                       </span>

@@ -280,6 +280,14 @@ export default function LaunchesPage() {
                         <span className={status.color}>{status.label}</span>
                       </div>
 
+                      {launch.status === "live" && (
+                        <Link
+                          href={`/trade/${launch.id}`}
+                          className="text-xs font-mono text-accent hover:text-accent-hover transition-colors px-2 py-1 flex-shrink-0 font-normal"
+                        >
+                          Trade
+                        </Link>
+                      )}
                       {launch.launch_tx && (
                         <a
                           href={`https://explorer.solana.com/tx/${launch.launch_tx}?cluster=${process.env.NEXT_PUBLIC_SOLANA_NETWORK || "devnet"}`}

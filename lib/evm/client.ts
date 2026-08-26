@@ -2,7 +2,7 @@
 
 import { Interface, id } from "ethers";
 
-type EvmLaunchpadId = "fourmeme";
+type EvmLaunchpadId = "fourmeme" | "sherwood";
 
 const EVM_CHAIN_CONFIG = {
   fourmeme: {
@@ -14,6 +14,16 @@ const EVM_CHAIN_CONFIG = {
     launcherAddress: process.env.NEXT_PUBLIC_FOURMEME_LAUNCHER_ADDRESS,
     functionSignature: process.env.NEXT_PUBLIC_FOURMEME_LAUNCH_FUNCTION_SIGNATURE,
     argTemplate: process.env.NEXT_PUBLIC_FOURMEME_LAUNCH_ARG_TEMPLATE,
+  },
+  sherwood: {
+    chainId: "0x1237", // 4663
+    chainName: "Robinhood Chain",
+    nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
+    rpcUrls: [process.env.NEXT_PUBLIC_ROBINHOOD_RPC_URL ?? "https://rpc.mainnet.chain.robinhood.com"],
+    blockExplorerUrls: ["https://robinhoodchain.blockscout.com"],
+    launcherAddress: process.env.NEXT_PUBLIC_SHERWOOD_LAUNCHER_ADDRESS,
+    functionSignature: process.env.NEXT_PUBLIC_SHERWOOD_LAUNCH_FUNCTION_SIGNATURE,
+    argTemplate: process.env.NEXT_PUBLIC_SHERWOOD_LAUNCH_ARG_TEMPLATE,
   },
 } as const;
 
@@ -92,7 +102,7 @@ function buildLaunchCallData(params: {
 }) {
   const config = EVM_CHAIN_CONFIG[params.launchpad];
   if (!config.functionSignature) {
-    throw new Error("fourmeme function signature is not configured. Set NEXT_PUBLIC_FOURMEME_LAUNCH_FUNCTION_SIGNATURE.");
+    throw new Error(`${params.launchpad} function signature is not configured.`);
   }
 
   const functionName = getFunctionName(config.functionSignature);

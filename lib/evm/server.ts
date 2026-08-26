@@ -2,7 +2,7 @@ import "server-only";
 
 import { JsonRpcProvider, getAddress, id } from "ethers";
 
-type EvmNetwork = "bsc";
+type EvmNetwork = "bsc" | "robinhood";
 
 const providers = new Map<EvmNetwork, JsonRpcProvider>();
 
@@ -11,14 +11,23 @@ export function areEvmLaunchAdaptersEnabled() {
 }
 
 function getRpcUrl(network: EvmNetwork) {
+  if (network === "robinhood") {
+    return process.env.ROBINHOOD_RPC_URL || "https://rpc.mainnet.chain.robinhood.com";
+  }
   return process.env.BSC_RPC_URL;
 }
 
 function getExpectedLauncherAddress(network: EvmNetwork) {
+  if (network === "robinhood") {
+    return process.env.NEXT_PUBLIC_SHERWOOD_LAUNCHER_ADDRESS;
+  }
   return process.env.NEXT_PUBLIC_FOURMEME_LAUNCHER_ADDRESS;
 }
 
 function getExpectedFunctionSignature(network: EvmNetwork) {
+  if (network === "robinhood") {
+    return process.env.NEXT_PUBLIC_SHERWOOD_LAUNCH_FUNCTION_SIGNATURE;
+  }
   return process.env.NEXT_PUBLIC_FOURMEME_LAUNCH_FUNCTION_SIGNATURE;
 }
 

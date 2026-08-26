@@ -12,6 +12,7 @@ const DEFAULT_LAUNCH_CONTROLS = {
     bags: true,
     pumpfun: true,
     fourmeme: true,
+    sherwood: true,
   } as Record<LaunchpadId, boolean>,
 };
 

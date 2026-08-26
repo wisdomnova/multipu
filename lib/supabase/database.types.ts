@@ -15,10 +15,11 @@ export type LaunchpadId =
   | "meteora"
   | "bags"
   | "pumpfun"
-  | "fourmeme";
+  | "fourmeme"
+  | "sherwood";
 export type LaunchStatus = "pending" | "confirming" | "live" | "failed";
 export type TokenStatus = "active" | "pending" | "failed";
-export type ChainNetwork = "devnet" | "testnet" | "mainnet-beta" | "bsc" | "base";
+export type ChainNetwork = "devnet" | "testnet" | "mainnet-beta" | "bsc" | "base" | "robinhood";
 export type AppPhase = "testnet" | "mainnet";
 
 export interface Database {
@@ -122,6 +123,7 @@ export interface Database {
           pool_address: string | null;
           launch_tx: string | null;
           initial_liquidity: number | null;
+          volume_24h: number | null;
           launched_at: string | null;
           created_at: string;
           updated_at: string;
@@ -138,6 +140,7 @@ export interface Database {
           pool_address?: string | null;
           launch_tx?: string | null;
           initial_liquidity?: number | null;
+          volume_24h?: number | null;
           launched_at?: string | null;
           created_at?: string;
           updated_at?: string;
@@ -149,6 +152,7 @@ export interface Database {
           pool_address?: string | null;
           launch_tx?: string | null;
           initial_liquidity?: number | null;
+          volume_24h?: number | null;
           launched_at?: string | null;
           updated_at?: string;
         };

@@ -4,10 +4,10 @@
 -- ═══════════════════════════════════════════════════
 
 -- ─── Enums ─────────────────────────────────────────
-CREATE TYPE launchpad_id AS ENUM ('meteora', 'bags', 'pumpfun', 'fourmeme');
+CREATE TYPE launchpad_id AS ENUM ('meteora', 'bags', 'pumpfun', 'fourmeme', 'sherwood');
 CREATE TYPE launch_status AS ENUM ('pending', 'confirming', 'live', 'failed');
 CREATE TYPE token_status AS ENUM ('active', 'pending', 'failed');
-CREATE TYPE chain_network AS ENUM ('devnet', 'testnet', 'mainnet-beta', 'bsc', 'base');
+CREATE TYPE chain_network AS ENUM ('devnet', 'testnet', 'mainnet-beta', 'bsc', 'base', 'robinhood');
 CREATE TYPE app_phase AS ENUM ('testnet', 'mainnet');
 
 -- ─── Users ─────────────────────────────────────────
@@ -203,7 +203,8 @@ VALUES (
       "meteora": true,
       "bags": true,
       "pumpfun": true,
-      "fourmeme": true
+      "fourmeme": true,
+      "sherwood": true
     }
   }'::jsonb
 )

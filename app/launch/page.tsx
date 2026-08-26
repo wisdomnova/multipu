@@ -293,7 +293,7 @@ export default function LaunchPage() {
           if (isEvmPad(padId)) {
             if (!evmAddress) throw new Error("EVM wallet not connected");
             const evmResult = await executeEvmLaunch({
-              launchpad: padId as "fourmeme",
+              launchpad: padId as "fourmeme" | "sherwood",
               walletAddress: evmAddress,
               token: {
                 name: tokenData.name,
