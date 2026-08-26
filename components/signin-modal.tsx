@@ -15,7 +15,7 @@ interface SignInModalProps {
 
 export function SignInModal({ isOpen, onClose }: SignInModalProps) {
   const { wallets, connecting, select } = useWallet();
-  const { connectEvmWallet, signInWithSolana, signInWithEvm, session } = useAuth();
+  const { connectEvmWallet, signInWithSolana, signInWithEvm, signInDemo, session } = useAuth();
   const [selectedMethod, setSelectedMethod] = useState<string | null>(null);
   const [isConnecting, setIsConnecting] = useState(false);
 
@@ -91,6 +91,21 @@ export function SignInModal({ isOpen, onClose }: SignInModalProps) {
     }
   };
 
+  const handleDemoSignIn = async () => {
+    setSelectedMethod("demo");
+    setIsConnecting(true);
+    try {
+      const demoAddress = "DemoSolanaWalletAddress111111111111111111";
+      await signInDemo(demoAddress);
+      toast.success("Successfully signed in with Demo Wallet");
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to sign in with Demo";
+      toast.error(message);
+      setIsConnecting(false);
+      setSelectedMethod(null);
+    }
+  };
+
   const handleGoogleOAuth = async () => {
     setSelectedMethod("google");
     setIsConnecting(true);
@@ -120,6 +135,14 @@ export function SignInModal({ isOpen, onClose }: SignInModalProps) {
   };
 
   const authMethods = [
+    {
+      id: "demo",
+      label: "Demo Wallet",
+      description: "Instant testing bypass",
+      onClick: handleDemoSignIn,
+      isPrimary: true,
+      icon: <Wallet className="w-5 h-5 text-accent" />,
+    },
     {
       id: "solana",
       label: "Solana Wallet",

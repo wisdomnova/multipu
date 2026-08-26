@@ -13,6 +13,7 @@ interface AuthContextType {
   signIn: () => Promise<void>;
   signInWithSolana: () => Promise<void>;
   signInWithEvm: () => Promise<void>;
+  signInDemo: (walletAddress: string) => Promise<void>;
   signOut: () => Promise<void>;
 }
 
@@ -25,6 +26,7 @@ const AuthContext = createContext<AuthContextType>({
   signIn: async () => {},
   signInWithSolana: async () => {},
   signInWithEvm: async () => {},
+  signInDemo: async () => {},
   signOut: async () => {},
 });
 
@@ -203,6 +205,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [disconnect]);
 
+  const signInDemo = useCallback(async (walletAddress: string) => {
+    try {
+      const res = await fetch("/api/auth/demo", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ walletAddress }),
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || "Demo login failed");
+      }
+      await fetchSession();
+    } catch (error) {
+      console.error("[AUTH] Demo sign-in error:", error);
+      throw error;
+    }
+  }, [fetchSession]);
+
   return (
     <AuthContext.Provider
       value={{
@@ -214,6 +234,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         signIn,
         signInWithSolana,
         signInWithEvm,
+        signInDemo,
         signOut,
       }}
     >
