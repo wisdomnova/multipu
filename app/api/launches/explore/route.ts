@@ -17,6 +17,8 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const query = searchParams.get("q") || "";
+    const page = Math.max(1, Number(searchParams.get("page") || 1));
+    const limit = Math.max(1, Number(searchParams.get("limit") || 10));
 
     const supabase = createAdminSupabase();
     const scope = getEnvironmentScope();
@@ -59,8 +61,8 @@ export async function GET(request: Request) {
       if (query) {
         dexscreenerUrl = `https://api.dexscreener.com/latest/dex/search?q=${encodeURIComponent(query)}`;
       } else {
-        // Seed explore with trending tokens using a general popular term
-        dexscreenerUrl = `https://api.dexscreener.com/latest/dex/search?q=pepe`;
+        // Seed explore with trending tokens using 'meme' keyword to get a diverse list of memes
+        dexscreenerUrl = `https://api.dexscreener.com/latest/dex/search?q=meme`;
       }
 
       const dexRes = await fetch(dexscreenerUrl, { signal: AbortSignal.timeout(5000) });
@@ -80,7 +82,7 @@ export async function GET(request: Request) {
 
             if (!exists) {
               publicLaunches.push({
-                id: tokenAddress, // Use the token address as ID for dynamic lookup on trade page
+                id: tokenAddress,
                 launchpad: pair.dexId || "dex",
                 network: chain === "solana" ? "Solana" : "BSC",
                 pool_address: pair.pairAddress || null,
@@ -101,7 +103,36 @@ export async function GET(request: Request) {
     }
 
     const combined = [...mappedDbLaunches, ...publicLaunches];
-    return Response.json({ launches: combined });
+
+    // Sort combined by volume descending
+    combined.sort((a, b) => b.volume_24h - a.volume_24h);
+
+    // Deduplicate by symbol (case insensitive) to keep only 1 of each type
+    const seenSymbols = new Set<string>();
+    const deduplicated: any[] = [];
+    for (const launch of combined) {
+      const symbol = launch.tokens.symbol?.toUpperCase();
+      if (symbol && !seenSymbols.has(symbol)) {
+        seenSymbols.add(symbol);
+        deduplicated.push(launch);
+      }
+    }
+
+    // Paginate results
+    const totalLaunches = deduplicated.length;
+    const totalPages = Math.ceil(totalLaunches / limit);
+    const startIndex = (page - 1) * limit;
+    const paginatedLaunches = deduplicated.slice(startIndex, startIndex + limit);
+
+    return Response.json({
+      launches: paginatedLaunches,
+      pagination: {
+        page,
+        limit,
+        totalLaunches,
+        totalPages,
+      },
+    });
   } catch (err) {
     console.error("[API] GET /api/launches/explore error:", err);
     return Response.json({ error: "Failed to fetch explore directory" }, { status: 500 });
