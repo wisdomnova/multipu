@@ -13,7 +13,7 @@ export async function GET(
     return Response.json({ error: "Rate limited" }, { status: 429 });
   }
 
-  const auth = await getAuth();
+  const auth = await getAuth(request);
   if (!auth.isLoggedIn) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
@@ -58,13 +58,13 @@ export async function GET(
             network: chain === "solana" ? "Solana" : "BSC",
             pool_address: matchedPair.pairAddress || null,
             volume_24h: Number(matchedPair.volume?.h24 || 0),
-            initial_liquidity: null,
+            initial_liquidity: matchedPair.liquidity?.quote ? Number(matchedPair.liquidity.quote) : null,
             tokens: {
               id: id,
               name: matchedPair.baseToken.name,
               symbol: matchedPair.baseToken.symbol,
               mint_address: id,
-              supply: "0",
+              supply: "1000000000", // Fallback standard meme supply
               decimals: 9,
             },
           };

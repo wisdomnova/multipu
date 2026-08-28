@@ -55,7 +55,7 @@ export function Hero() {
                   Start Launching {">"}
                 </Link>
                 <Link
-                  href="/explore"
+                  href="/dashboard/explore"
                   className="px-8 py-4 border border-white/20 text-white text-[11px] font-mono tracking-[0.2em] hover:bg-white/5 transition-all text-center uppercase"
                 >
                   Explore & Trade

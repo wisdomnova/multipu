@@ -415,6 +415,7 @@ export default function LaunchPage() {
                 src="/1.jpg"
                 alt=""
                 fill
+                sizes="24px"
                 className="object-cover rounded-md"
               />
             </div>

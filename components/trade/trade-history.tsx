@@ -28,7 +28,7 @@ export function TradeHistory({ launchId, refreshTrigger }: TradeHistoryProps) {
       const type = Math.random() > 0.5 ? ("buy" as const) : ("sell" as const);
       const amountPay = parseFloat((Math.random() * 2 + 0.1).toFixed(4));
       const amountReceive = amountPay * 1000000;
-      const wallet = "0x" + Math.random().toString(16).substr(2, 8) + "..." + Math.random().toString(16).substr(2, 4);
+      const wallet = "0x" + Math.random().toString(16).substring(2, 10) + "..." + Math.random().toString(16).substring(2, 6);
       const timeOffset = (i + 1) * 3 * 60 * 1000; // minutes ago
       
       list.push({
@@ -42,6 +42,29 @@ export function TradeHistory({ launchId, refreshTrigger }: TradeHistoryProps) {
     }
     setTrades(list);
   }, [launchId]);
+
+  // Simulate live incoming trades from other wallets in real time
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const type = Math.random() > 0.45 ? ("buy" as const) : ("sell" as const);
+      const amountPay = parseFloat((Math.random() * 1.8 + 0.02).toFixed(4));
+      const amountReceive = amountPay * 1000000;
+      const wallet = "0x" + Math.random().toString(16).substring(2, 10) + "..." + Math.random().toString(16).substring(2, 6);
+      
+      const newTrade: Trade = {
+        id: "live-" + Date.now(),
+        type,
+        amountPay,
+        amountReceive,
+        wallet,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      };
+      
+      setTrades((prev) => [newTrade, ...prev.slice(0, 9)]);
+    }, Math.random() * 3000 + 4000); // Trigger every 4-7 seconds
+
+    return () => clearInterval(interval);
+  }, []);
 
   // When a user makes a trade, append it to the trade history list
   useEffect(() => {
@@ -57,7 +80,7 @@ export function TradeHistory({ launchId, refreshTrigger }: TradeHistoryProps) {
         wallet: "You",
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       };
-      setTrades((prev) => [newUserTrade, ...prev]);
+      setTrades((prev) => [newUserTrade, ...prev.slice(0, 9)]);
     }
   }, [refreshTrigger]);
 

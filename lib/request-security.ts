@@ -5,6 +5,11 @@ import "server-only";
  * Requires same-origin requests for mutating endpoints.
  */
 export function assertTrustedOrigin(request: Request): string | null {
+  // Requests using API keys are not cookie-based and are immune to CSRF
+  if (request.headers.get("x-api-key")) {
+    return null;
+  }
+
   const origin = request.headers.get("origin");
   if (!origin) return null;
 

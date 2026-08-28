@@ -282,7 +282,7 @@ export default function LaunchesPage() {
 
                       {launch.status === "live" && (
                         <Link
-                          href={`/trade/${launch.id}`}
+                          href={`/dashboard/trade/${launch.id}`}
                           className="text-xs font-mono text-accent hover:text-accent-hover transition-colors px-2 py-1 flex-shrink-0 font-normal"
                         >
                           Trade

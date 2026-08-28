@@ -229,3 +229,22 @@ LEFT JOIN tokens t ON t.user_id = u.id
 LEFT JOIN launches l ON l.user_id = u.id AND l.network = t.network AND l.app_phase = t.app_phase
 LEFT JOIN earnings e ON e.user_id = u.id AND e.network = t.network AND e.app_phase = t.app_phase
 GROUP BY u.wallet_address, t.network, t.app_phase;
+
+-- ─── Developer API Keys ─────────────────────────────
+CREATE TABLE developer_api_keys (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  wallet_address TEXT NOT NULL,
+  name TEXT NOT NULL,
+  api_key TEXT NOT NULL UNIQUE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  revoked BOOLEAN NOT NULL DEFAULT false
+);
+
+CREATE INDEX idx_developer_api_keys_wallet ON developer_api_keys (wallet_address);
+CREATE INDEX idx_developer_api_keys_key ON developer_api_keys (api_key);
+
+ALTER TABLE developer_api_keys ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY developer_api_keys_own ON developer_api_keys FOR ALL USING (true) WITH CHECK (true);
+

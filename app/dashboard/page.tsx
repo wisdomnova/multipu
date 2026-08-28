@@ -403,7 +403,7 @@ export default function DashboardPage() {
                                     <div className="flex items-center gap-3">
                                       {launch.status === "live" && (
                                         <Link
-                                          href={`/trade/${launch.id}`}
+                                          href={`/dashboard/trade/${launch.id}`}
                                           className="text-xs font-mono text-accent hover:text-accent-hover transition-colors font-normal"
                                         >
                                           Trade

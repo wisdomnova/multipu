@@ -12,7 +12,7 @@ const navLinks = [
   { href: "/#features", label: "Features" },
   { href: "/#how-it-works", label: "How it works" },
   { href: "/#launchpads", label: "Launchpads" },
-  { href: "/explore", label: "Explore" },
+  { href: "/dashboard/explore", label: "Explore" },
 ]; 
 
 export function Nav() {
@@ -39,7 +39,7 @@ export function Nav() {
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2.5 group">
             <div className="relative w-7 h-7 flex-shrink-0">
-              <Image src="/1.jpg" alt="" fill className="object-cover rounded-md" />
+              <Image src="/1.jpg" alt="" fill sizes="28px" className="object-cover rounded-md" />
             </div>
             <span className="text-lg font-semibold tracking-tight text-text-primary">
               Multipu

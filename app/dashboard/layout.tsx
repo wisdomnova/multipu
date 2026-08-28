@@ -9,6 +9,7 @@ import {
   Rocket,
   LayoutGrid,
   Search,
+  Key,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
@@ -19,7 +20,8 @@ const navItems = [
   { label: "Tokens", icon: Coins, href: "/dashboard/tokens" },
   { label: "Launches", icon: Rocket, href: "/dashboard/launches" },
   { label: "Earnings", icon: TrendingUp, href: "/dashboard/earnings" },
-  { label: "Explore", icon: Search, href: "/explore" },
+  { label: "API Keys", icon: Key, href: "/dashboard/api" },
+  { label: "Explore", icon: Search, href: "/dashboard/explore" },
 ];
 
 export default function DashboardLayout({
@@ -30,19 +32,29 @@ export default function DashboardLayout({
   const pathname = usePathname();
   const { session } = useAuth();
 
+  const isItemActive = (href: string) => {
+    if (href === "/dashboard") {
+      return pathname === "/dashboard";
+    }
+    if (href === "/dashboard/explore") {
+      return pathname === "/dashboard/explore" || pathname.startsWith("/dashboard/trade");
+    }
+    return pathname.startsWith(href);
+  };
+
   const walletShort = session.isLoggedIn
     ? `${session.walletAddress.slice(0, 4)}...${session.walletAddress.slice(-4)}`
     : null;
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="flex">
+    <div className="h-screen overflow-hidden bg-background">
+      <div className="flex h-full">
         {/* Sidebar */}
-        <aside className="hidden lg:flex flex-col w-64 border-r border-border min-h-screen sticky top-0">
+        <aside className="hidden lg:flex flex-col w-64 border-r border-border h-full flex-shrink-0 bg-background">
           <div className="p-6 border-b border-border">
             <Link href="/" className="flex items-center gap-2.5">
               <div className="relative w-7 h-7 flex-shrink-0">
-                <Image src="/1.jpg" alt="" fill className="object-cover rounded-md" />
+                <Image src="/1.jpg" alt="" fill sizes="28px" className="object-cover rounded-md" />
               </div>
               <span className="text-base font-semibold text-text-primary">
                 Multipu
@@ -52,7 +64,7 @@ export default function DashboardLayout({
 
           <nav className="flex-1 p-4 space-y-1">
             {navItems.map((item) => {
-              const isActive = pathname === item.href;
+              const isActive = isItemActive(item.href);
               return (
                 <Link
                   key={item.label}
@@ -92,13 +104,13 @@ export default function DashboardLayout({
         </aside>
 
         {/* Main content */}
-        <main className="flex-1 min-w-0">
+        <main className="flex-1 h-full overflow-y-auto min-w-0 flex flex-col">
           {/* Top bar (mobile) */}
           <div className="lg:hidden border-b border-border bg-[rgba(5,5,5,0.8)] backdrop-blur-xl sticky top-0 z-50">
             <div className="flex items-center justify-between px-6 h-16">
               <Link href="/" className="flex items-center gap-2.5">
                 <div className="relative w-6 h-6 flex-shrink-0">
-                  <Image src="/1.jpg" alt="" fill className="object-cover rounded-md" />
+                  <Image src="/1.jpg" alt="" fill sizes="24px" className="object-cover rounded-md" />
                 </div>
                 <span className="text-sm font-semibold text-text-primary">
                   Multipu
@@ -109,7 +121,7 @@ export default function DashboardLayout({
             {/* Mobile nav tabs */}
             <div className="flex px-4 gap-1 pb-2 overflow-x-auto">
               {navItems.map((item) => {
-                const isActive = pathname === item.href;
+                const isActive = isItemActive(item.href);
                 return (
                   <Link
                     key={item.label}

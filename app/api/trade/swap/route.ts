@@ -24,7 +24,7 @@ export async function POST(request: Request) {
     return Response.json({ error: "Rate limited" }, { status: 429 });
   }
 
-  const auth = await getAuth();
+  const auth = await getAuth(request);
   if (!auth.isLoggedIn) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }

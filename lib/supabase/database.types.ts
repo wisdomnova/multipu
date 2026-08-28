@@ -275,6 +275,39 @@ export interface Database {
         };
         Relationships: [];
       };
+      developer_api_keys: {
+        Row: {
+          id: string;
+          user_id: string;
+          wallet_address: string;
+          name: string;
+          api_key: string;
+          created_at: string;
+          revoked: boolean;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          wallet_address: string;
+          name: string;
+          api_key: string;
+          created_at?: string;
+          revoked?: boolean;
+        };
+        Update: {
+          name?: string;
+          revoked?: boolean;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "developer_api_keys_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
@@ -294,7 +327,9 @@ export type User = Database["public"]["Tables"]["users"]["Row"];
 export type Token = Database["public"]["Tables"]["tokens"]["Row"];
 export type Launch = Database["public"]["Tables"]["launches"]["Row"];
 export type Earning = Database["public"]["Tables"]["earnings"]["Row"];
+export type DeveloperApiKey = Database["public"]["Tables"]["developer_api_keys"]["Row"];
 
 export type TokenInsert = Database["public"]["Tables"]["tokens"]["Insert"];
 export type LaunchInsert = Database["public"]["Tables"]["launches"]["Insert"];
 export type EarningInsert = Database["public"]["Tables"]["earnings"]["Insert"];
+export type DeveloperApiKeyInsert = Database["public"]["Tables"]["developer_api_keys"]["Insert"];
