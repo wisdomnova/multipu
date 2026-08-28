@@ -248,3 +248,21 @@ ALTER TABLE developer_api_keys ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY developer_api_keys_own ON developer_api_keys FOR ALL USING (true) WITH CHECK (true);
 
+-- ─── Developer Wallets ──────────────────────────────
+CREATE TABLE developer_wallets (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  wallet_address TEXT NOT NULL,
+  network TEXT NOT NULL, -- 'solana' or 'evm'
+  public_key TEXT NOT NULL,
+  encrypted_private_key TEXT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  CONSTRAINT uq_user_wallet_network UNIQUE(user_id, network)
+);
+
+CREATE INDEX idx_developer_wallets_wallet ON developer_wallets (wallet_address);
+
+ALTER TABLE developer_wallets ENABLE ROW LEVEL SECURITY;
+CREATE POLICY developer_wallets_own ON developer_wallets FOR ALL USING (true) WITH CHECK (true);
+

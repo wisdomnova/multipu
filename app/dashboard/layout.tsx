@@ -10,6 +10,7 @@ import {
   LayoutGrid,
   Search,
   Key,
+  Wallet,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
@@ -21,6 +22,7 @@ const navItems = [
   { label: "Launches", icon: Rocket, href: "/dashboard/launches" },
   { label: "Earnings", icon: TrendingUp, href: "/dashboard/earnings" },
   { label: "API Keys", icon: Key, href: "/dashboard/api" },
+  { label: "Dev Wallet", icon: Wallet, href: "/dashboard/wallet" },
   { label: "Explore", icon: Search, href: "/dashboard/explore" },
 ];
 
