@@ -107,13 +107,13 @@ export async function GET(request: Request) {
     // Sort combined by volume descending
     combined.sort((a, b) => b.volume_24h - a.volume_24h);
 
-    // Deduplicate by symbol (case insensitive) to keep only 1 of each type
-    const seenSymbols = new Set<string>();
+    // Deduplicate by mint address (case insensitive) to keep only 1 of each unique token
+    const seenAddresses = new Set<string>();
     const deduplicated: any[] = [];
     for (const launch of combined) {
-      const symbol = launch.tokens.symbol?.toUpperCase();
-      if (symbol && !seenSymbols.has(symbol)) {
-        seenSymbols.add(symbol);
+      const address = launch.tokens.mint_address?.toLowerCase();
+      if (address && !seenAddresses.has(address)) {
+        seenAddresses.add(address);
         deduplicated.push(launch);
       }
     }
