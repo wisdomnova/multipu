@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "multipu-mcp": {
+      "command": "node",
+      "args": ["/Users/user/multipu/.agents/plugins/multipu/server.js"],
+      "env": {
+        "MULTIPU_API_URL": "http://localhost:3001"
+      }
+    }
+  }
+}
