@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Search, RefreshCw } from "lucide-react";
+import { IconSearch, IconRefresh } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 import { TerminalColumnBoard } from "@/components/explore/terminal-column-board";
 import { QuickBuyModal } from "@/components/explore/quick-buy-modal";
@@ -113,7 +113,7 @@ export default function ExplorePage() {
         {/* Search & Refresh */}
         <div className="flex items-center gap-2 w-full md:w-80">
           <div className="relative flex-1">
-            <Search
+            <IconSearch
               size={13}
               className="absolute left-3 top-1/2 -translate-y-1/2 text-text-dim"
             />
@@ -132,7 +132,7 @@ export default function ExplorePage() {
             className="p-1.5 border border-border hover:border-border-hover bg-white/[0.02] text-text-muted hover:text-text-primary rounded transition-colors"
             title="Refresh"
           >
-            <RefreshCw
+            <IconRefresh
               size={13}
               className={cn(isRefreshing && "animate-spin text-accent")}
             />

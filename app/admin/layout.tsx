@@ -3,16 +3,16 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { Lock, Zap, DollarSign, AlertCircle, LogOut, Globe, Wallet } from "lucide-react";
+import { IconLock, IconBolt, IconCurrencyDollar, IconAlertCircle, IconLogout, IconWorld, IconWallet } from "@tabler/icons-react";
 import { useState } from "react";
 
 const items = [
-  { href: "/admin", label: "Overview", icon: Zap },
-  { href: "/admin/protocol-fee", label: "Protocol Fee", icon: DollarSign },
-  { href: "/admin/launch-controls", label: "Launch Controls", icon: Lock },
-  { href: "/admin/treasury", label: "Treasury", icon: Wallet },
-  { href: "/admin/network-settings", label: "Network Settings", icon: Globe },
-  { href: "/admin/security", label: "Security Logs", icon: AlertCircle },
+  { href: "/admin", label: "Overview", icon: IconBolt },
+  { href: "/admin/protocol-fee", label: "Protocol Fee", icon: IconCurrencyDollar },
+  { href: "/admin/launch-controls", label: "Launch Controls", icon: IconLock },
+  { href: "/admin/treasury", label: "Treasury", icon: IconWallet },
+  { href: "/admin/network-settings", label: "Network Settings", icon: IconWorld },
+  { href: "/admin/security", label: "Security Logs", icon: IconAlertCircle },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -75,7 +75,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             "disabled:opacity-50"
           )}
         >
-          <LogOut size={16} className="opacity-60" />
+          <IconLogout size={16} className="opacity-60" />
           <span>{isLoggingOut ? "Logging out..." : "Sign out"}</span>
         </button>
       </aside>

@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { fadeUp, stagger } from "@/components/motion";
-import { TrendingUp, ArrowUpRight, ArrowDownRight } from "lucide-react";
+import { IconTrendingUp, IconArrowUpRight, IconArrowDownRight } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 import { useApi } from "@/hooks/use-api";
 import { StatsSkeleton, ListSkeleton } from "@/components/skeleton";
@@ -155,7 +155,7 @@ export default function EarningsPage() {
                 className="bg-background p-5 md:p-6 hover:bg-elevated transition-colors"
               >
                 <div className="flex items-center gap-2 mb-3">
-                  <TrendingUp size={14} className="text-text-muted" />
+                  <IconTrendingUp size={14} className="text-text-muted" />
                   <span className="font-mono text-[0.65rem] text-text-muted uppercase tracking-wider">
                     {stat.label}
                   </span>
@@ -170,7 +170,7 @@ export default function EarningsPage() {
                 </div>
                 {stat.positive && (
                   <span className="mt-1.5 text-xs text-success flex items-center gap-0.5">
-                    <ArrowUpRight size={10} />+{stat.value.toFixed(2)}{" "}
+                    <IconArrowUpRight size={10} />+{stat.value.toFixed(2)}{" "}
                     {stat.period}
                   </span>
                 )}
@@ -218,7 +218,7 @@ export default function EarningsPage() {
                               </span>
                               {pad.todayEarnings > 0 && (
                                 <div className="text-[10px] font-mono text-success flex items-center gap-0.5 mt-0.5">
-                                  <ArrowUpRight size={8} />+
+                                  <IconArrowUpRight size={8} />+
                                   {pad.todayEarnings.toFixed(2)} SOL today
                                 </div>
                               )}
@@ -239,7 +239,7 @@ export default function EarningsPage() {
                 </div>
               ) : (
                 <div className="border border-dashed border-border p-8 text-center">
-                  <TrendingUp
+                  <IconTrendingUp
                     size={24}
                     className="text-text-dim mx-auto mb-3"
                   />
@@ -278,7 +278,7 @@ export default function EarningsPage() {
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           <div className="w-7 h-7 rounded-sm bg-success/10 border border-success/20 flex items-center justify-center">
-                            <ArrowUpRight size={12} className="text-success" />
+                            <IconArrowUpRight size={12} className="text-success" />
                           </div>
                           <div>
                             <div className="flex items-center gap-1.5">

@@ -4,26 +4,26 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import {
-  TrendingUp,
-  Coins,
-  Rocket,
-  LayoutGrid,
-  Search,
-  Key,
-  Wallet,
-} from "lucide-react";
+  IconTrendingUp,
+  IconCoins,
+  IconRocket,
+  IconLayoutGrid,
+  IconSearch,
+  IconKey,
+  IconWallet,
+} from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
 import { WalletButton } from "@/components/wallet-button";
 
 const navItems = [
-  { label: "Dashboard", icon: LayoutGrid, href: "/dashboard" },
-  { label: "Tokens", icon: Coins, href: "/dashboard/tokens" },
-  { label: "Launches", icon: Rocket, href: "/dashboard/launches" },
-  { label: "Earnings", icon: TrendingUp, href: "/dashboard/earnings" },
-  { label: "API Keys", icon: Key, href: "/dashboard/api" },
-  { label: "Dev Wallet", icon: Wallet, href: "/dashboard/wallet" },
-  { label: "Explore", icon: Search, href: "/dashboard/explore" },
+  { label: "Dashboard", icon: IconLayoutGrid, href: "/dashboard" },
+  { label: "Tokens", icon: IconCoins, href: "/dashboard/tokens" },
+  { label: "Launches", icon: IconRocket, href: "/dashboard/launches" },
+  { label: "Earnings", icon: IconTrendingUp, href: "/dashboard/earnings" },
+  { label: "API Keys", icon: IconKey, href: "/dashboard/api" },
+  { label: "Dev Wallet", icon: IconWallet, href: "/dashboard/wallet" },
+  { label: "Explore", icon: IconSearch, href: "/dashboard/explore" },
 ];
 
 export default function DashboardLayout({

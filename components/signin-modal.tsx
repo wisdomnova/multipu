@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Loader2, Wallet } from "lucide-react";
+import { IconX, IconLoader2, IconWallet } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useAuth } from "@/hooks/use-auth";
@@ -141,7 +141,7 @@ export function SignInModal({ isOpen, onClose }: SignInModalProps) {
       description: "Instant testing bypass",
       onClick: handleDemoSignIn,
       isPrimary: true,
-      icon: <Wallet className="w-5 h-5 text-accent" />,
+      icon: <IconWallet className="w-5 h-5 text-accent" />,
     },
     {
       id: "solana",
@@ -149,7 +149,7 @@ export function SignInModal({ isOpen, onClose }: SignInModalProps) {
       description: "Fast multi-chain deployment",
       onClick: handleSolanaSignIn,
       isPrimary: true,
-      icon: <Wallet className="w-5 h-5 text-[#14F195]" />,
+      icon: <IconWallet className="w-5 h-5 text-[#14F195]" />,
     },
     {
       id: "bsc",
@@ -157,7 +157,7 @@ export function SignInModal({ isOpen, onClose }: SignInModalProps) {
       description: "BNB Smart Chain networks",
       onClick: handleBscSignIn,
       isPrimary: true,
-      icon: <Wallet className="w-5 h-5 text-[#F3BA2F]" />,
+      icon: <IconWallet className="w-5 h-5 text-[#F3BA2F]" />,
     },
     {
       id: "google",
@@ -232,7 +232,7 @@ export function SignInModal({ isOpen, onClose }: SignInModalProps) {
                     disabled={isConnecting}
                     className="absolute top-6 right-6 p-2 text-text-muted hover:text-white hover:bg-white/5 rounded-full transition-all"
                   >
-                    <X size={18} />
+                    <IconX size={18} />
                   </button>
                   
                   <h2 className="text-2xl font-bold text-white tracking-tight">Welcome back</h2>
@@ -258,7 +258,7 @@ export function SignInModal({ isOpen, onClose }: SignInModalProps) {
                       >
                         <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center border border-white/5 group-hover:border-white/10 transition-colors">
                           {isConnecting && selectedMethod === method.id ? (
-                            <Loader2 size={20} className="animate-spin text-accent" />
+                            <IconLoader2 size={20} className="animate-spin text-accent" />
                           ) : (
                              method.icon
                           )}

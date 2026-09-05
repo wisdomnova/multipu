@@ -5,7 +5,7 @@ import Link from "next/link";
 import { TradeForm } from "@/components/trade/trade-form";
 import { TradeHistory } from "@/components/trade/trade-history";
 import { CandlestickChart } from "@/components/trade/candlestick-chart";
-import { ArrowLeft, RefreshCw } from "lucide-react";
+import { IconArrowLeft, IconRefresh } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 
 interface TokenData {
@@ -109,7 +109,7 @@ export default function TradePage({ params }: { params: Promise<{ id: string }> 
           {error || "Launch details not found."}
         </div>
         <Link href="/dashboard" className="text-xs text-accent font-mono flex items-center gap-1">
-          <ArrowLeft size={12} /> Back to dashboard
+          <IconArrowLeft size={12} /> Back to dashboard
         </Link>
       </div>
     );
@@ -126,13 +126,13 @@ export default function TradePage({ params }: { params: Promise<{ id: string }> 
           href="/dashboard/explore"
           className="text-xs text-text-muted hover:text-text-primary transition-colors font-mono flex items-center gap-1.5"
         >
-          <ArrowLeft size={12} /> Explore Memes
+          <IconArrowLeft size={12} /> Explore Memes
         </Link>
         <button
           onClick={fetchDetails}
           className="text-xs text-text-muted hover:text-text-primary transition-colors font-mono flex items-center gap-1"
         >
-          <RefreshCw size={12} className="animate-hover" /> Refresh
+          <IconRefresh size={12} className="animate-hover" /> Refresh
         </button>
       </div>
 

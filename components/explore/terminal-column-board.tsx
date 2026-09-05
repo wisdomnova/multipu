@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Copy, Check, ChevronLeft, ChevronRight } from "lucide-react";
+import { IconCopy, IconCheck, IconChevronLeft, IconChevronRight } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 
 export interface TerminalToken {
@@ -197,7 +197,7 @@ export function TerminalColumnBoard({
                               className="text-text-dim hover:text-text-secondary transition-colors p-0.5"
                               title="Copy contract address"
                             >
-                              {isCopied ? <Check size={11} className="text-success" /> : <Copy size={11} />}
+                              {isCopied ? <IconCheck size={11} className="text-success" /> : <IconCopy size={11} />}
                             </button>
                           </div>
 
@@ -349,7 +349,7 @@ export function TerminalColumnBoard({
               disabled={currentPage === 1}
               className="px-3 py-1.5 text-xs font-mono bg-white/[0.04] hover:bg-white/[0.08] disabled:opacity-30 disabled:hover:bg-white/[0.04] text-text-secondary hover:text-white border border-border rounded transition-colors flex items-center gap-1"
             >
-              <ChevronLeft size={14} />
+              <IconChevronLeft size={14} />
               <span>Previous</span>
             </button>
 
@@ -383,7 +383,7 @@ export function TerminalColumnBoard({
               className="px-3 py-1.5 text-xs font-mono bg-white/[0.04] hover:bg-white/[0.08] disabled:opacity-30 disabled:hover:bg-white/[0.04] text-text-secondary hover:text-white border border-border rounded transition-colors flex items-center gap-1"
             >
               <span>Next</span>
-              <ChevronRight size={14} />
+              <IconChevronRight size={14} />
             </button>
           </div>
         </div>

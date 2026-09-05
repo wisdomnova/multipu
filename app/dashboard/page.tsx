@@ -6,15 +6,15 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import { fadeUp, stagger } from "@/components/motion";
 import {
-  Plus,
-  TrendingUp,
-  Coins,
-  Rocket,
-  ExternalLink,
-  Copy,
-  ChevronDown,
-  Activity,
-} from "lucide-react";
+  IconPlus,
+  IconTrendingUp,
+  IconCoins,
+  IconRocket,
+  IconExternalLink,
+  IconCopy,
+  IconChevronDown,
+  IconActivity,
+} from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 import { useApi } from "@/hooks/use-api";
 import { StatsSkeleton, ListSkeleton } from "@/components/skeleton";
@@ -92,13 +92,13 @@ export default function DashboardPage() {
     {
       label: "Total Tokens",
       value: stats?.totalTokens?.toString() || "0",
-      icon: Coins,
+      icon: IconCoins,
       change: tokens.length > 0 ? `${tokens.length} deployed` : "none yet",
     },
     {
       label: "Active Launches",
       value: stats?.activeLaunches?.toString() || "0",
-      icon: Rocket,
+      icon: IconRocket,
       change: stats?.launchpadsUsed?.length
         ? `across ${stats.launchpadsUsed.length} pads`
         : "no launches",
@@ -106,7 +106,7 @@ export default function DashboardPage() {
     {
       label: "Total Earnings",
       value: stats?.totalEarnings?.toFixed(2) || "0.00",
-      icon: TrendingUp,
+      icon: IconTrendingUp,
       change: stats?.earningsToday
         ? `+${stats.earningsToday.toFixed(2)} today`
         : "no earnings yet",
@@ -115,7 +115,7 @@ export default function DashboardPage() {
     {
       label: "Launchpads Used",
       value: stats?.launchpadsUsed?.length?.toString() || "0",
-      icon: Activity,
+      icon: IconActivity,
       change: stats?.launchpadsUsed?.map((p) => launchpadNames[p] || p).join(", ") || "none",
     },
   ];
@@ -145,7 +145,7 @@ export default function DashboardPage() {
             href="/launch"
             className="hidden md:inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold bg-accent hover:bg-accent-hover text-white rounded-full transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(139,92,246,0.3)]"
           >
-            <Plus size={16} />
+            <IconPlus size={16} />
             Launch Token
           </Link>
         </motion.div>
@@ -213,7 +213,7 @@ export default function DashboardPage() {
                 Your Tokens
               </h2>
               <button className="font-mono text-xs text-text-muted hover:text-text-primary transition-colors flex items-center gap-1">
-                Sort by <ChevronDown size={12} />
+                Sort by <IconChevronDown size={12} />
               </button>
             </motion.div>
 
@@ -241,7 +241,7 @@ export default function DashboardPage() {
                         className="w-full text-left p-5 flex items-center gap-4"
                       >
                         <div className="w-10 h-10 rounded-lg bg-accent/10 border border-accent/20 flex items-center justify-center flex-shrink-0">
-                          <Coins size={16} className="text-accent" />
+                          <IconCoins size={16} className="text-accent" />
                         </div>
 
                         <div className="flex-1 min-w-0">
@@ -294,7 +294,7 @@ export default function DashboardPage() {
                           </div>
                         </div>
 
-                        <ChevronDown
+                        <IconChevronDown
                           size={14}
                           className={cn(
                             "text-text-dim transition-transform flex-shrink-0",
@@ -338,7 +338,7 @@ export default function DashboardPage() {
                                       {row.value}
                                       {row.label === "Address" &&
                                         token.mint_address && (
-                                          <Copy
+                                          <IconCopy
                                             size={10}
                                             className="text-text-dim hover:text-text-muted cursor-pointer"
                                             onClick={() => {
@@ -413,7 +413,7 @@ export default function DashboardPage() {
                                         {formatAddress(launch.pool_address)}
                                       </span>
                                       {launch.pool_address && (
-                                        <ExternalLink
+                                        <IconExternalLink
                                           size={10}
                                           className="text-text-dim hover:text-text-muted cursor-pointer"
                                         />
@@ -432,7 +432,7 @@ export default function DashboardPage() {
               </motion.div>
             ) : (
               <div className="border border-dashed border-border p-12 text-center">
-                <Coins size={32} className="text-text-dim mx-auto mb-4" />
+                <IconCoins size={32} className="text-text-dim mx-auto mb-4" />
                 <h3 className="text-base font-semibold text-text-primary mb-2">
                   No tokens yet
                 </h3>
@@ -443,7 +443,7 @@ export default function DashboardPage() {
                   href="/launch"
                   className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold bg-accent hover:bg-accent-hover text-white rounded-full transition-all"
                 >
-                  <Plus size={16} />
+                  <IconPlus size={16} />
                   Launch Token
                 </Link>
               </div>

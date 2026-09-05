@@ -3,18 +3,18 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Wallet,
-  Copy,
-  Check,
-  RefreshCw,
-  ArrowRight,
-  Download,
-  Upload,
-  Lock,
-  Eye,
-  EyeOff,
-  ExternalLink,
-} from "lucide-react";
+  IconWallet,
+  IconCopy,
+  IconCheck,
+  IconRefresh,
+  IconArrowRight,
+  IconDownload,
+  IconUpload,
+  IconLock,
+  IconEye,
+  IconEyeOff,
+  IconExternalLink,
+} from "@tabler/icons-react";
 import { fadeUp, stagger } from "@/components/motion";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
@@ -209,7 +209,7 @@ export default function WalletPage() {
                   className="text-text-muted hover:text-text-primary p-1 border border-border/20 rounded transition-colors"
                   title="Refresh Balance"
                 >
-                  <RefreshCw size={13} className={cn(refreshing && "animate-spin")} />
+                  <IconRefresh size={13} className={cn(refreshing && "animate-spin")} />
                 </button>
               </div>
 
@@ -234,7 +234,7 @@ export default function WalletPage() {
                     onClick={() => handleCopy(walletAddress, "Address")}
                     className="flex-shrink-0 p-1.5 bg-white/[0.04] hover:bg-white/[0.08] border border-border rounded transition-all text-text-muted hover:text-text-primary"
                   >
-                    {copiedText === walletAddress ? <Check size={12} /> : <Copy size={12} />}
+                    {copiedText === walletAddress ? <IconCheck size={12} /> : <IconCopy size={12} />}
                   </button>
                 </div>
               </div>
@@ -245,7 +245,7 @@ export default function WalletPage() {
                   onClick={handleGenerateNew}
                   className="flex items-center justify-center gap-1.5 px-4 py-2 text-xs font-mono text-text-muted border border-border hover:border-border-hover transition-colors bg-white/[0.01]"
                 >
-                  <RefreshCw size={12} /> Regenerate Wallet
+                  <IconRefresh size={12} /> Regenerate Wallet
                 </button>
                 
                 {network === "solana" && (
@@ -255,7 +255,7 @@ export default function WalletPage() {
                     rel="noreferrer"
                     className="flex items-center justify-center gap-1.5 px-4 py-2 text-xs font-mono text-accent border border-accent/20 bg-accent/5 hover:bg-accent/10 transition-colors"
                   >
-                    Solana Faucet <ExternalLink size={12} />
+                    Solana Faucet <IconExternalLink size={12} />
                   </a>
                 )}
               </div>
@@ -267,7 +267,7 @@ export default function WalletPage() {
               {/* Import Panel */}
               <div className="border border-border p-5 md:p-6 space-y-4">
                 <h2 className="text-xs font-semibold text-text-primary flex items-center gap-1.5 uppercase tracking-wider font-mono">
-                  <Upload size={14} className="text-text-muted" /> Import Wallet
+                  <IconUpload size={14} className="text-text-muted" /> Import Wallet
                 </h2>
                 <p className="text-[11px] text-text-secondary leading-relaxed">
                   Overwrite the current developer wallet by importing your own private key.
@@ -294,7 +294,7 @@ export default function WalletPage() {
               {/* Export Panel */}
               <div className="border border-border p-5 md:p-6 space-y-4">
                 <h2 className="text-xs font-semibold text-text-primary flex items-center gap-1.5 uppercase tracking-wider font-mono">
-                  <Download size={14} className="text-text-muted" /> Export Wallet
+                  <IconDownload size={14} className="text-text-muted" /> Export Wallet
                 </h2>
                 <p className="text-[11px] text-text-secondary leading-relaxed">
                   Securely view and export the private key of your current developer wallet.
@@ -309,9 +309,9 @@ export default function WalletPage() {
                     {isExporting ? (
                       "Exporting..."
                     ) : showExportedKey ? (
-                      <><EyeOff size={13} /> Hide Private Key</>
+                      <><IconEyeOff size={13} /> Hide Private Key</>
                     ) : (
-                      <><Eye size={13} /> Reveal Private Key</>
+                      <><IconEye size={13} /> Reveal Private Key</>
                     )}
                   </button>
 
@@ -331,7 +331,7 @@ export default function WalletPage() {
                             onClick={() => handleCopy(exportedKey, "Private Key")}
                             className="flex-shrink-0 p-1 border border-border rounded text-text-muted hover:text-text-primary bg-white/[0.02]"
                           >
-                            {copiedText === exportedKey ? <Check size={10} /> : <Copy size={10} />}
+                            {copiedText === exportedKey ? <IconCheck size={10} /> : <IconCopy size={10} />}
                           </button>
                         </div>
                       </motion.div>
@@ -347,7 +347,7 @@ export default function WalletPage() {
           {/* Right Column - FAQ */}
           <div className="lg:col-span-1 border border-border p-5 md:p-6 space-y-6 bg-white/[0.002]">
             <h2 className="text-xs font-semibold text-text-primary uppercase tracking-wider font-mono flex items-center gap-1.5">
-              <Lock size={14} className="text-accent" /> Security Guide
+              <IconLock size={14} className="text-accent" /> Security Guide
             </h2>
 
             <div className="space-y-4">

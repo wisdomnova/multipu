@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { AlertCircle, CheckCircle, Clock, Shield } from "lucide-react";
+import { IconAlertCircle, IconCircleCheck, IconClock, IconShield } from "@tabler/icons-react";
 
 type AuditLog = {
   id: string;
@@ -49,15 +49,15 @@ export default function AdminSecurityPage() {
 
   const getActionIcon = (action: string) => {
     if (action.includes("login") || action.includes("logout")) {
-      return <Shield size={16} className="text-blue-500" />;
+      return <IconShield size={16} className="text-blue-500" />;
     }
     if (action.includes("suspicious")) {
-      return <AlertCircle size={16} className="text-error" />;
+      return <IconAlertCircle size={16} className="text-error" />;
     }
     if (action.includes("update")) {
-      return <CheckCircle size={16} className="text-emerald-500" />;
+      return <IconCircleCheck size={16} className="text-emerald-500" />;
     }
-    return <Clock size={16} className="text-text-muted" />;
+    return <IconClock size={16} className="text-text-muted" />;
   };
 
   const formatTime = (timestamp: string) => {
@@ -91,7 +91,7 @@ export default function AdminSecurityPage() {
       {/* Header */}
       <div>
         <div className="flex items-center gap-3 mb-2">
-          <Shield size={24} className="text-accent" />
+          <IconShield size={24} className="text-accent" />
           <h1 className="text-3xl font-bold text-white">Security & Audit Logs</h1>
         </div>
         <p className="text-sm text-text-secondary">
@@ -137,7 +137,7 @@ export default function AdminSecurityPage() {
           </div>
         ) : error ? (
           <div className="p-6 text-center">
-            <AlertCircle size={20} className="text-error mx-auto mb-2" />
+            <IconAlertCircle size={20} className="text-error mx-auto mb-2" />
             <p className="text-sm text-error">{error}</p>
           </div>
         ) : logs.length === 0 ? (

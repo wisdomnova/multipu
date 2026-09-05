@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { AlertCircle, Lock, Eye, EyeOff } from "lucide-react";
+import { IconAlertCircle, IconLock, IconEye, IconEyeOff } from "@tabler/icons-react";
 
 export default function AdminLoginPage() {
   const [password, setPassword] = useState("");
@@ -43,7 +43,7 @@ export default function AdminLoginPage() {
         {/* Header */}
         <div className="mb-8 text-center">
           <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-accent/10 border border-accent/30 mb-4">
-            <Lock size={24} className="text-accent" />
+            <IconLock size={24} className="text-accent" />
           </div>
           <h1 className="text-2xl font-bold text-white mb-2">Admin Access</h1>
           <p className="text-sm text-text-secondary">
@@ -72,7 +72,7 @@ export default function AdminLoginPage() {
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 transform text-text-muted hover:text-white transition-colors"
               >
-                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                {showPassword ? <IconEyeOff size={16} /> : <IconEye size={16} />}
               </button>
             </div>
           </div>
@@ -80,7 +80,7 @@ export default function AdminLoginPage() {
           {/* Error Message */}
           {error && (
             <div className="flex items-center gap-2 px-4 py-3 rounded-xl bg-error/10 border border-error/30">
-              <AlertCircle size={16} className="text-error flex-shrink-0" />
+              <IconAlertCircle size={16} className="text-error flex-shrink-0" />
               <p className="text-xs text-error">{error}</p>
             </div>
           )}

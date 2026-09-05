@@ -5,13 +5,13 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import { fadeUp, stagger } from "@/components/motion";
 import {
-  Plus,
-  Rocket,
-  ExternalLink,
-  Clock,
-  CheckCircle2,
-  AlertCircle,
-} from "lucide-react";
+  IconPlus,
+  IconRocket,
+  IconExternalLink,
+  IconClock,
+  IconCircleCheck,
+  IconAlertCircle,
+} from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 import { useApi } from "@/hooks/use-api";
 import { StatsSkeleton, ListSkeleton } from "@/components/skeleton";
@@ -53,7 +53,7 @@ const statusConfig: Record<
   string,
   {
     label: string;
-    icon: typeof CheckCircle2;
+    icon: typeof IconCircleCheck;
     color: string;
     dotColor: string;
     bgColor: string;
@@ -61,21 +61,21 @@ const statusConfig: Record<
 > = {
   live: {
     label: "Live",
-    icon: CheckCircle2,
+    icon: IconCircleCheck,
     color: "text-success",
     dotColor: "bg-success",
     bgColor: "bg-success/5 border-success/20",
   },
   pending: {
     label: "Pending",
-    icon: Clock,
+    icon: IconClock,
     color: "text-warning",
     dotColor: "bg-warning",
     bgColor: "bg-warning/5 border-warning/20",
   },
   failed: {
     label: "Failed",
-    icon: AlertCircle,
+    icon: IconAlertCircle,
     color: "text-error",
     dotColor: "bg-error",
     bgColor: "bg-error/5 border-error/20",
@@ -131,7 +131,7 @@ export default function LaunchesPage() {
             href="/launch"
             className="hidden md:inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold bg-accent hover:bg-accent-hover text-white rounded-full transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(139,92,246,0.3)]"
           >
-            <Plus size={16} />
+            <IconPlus size={16} />
             New Launch
           </Link>
         </motion.div>
@@ -294,7 +294,7 @@ export default function LaunchesPage() {
                           target="_blank"
                           rel="noopener noreferrer"
                         >
-                          <ExternalLink
+                          <IconExternalLink
                             size={14}
                             className="text-text-dim hover:text-text-muted cursor-pointer flex-shrink-0"
                           />
@@ -310,7 +310,7 @@ export default function LaunchesPage() {
           {/* Empty state */}
           {launches.length === 0 && (
             <div className="border border-dashed border-border p-12 text-center">
-              <Rocket size={32} className="text-text-dim mx-auto mb-4" />
+              <IconRocket size={32} className="text-text-dim mx-auto mb-4" />
               <h3 className="text-base font-semibold text-text-primary mb-2">
                 No launches yet
               </h3>
@@ -321,7 +321,7 @@ export default function LaunchesPage() {
                 href="/launch"
                 className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold bg-accent hover:bg-accent-hover text-white rounded-full transition-all"
               >
-                <Plus size={16} />
+                <IconPlus size={16} />
                 Launch Token
               </Link>
             </div>

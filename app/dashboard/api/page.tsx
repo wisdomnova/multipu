@@ -3,16 +3,16 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Key,
-  Copy,
-  Check,
-  Trash2,
-  Plus,
-  Terminal,
-  Lock,
-  Code2,
-  Info,
-} from "lucide-react";
+  IconKey,
+  IconCopy,
+  IconCheck,
+  IconTrash,
+  IconPlus,
+  IconTerminal,
+  IconLock,
+  IconCode,
+  IconInfoCircle,
+} from "@tabler/icons-react";
 import { fadeUp, stagger } from "@/components/motion";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
@@ -285,7 +285,7 @@ console.log(await resConfirm.json());`,
           >
             <div className="flex items-start gap-3">
               <div className="p-1.5 bg-accent/15 rounded-sm flex-shrink-0">
-                <Lock size={15} className="text-accent" />
+                <IconLock size={15} className="text-accent" />
               </div>
               <div className="space-y-1">
                 <h3 className="text-xs font-semibold text-text-primary">
@@ -305,7 +305,7 @@ console.log(await resConfirm.json());`,
                 onClick={() => copyToClipboard(generatedKey)}
                 className="flex-shrink-0 flex items-center gap-1 px-3 py-1.5 bg-accent hover:bg-accent-hover text-white transition-all text-[10px] font-semibold font-mono"
               >
-                {copiedKey ? <Check size={11} /> : <Copy size={11} />}
+                {copiedKey ? <IconCheck size={11} /> : <IconCopy size={11} />}
                 {copiedKey ? "Copied" : "Copy"}
               </button>
             </div>
@@ -328,7 +328,7 @@ console.log(await resConfirm.json());`,
         <div className="lg:col-span-1 space-y-6">
           <div className="border border-border p-5 md:p-6 space-y-6">
             <h2 className="text-sm font-semibold text-text-primary flex items-center gap-2">
-              <Key size={14} className="text-text-muted" /> API Key Controls
+              <IconKey size={14} className="text-text-muted" /> API Key Controls
             </h2>
 
             {/* Create API Key Form */}
@@ -350,7 +350,7 @@ console.log(await resConfirm.json());`,
                     disabled={isGenerating}
                     className="px-3.5 py-2 border border-border hover:border-border-hover text-text-muted hover:text-text-primary text-xs font-mono font-semibold transition-colors flex items-center gap-1"
                   >
-                    {isGenerating ? "..." : <><Plus size={14} /> Add</>}
+                    {isGenerating ? "..." : <><IconPlus size={14} /> Add</>}
                   </button>
                 </div>
               </div>
@@ -388,7 +388,7 @@ console.log(await resConfirm.json());`,
                         className="text-text-muted hover:text-error hover:bg-error/5 p-1 border border-transparent hover:border-error/10 transition-colors ml-2"
                         title="Revoke Key"
                       >
-                        <Trash2 size={13} />
+                        <IconTrash size={13} />
                       </button>
                     </div>
                   ))}
@@ -405,7 +405,7 @@ console.log(await resConfirm.json());`,
             {/* Doc Header Tabs */}
             <div className="border-b border-border bg-white/[0.005] px-6 py-4 flex flex-wrap items-center justify-between gap-4">
               <div className="flex items-center gap-1.5">
-                <Terminal size={14} className="text-text-muted" />
+                <IconTerminal size={14} className="text-text-muted" />
                 <span className="text-xs font-mono font-semibold text-text-primary">
                   DEVELOPER API REFERENCE
                 </span>
@@ -465,7 +465,7 @@ console.log(await resConfirm.json());`,
                 </div>
 
                 <div className="flex items-center gap-2 p-3 bg-white/[0.01] border border-border text-[10px] text-text-dim">
-                  <Info size={12} className="text-accent flex-shrink-0" />
+                  <IconInfoCircle size={12} className="text-accent flex-shrink-0" />
                   <span>
                     Note: Requests are automatically isolated by your wallet's current environment scope (e.g. devnet/testnet).
                   </span>
@@ -491,7 +491,7 @@ console.log(await resConfirm.json());`,
                     className="absolute top-3 right-3 text-text-muted hover:text-text-primary p-1.5 bg-white/[0.04] border border-border rounded transition-all"
                     title="Copy Snippet"
                   >
-                    <Copy size={11} />
+                    <IconCopy size={11} />
                   </button>
                 </div>
               </div>

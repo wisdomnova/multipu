@@ -8,16 +8,16 @@ import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { PublicKey } from "@solana/web3.js";
 import { fadeUp, stagger, scaleIn } from "@/components/motion";
 import {
-  ArrowLeft,
-  ArrowRight,
-  Upload,
-  Check,
-  Loader2,
-  Rocket,
-  ExternalLink,
-  Copy,
-  AlertCircle,
-} from "lucide-react";
+  IconArrowLeft,
+  IconArrowRight,
+  IconUpload,
+  IconCheck,
+  IconLoader2,
+  IconRocket,
+  IconExternalLink,
+  IconCopy,
+  IconAlertCircle,
+} from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
 import { WalletButton } from "@/components/wallet-button";
@@ -406,7 +406,7 @@ export default function LaunchPage() {
             href="/"
             className="flex items-center gap-2 text-text-secondary hover:text-text-primary transition-colors text-sm"
           >
-            <ArrowLeft size={16} />
+            <IconArrowLeft size={16} />
             <span className="hidden sm:inline">Back to home</span>
           </Link>
           <div className="flex items-center gap-2.5">
@@ -477,7 +477,7 @@ export default function LaunchPage() {
               exit={{ opacity: 0, y: -10 }}
               className="mb-6 p-4 border border-error/30 bg-error/5 flex items-start gap-3"
             >
-              <AlertCircle
+              <IconAlertCircle
                 size={16}
                 className="text-error mt-0.5 flex-shrink-0"
               />
@@ -554,7 +554,7 @@ export default function LaunchPage() {
                       <span className="font-mono text-xs text-success ml-auto">
                         Connected & Signed In
                       </span>
-                      <Check size={14} className="text-success" />
+                      <IconCheck size={14} className="text-success" />
                     </div>
                   </div>
                 )}
@@ -598,7 +598,7 @@ export default function LaunchPage() {
                       />
                     ) : (
                       <>
-                        <Upload size={18} className="text-text-muted" />
+                        <IconUpload size={18} className="text-text-muted" />
                         <span className="text-[10px] font-mono text-text-dim">
                           Logo
                         </span>
@@ -757,7 +757,7 @@ export default function LaunchPage() {
                   >
                     {selectedPads.includes(pad.id) && (
                       <div className="absolute top-4 right-4 w-5 h-5 rounded-sm bg-accent flex items-center justify-center">
-                        <Check size={12} className="text-white" />
+                        <IconCheck size={12} className="text-white" />
                       </div>
                     )}
 
@@ -910,7 +910,7 @@ export default function LaunchPage() {
                           key={padId}
                           className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-mono border border-accent/20 bg-accent/5 text-accent"
                         >
-                          <Rocket size={12} />
+                          <IconRocket size={12} />
                           {meta?.name || padId}
                         </span>
                       );
@@ -940,7 +940,7 @@ export default function LaunchPage() {
                   className="mt-6 p-4 border border-accent/20 bg-accent/5"
                 >
                   <div className="flex items-center gap-3">
-                    <Loader2 size={16} className="text-accent animate-spin" />
+                    <IconLoader2 size={16} className="text-accent animate-spin" />
                     <span className="text-sm text-accent font-mono">
                       {deployProgress}
                     </span>
@@ -961,7 +961,7 @@ export default function LaunchPage() {
             >
               <motion.div variants={scaleIn} className="mb-8">
                 <div className="inline-flex w-16 h-16 rounded-full bg-success/10 border border-success/20 items-center justify-center">
-                  <Check size={28} className="text-success" />
+                  <IconCheck size={28} className="text-success" />
                 </div>
               </motion.div>
 
@@ -1003,7 +1003,7 @@ export default function LaunchPage() {
                       }}
                       className="text-text-muted hover:text-text-primary transition-colors flex-shrink-0"
                     >
-                      <Copy size={14} />
+                      <IconCopy size={14} />
                     </button>
                   </div>
                   {mintTx && (
@@ -1013,7 +1013,7 @@ export default function LaunchPage() {
                       rel="noopener noreferrer"
                       className="mt-2 inline-flex items-center gap-1 text-xs font-mono text-accent hover:text-accent-hover transition-colors"
                     >
-                      View transaction <ExternalLink size={10} />
+                      View transaction <IconExternalLink size={10} />
                     </a>
                   )}
                 </motion.div>
@@ -1066,7 +1066,7 @@ export default function LaunchPage() {
                   className="inline-flex items-center gap-2 px-6 py-3 text-sm font-semibold bg-accent hover:bg-accent-hover text-white rounded-full transition-all duration-300"
                 >
                   View Dashboard
-                  <ArrowRight size={16} />
+                  <IconArrowRight size={16} />
                 </Link>
                 <button
                   onClick={() => {
@@ -1112,7 +1112,7 @@ export default function LaunchPage() {
                   : "border-border text-text-primary hover:border-border-hover hover:bg-elevated"
               )}
             >
-              <ArrowLeft size={16} />
+              <IconArrowLeft size={16} />
               Back
             </button>
             <button
@@ -1127,18 +1127,18 @@ export default function LaunchPage() {
             >
               {isDeploying ? (
                 <>
-                  <Loader2 size={16} className="animate-spin" />
+                  <IconLoader2 size={16} className="animate-spin" />
                   Deploying...
                 </>
               ) : currentStep === "confirm" ? (
                 <>
-                  <Rocket size={16} />
+                  <IconRocket size={16} />
                   Deploy & Launch
                 </>
               ) : (
                 <>
                   Next
-                  <ArrowRight size={16} />
+                  <IconArrowRight size={16} />
                 </>
               )}
             </button>

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useAuth } from "@/hooks/use-auth";
-import { Wallet, LogOut, Loader2, ChevronDown } from "lucide-react";
+import { IconWallet, IconLogout, IconLoader2, IconChevronDown } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { SignInModal } from "@/components/signin-modal";
@@ -34,7 +34,7 @@ export function WalletButton({ className }: { className?: string }) {
           className
         )}
       >
-        <Loader2 size={14} className="animate-spin" />
+        <IconLoader2 size={14} className="animate-spin" />
       </div>
     );
   }
@@ -55,7 +55,7 @@ export function WalletButton({ className }: { className?: string }) {
         >
           <div className="w-2 h-2 rounded-full bg-success" />
           <span className="text-text-primary">{short}</span>
-          <ChevronDown
+          <IconChevronDown
             size={12}
             className={cn(
               "text-text-muted transition-transform",
@@ -88,7 +88,7 @@ export function WalletButton({ className }: { className?: string }) {
                 }}
                 className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-text-secondary hover:text-text-primary hover:bg-elevated transition-colors"
               >
-                <LogOut size={14} />
+                <IconLogout size={14} />
                 Disconnect
               </button>
             </div>
@@ -122,12 +122,12 @@ export function WalletButton({ className }: { className?: string }) {
       >
         {isSigningIn ? (
           <>
-            <Loader2 size={14} className="animate-spin" />
+            <IconLoader2 size={14} className="animate-spin" />
             Signing in...
           </>
         ) : (
           <>
-            <Wallet size={14} />
+            <IconWallet size={14} />
             Sign In ({connected && publicKey ? "SIWS" : "SIWB"})
           </>
         )}
@@ -145,7 +145,7 @@ export function WalletButton({ className }: { className?: string }) {
           className
         )}
       >
-        <Wallet size={14} />
+        <IconWallet size={14} />
         Sign In
       </button>
       <SignInModal isOpen={showSignInModal} onClose={() => setShowSignInModal(false)} />

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { CheckCircle, AlertCircle, Server, Shield } from "lucide-react";
+import { IconCircleCheck, IconAlertCircle, IconServer, IconShield } from "@tabler/icons-react";
 
 type HealthData = {
   launchesPaused: boolean;
@@ -26,19 +26,19 @@ export default function AdminOverviewPage() {
       label: "Launch Status",
       value: data?.launchesPaused ? "Paused" : "Active",
       status: data?.launchesPaused ? "warning" : "healthy",
-      icon: Server,
+      icon: IconServer,
     },
     {
       label: "Mainnet Launches",
       value: data?.mainnetLaunchesAllowed ? "Enabled" : "Disabled",
       status: data?.mainnetLaunchesAllowed ? "healthy" : "warning",
-      icon: Shield,
+      icon: IconShield,
     },
     {
       label: "EVM Adapters",
       value: data?.evmLaunchesAllowed ? "Enabled" : "Disabled",
       status: data?.evmLaunchesAllowed ? "healthy" : "warning",
-      icon: Shield,
+      icon: IconShield,
     },
   ];
 
@@ -75,9 +75,9 @@ export default function AdminOverviewPage() {
                 <div className="flex items-start justify-between mb-3">
                   <Icon size={20} className="text-text-muted opacity-60" />
                   {isHealthy ? (
-                    <CheckCircle size={18} className="text-emerald-500/70" />
+                    <IconCircleCheck size={18} className="text-emerald-500/70" />
                   ) : (
-                    <AlertCircle size={18} className="text-amber-500/70" />
+                    <IconAlertCircle size={18} className="text-amber-500/70" />
                   )}
                 </div>
                 <div className="text-xs text-text-muted uppercase tracking-widest mb-1">
@@ -95,7 +95,7 @@ export default function AdminOverviewPage() {
       {/* Info Box */}
       <div className="p-5 rounded-xl bg-accent/5 border border-accent/20">
         <div className="flex gap-3">
-          <Shield size={18} className="text-accent flex-shrink-0 mt-0.5" />
+          <IconShield size={18} className="text-accent flex-shrink-0 mt-0.5" />
           <div>
             <h3 className="font-semibold text-white mb-1 text-sm">Security Monitoring Active</h3>
             <p className="text-xs text-text-secondary leading-relaxed">

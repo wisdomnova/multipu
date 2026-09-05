@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X } from "lucide-react";
+import { IconMenu2, IconX } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 import { WalletButton } from "@/components/wallet-button";
 
@@ -76,7 +76,7 @@ export function Nav() {
             className="md:hidden text-text-secondary hover:text-text-primary p-2"
             aria-label="Toggle menu"
           >
-            {mobileOpen ? <X size={20} /> : <Menu size={20} />}
+            {mobileOpen ? <IconX size={20} /> : <IconMenu2 size={20} />}
           </button>
         </div>
       </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { X } from "lucide-react";
+import { IconX } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 
 interface QuickBuyModalProps {
@@ -80,7 +80,7 @@ export function QuickBuyModal({
             onClick={onClose}
             className="text-text-dim hover:text-text-primary transition-colors p-1"
           >
-            <X size={16} />
+            <IconX size={16} />
           </button>
         </div>
 

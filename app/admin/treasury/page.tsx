@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Wallet, Send, AlertCircle, CheckCircle, Clock } from "lucide-react";
+import { IconWallet, IconSend, IconAlertCircle, IconCircleCheck, IconClock } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 
 type TreasuryData = {
@@ -98,9 +98,9 @@ export default function AdminTreasuryPage() {
   };
 
   const getStatusIcon = (status: string) => {
-    if (status === "confirmed") return <CheckCircle size={14} className="text-emerald-500" />;
-    if (status === "failed") return <AlertCircle size={14} className="text-error" />;
-    return <Clock size={14} className="text-amber-500" />;
+    if (status === "confirmed") return <IconCircleCheck size={14} className="text-emerald-500" />;
+    if (status === "failed") return <IconAlertCircle size={14} className="text-error" />;
+    return <IconClock size={14} className="text-amber-500" />;
   };
 
   return (
@@ -108,7 +108,7 @@ export default function AdminTreasuryPage() {
       {/* Header */}
       <div>
         <div className="flex items-center gap-3 mb-2">
-          <Wallet size={24} className="text-accent" />
+          <IconWallet size={24} className="text-accent" />
           <h1 className="text-3xl font-bold text-white">Treasury Management</h1>
         </div>
         <p className="text-sm text-text-secondary">
@@ -129,9 +129,9 @@ export default function AdminTreasuryPage() {
           )}
         >
           {status === "success" ? (
-            <CheckCircle size={16} className="text-emerald-500 flex-shrink-0" />
+            <IconCircleCheck size={16} className="text-emerald-500 flex-shrink-0" />
           ) : (
-            <AlertCircle
+            <IconAlertCircle
               size={16}
               className={status === "error" ? "text-error" : "text-blue-500"}
               style={{ flexShrink: 0 }}
@@ -146,7 +146,7 @@ export default function AdminTreasuryPage() {
       ) : !data?.configured ? (
         <div className="p-6 rounded-xl border border-error/30 bg-error/5">
           <div className="flex items-start gap-3">
-            <AlertCircle size={20} className="text-error mt-1 flex-shrink-0" />
+            <IconAlertCircle size={20} className="text-error mt-1 flex-shrink-0" />
             <div>
               <h3 className="font-semibold text-white mb-2">Treasury Not Configured</h3>
               <p className="text-sm text-text-secondary mb-4">
@@ -186,7 +186,7 @@ export default function AdminTreasuryPage() {
           {/* Withdrawal Form */}
           <div className="p-6 rounded-xl border border-white/[0.05] bg-white/[0.02]">
             <div className="flex items-center gap-2 mb-4">
-              <Send size={18} className="text-accent" />
+              <IconSend size={18} className="text-accent" />
               <h3 className="text-sm font-semibold text-white">Execute Withdrawal</h3>
             </div>
 
@@ -304,7 +304,7 @@ export default function AdminTreasuryPage() {
           {/* Security Notice */}
           <div className="p-5 rounded-xl bg-accent/5 border border-accent/20">
             <div className="flex gap-3">
-              <AlertCircle size={18} className="text-accent flex-shrink-0 mt-0.5" />
+              <IconAlertCircle size={18} className="text-accent flex-shrink-0 mt-0.5" />
               <div>
                 <h3 className="font-semibold text-white mb-2 text-sm">Server-Side Security</h3>
                 <ul className="text-xs text-text-secondary space-y-1">

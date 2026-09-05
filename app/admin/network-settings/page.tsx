@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Globe, AlertCircle, CheckCircle } from "lucide-react";
+import { IconWorld, IconAlertCircle, IconCircleCheck } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 
 type NetworkSettings = {
@@ -92,7 +92,7 @@ export default function AdminNetworkSettingsPage() {
       {/* Header */}
       <div>
         <div className="flex items-center gap-3 mb-2">
-          <Globe size={24} className="text-accent" />
+          <IconWorld size={24} className="text-accent" />
           <h1 className="text-3xl font-bold text-white">Network Settings</h1>
         </div>
         <p className="text-sm text-text-secondary">
@@ -112,9 +112,9 @@ export default function AdminNetworkSettingsPage() {
           }`}
         >
           {status === "success" ? (
-            <CheckCircle size={16} className="text-emerald-500 flex-shrink-0" />
+            <IconCircleCheck size={16} className="text-emerald-500 flex-shrink-0" />
           ) : (
-            <AlertCircle size={16} className="text-blue-500 flex-shrink-0" />
+            <IconAlertCircle size={16} className="text-blue-500 flex-shrink-0" />
           )}
           <p className="text-xs text-white/70">{statusMessage}</p>
         </div>
@@ -197,7 +197,7 @@ export default function AdminNetworkSettingsPage() {
           {/* Info Box */}
           <div className="p-5 rounded-xl bg-accent/5 border border-accent/20">
             <div className="flex gap-3">
-              <AlertCircle size={18} className="text-accent flex-shrink-0 mt-0.5" />
+              <IconAlertCircle size={18} className="text-accent flex-shrink-0 mt-0.5" />
               <div>
                 <h3 className="font-semibold text-white mb-1 text-sm">Safety Notes</h3>
                 <ul className="text-xs text-text-secondary space-y-1">

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Lock, AlertTriangle, CheckCircle } from "lucide-react";
+import { IconLock, IconAlertTriangle, IconCircleCheck } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 
 type LaunchControls = {
@@ -174,7 +174,7 @@ export default function AdminLaunchControlsPage() {
       {/* Header */}
       <div>
         <div className="flex items-center gap-3 mb-2">
-          <Lock size={24} className="text-accent" />
+          <IconLock size={24} className="text-accent" />
           <h1 className="text-3xl font-bold text-white">Launch Controls</h1>
         </div>
         <p className="text-sm text-text-secondary">
@@ -193,7 +193,7 @@ export default function AdminLaunchControlsPage() {
               : "bg-blue-500/10 border-blue-500/30"
           }`}
         >
-          <CheckCircle size={16} className={`flex-shrink-0 ${status === "success" ? "text-emerald-500" : "text-blue-500"}`} />
+          <IconCircleCheck size={16} className={`flex-shrink-0 ${status === "success" ? "text-emerald-500" : "text-blue-500"}`} />
           <p className="text-xs text-white/70">{statusMessage}</p>
         </div>
       )}
@@ -203,7 +203,7 @@ export default function AdminLaunchControlsPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
           <div className="bg-[#0a0a0a] border border-white/10 rounded-2xl max-w-sm p-6">
             <div className="flex items-center gap-3 mb-4">
-              <AlertTriangle size={20} className="text-amber-500" />
+              <IconAlertTriangle size={20} className="text-amber-500" />
               <h3 className="text-lg font-bold text-white">Confirm Action</h3>
             </div>
             <p className="text-sm text-text-secondary mb-6">

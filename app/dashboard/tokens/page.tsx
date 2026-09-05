@@ -4,13 +4,13 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { fadeUp, stagger } from "@/components/motion";
 import {
-  Plus,
-  Coins,
-  Copy,
-  ExternalLink,
-  Search,
-  ChevronDown,
-} from "lucide-react";
+  IconPlus,
+  IconCoins,
+  IconCopy,
+  IconExternalLink,
+  IconSearch,
+  IconChevronDown,
+} from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 import { useApi } from "@/hooks/use-api";
 import { ListSkeleton } from "@/components/skeleton";
@@ -91,7 +91,7 @@ export default function TokensPage() {
             href="/launch"
             className="hidden md:inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold bg-accent hover:bg-accent-hover text-white rounded-full transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(139,92,246,0.3)]"
           >
-            <Plus size={16} />
+            <IconPlus size={16} />
             Create Token
           </Link>
         </motion.div>
@@ -105,7 +105,7 @@ export default function TokensPage() {
         className="mb-6 flex items-center gap-3"
       >
         <div className="flex-1 relative">
-          <Search
+          <IconSearch
             size={14}
             className="absolute left-3 top-1/2 -translate-y-1/2 text-text-dim"
           />
@@ -118,7 +118,7 @@ export default function TokensPage() {
           />
         </div>
         <button className="flex items-center gap-1.5 px-4 py-2.5 text-xs font-mono text-text-muted border border-border hover:border-border-hover transition-colors">
-          Status <ChevronDown size={12} />
+          Status <IconChevronDown size={12} />
         </button>
       </motion.div>
 
@@ -145,7 +145,7 @@ export default function TokensPage() {
               <div className="p-5 md:p-6">
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 rounded-lg bg-accent/10 border border-accent/20 flex items-center justify-center flex-shrink-0">
-                    <Coins size={20} className="text-accent" />
+                    <IconCoins size={20} className="text-accent" />
                   </div>
 
                   <div className="flex-1 min-w-0">
@@ -179,7 +179,7 @@ export default function TokensPage() {
                       <span className="flex items-center gap-1">
                         {formatAddress(token.mint_address)}
                         {token.mint_address && (
-                          <Copy
+                          <IconCopy
                             size={10}
                             className="hover:text-text-muted cursor-pointer"
                             onClick={() => {
@@ -212,7 +212,7 @@ export default function TokensPage() {
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      <ExternalLink
+                      <IconExternalLink
                         size={14}
                         className="text-text-dim hover:text-text-muted cursor-pointer flex-shrink-0"
                       />
@@ -228,7 +228,7 @@ export default function TokensPage() {
       {/* Empty state */}
       {!loading && !error && tokens.length === 0 && (
         <div className="border border-dashed border-border p-12 text-center">
-          <Coins size={32} className="text-text-dim mx-auto mb-4" />
+          <IconCoins size={32} className="text-text-dim mx-auto mb-4" />
           <h3 className="text-base font-semibold text-text-primary mb-2">
             {search ? "No matching tokens" : "No tokens yet"}
           </h3>
@@ -242,7 +242,7 @@ export default function TokensPage() {
               href="/launch"
               className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold bg-accent hover:bg-accent-hover text-white rounded-full transition-all"
             >
-              <Plus size={16} />
+              <IconPlus size={16} />
               Create Token
             </Link>
           )}

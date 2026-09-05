@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { DollarSign, CheckCircle, AlertCircle } from "lucide-react";
+import { IconCurrencyDollar, IconCircleCheck, IconAlertCircle } from "@tabler/icons-react";
 
 type ProtocolFee = {
   enabled: boolean;
@@ -76,7 +76,7 @@ export default function AdminProtocolFeePage() {
       {/* Header */}
       <div>
         <div className="flex items-center gap-3 mb-2">
-          <DollarSign size={24} className="text-accent" />
+          <IconCurrencyDollar size={24} className="text-accent" />
           <h1 className="text-3xl font-bold text-white">Protocol Fee</h1>
         </div>
         <p className="text-sm text-text-secondary">
@@ -96,9 +96,9 @@ export default function AdminProtocolFeePage() {
           }`}
         >
           {status === "success" ? (
-            <CheckCircle size={16} className="text-emerald-500 flex-shrink-0" />
+            <IconCircleCheck size={16} className="text-emerald-500 flex-shrink-0" />
           ) : (
-            <AlertCircle size={16} className="text-blue-500 flex-shrink-0" />
+            <IconAlertCircle size={16} className="text-blue-500 flex-shrink-0" />
           )}
           <p className="text-xs text-white/70">{statusMessage}</p>
         </div>

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { fadeUp, stagger } from "@/components/motion";
-import { ArrowRight, Zap } from "lucide-react";
+import { IconArrowRight, IconBolt } from "@tabler/icons-react";
 
 export function CTA() {
   return (
@@ -53,7 +53,7 @@ export function CTA() {
               className="group inline-flex items-center gap-2 px-8 py-4 text-sm font-semibold bg-accent hover:bg-accent-hover text-white rounded-full transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_12px_32px_rgba(139,92,246,0.35)]"
             >
               Start Launching
-              <ArrowRight
+              <IconArrowRight
                 size={16}
                 className="group-hover:translate-x-0.5 transition-transform"
               />
