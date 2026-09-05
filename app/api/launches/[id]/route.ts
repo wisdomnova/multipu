@@ -13,11 +13,6 @@ export async function GET(
     return Response.json({ error: "Rate limited" }, { status: 429 });
   }
 
-  const auth = await getAuth(request);
-  if (!auth.isLoggedIn) {
-    return Response.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
   try {
     const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
 
@@ -46,26 +41,40 @@ export async function GET(
       if (dexRes.ok) {
         const dexData = await dexRes.json();
         const pairs = dexData.pairs || [];
-        const matchedPair = pairs.find(
-          (p: any) => p.chainId?.toLowerCase() === "solana" || p.chainId?.toLowerCase() === "bsc"
-        ) || pairs[0];
+        const matchedPair =
+          pairs.find((p: any) => ["solana", "bsc", "robinhood", "base"].includes(p.chainId?.toLowerCase())) ||
+          pairs[0];
 
         if (matchedPair) {
           const chain = matchedPair.chainId?.toLowerCase();
+          const normalizedNetwork =
+            chain === "solana" ? "Solana" : chain === "bsc" ? "BSC" : chain === "robinhood" ? "Robinhood" : chain === "base" ? "Base" : "Solana";
+
           const publicLaunch = {
             id: id,
             launchpad: matchedPair.dexId || "dex",
-            network: chain === "solana" ? "Solana" : "BSC",
+            network: normalizedNetwork,
             pool_address: matchedPair.pairAddress || null,
             volume_24h: Number(matchedPair.volume?.h24 || 0),
+            market_cap: Number(matchedPair.marketCap || matchedPair.fdv || 0),
             initial_liquidity: matchedPair.liquidity?.quote ? Number(matchedPair.liquidity.quote) : null,
             tokens: {
               id: id,
               name: matchedPair.baseToken.name,
               symbol: matchedPair.baseToken.symbol,
               mint_address: id,
-              supply: "1000000000", // Fallback standard meme supply
+              supply: "1000000000",
               decimals: 9,
+              image_url:
+                matchedPair.info?.imageUrl ||
+                `https://api.dicebear.com/7.x/identicon/svg?seed=${matchedPair.baseToken.symbol}`,
+              header_url: matchedPair.info?.header || null,
+              description: matchedPair.info?.description || "",
+              socials: {
+                website: matchedPair.info?.websites?.[0]?.url || "",
+                twitter: matchedPair.info?.socials?.find((s: any) => s.type === "twitter" || s.type === "x")?.url || "",
+                telegram: matchedPair.info?.socials?.find((s: any) => s.type === "telegram")?.url || "",
+              },
             },
           };
           return Response.json({ launch: publicLaunch });

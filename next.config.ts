@@ -42,13 +42,18 @@ const nextConfig: NextConfig = {
   // ─── Image Domains ─────────────────────────────────
   images: {
     remotePatterns: [
+      { protocol: "https", hostname: "cdn.dexscreener.com" },
+      { protocol: "https", hostname: "dd.dexscreener.com" },
       { protocol: "https", hostname: "arweave.net" },
       { protocol: "https", hostname: "**.ipfs.dweb.link" },
-      { protocol: "https", hostname: "dd.dexscreener.com" },
       { protocol: "https", hostname: "raw.githubusercontent.com" },
       { protocol: "https", hostname: "assets.coingecko.com" },
       { protocol: "https", hostname: "coin-images.coingecko.com" },
       { protocol: "https", hostname: "ipfs.io" },
+      { protocol: "https", hostname: "gateway.pinata.cloud" },
+      { protocol: "https", hostname: "cf-ipfs.com" },
+      { protocol: "https", hostname: "pump.fun" },
+      { protocol: "https", hostname: "**" },
     ],
   },
 
