@@ -14,6 +14,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
 import { WalletButton } from "@/components/wallet-button";
+import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 
 const navItems = [
   { label: "Dashboard", icon: IconLayoutGrid, href: "/dashboard" },
@@ -141,7 +142,12 @@ export default function DashboardLayout({
             </div>
           </div>
 
-          {children}
+          {/* Unified Header with Supported Chain Balances */}
+          <DashboardHeader />
+
+          <div className="flex-1 min-w-0">
+            {children}
+          </div>
         </main>
       </div>
     </div>
