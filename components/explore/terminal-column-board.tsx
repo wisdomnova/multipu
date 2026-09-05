@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Copy, Check, Search } from "lucide-react";
+import { Copy, Check, ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export interface TerminalToken {
@@ -44,6 +44,18 @@ interface TerminalColumnBoardProps {
     migrated: TerminalToken[];
     new_pairs: TerminalToken[];
   };
+  columnCounts?: {
+    final_stretch: number;
+    migrated: number;
+    new_pairs: number;
+  };
+  pagination?: {
+    page: number;
+    limit: number;
+    totalLaunches: number;
+    totalPages: number;
+  };
+  onPageChange?: (page: number) => void;
   onQuickBuy?: (token: TerminalToken, solAmount: number) => void;
 }
 
@@ -55,7 +67,13 @@ function formatUSD(num: number): string {
   return `$${num.toFixed(2)}`;
 }
 
-export function TerminalColumnBoard({ columns, onQuickBuy }: TerminalColumnBoardProps) {
+export function TerminalColumnBoard({
+  columns,
+  columnCounts,
+  pagination,
+  onPageChange,
+  onQuickBuy,
+}: TerminalColumnBoardProps) {
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [quickBuyAmount, setQuickBuyAmount] = useState<number>(1);
 
@@ -74,21 +92,28 @@ export function TerminalColumnBoard({ columns, onQuickBuy }: TerminalColumnBoard
       key: "final_stretch",
       title: "Final Stretch",
       subtitle: "Bonding curve completing",
+      totalCount: columnCounts?.final_stretch ?? (columns.final_stretch?.length || 0),
       tokens: columns.final_stretch || [],
     },
     {
       key: "migrated",
       title: "Migrated",
       subtitle: "Raydium and DEX pools",
+      totalCount: columnCounts?.migrated ?? (columns.migrated?.length || 0),
       tokens: columns.migrated || [],
     },
     {
       key: "new_pairs",
       title: "New Pairs",
       subtitle: "Recent token launches",
+      totalCount: columnCounts?.new_pairs ?? (columns.new_pairs?.length || 0),
       tokens: columns.new_pairs || [],
     },
   ];
+
+  const currentPage = pagination?.page || 1;
+  const totalPages = pagination?.totalPages || 1;
+  const totalItems = pagination?.totalLaunches || 0;
 
   return (
     <div className="flex flex-col gap-6">
@@ -131,13 +156,13 @@ export function TerminalColumnBoard({ columns, onQuickBuy }: TerminalColumnBoard
                   {col.title}
                 </h3>
                 <p className="text-[10px] text-text-dim font-mono mt-0.5">
-                  {col.subtitle} ({col.tokens.length})
+                  {col.subtitle} ({col.totalCount})
                 </p>
               </div>
             </div>
 
             {/* Column Tokens List */}
-            <div className="flex-1 overflow-y-auto divide-y divide-border p-3 space-y-3 max-h-[850px]">
+            <div className="flex-1 overflow-y-auto divide-y divide-border p-3 space-y-3 min-h-[500px]">
               {col.tokens.map((item) => {
                 const t = item.tokens;
                 const isCopied = copiedId === item.id;
@@ -310,6 +335,59 @@ export function TerminalColumnBoard({ columns, onQuickBuy }: TerminalColumnBoard
           </div>
         ))}
       </div>
+
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="border border-border bg-white/[0.02] p-4 rounded-lg flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="text-xs font-mono text-text-dim">
+            Showing page {currentPage} of {totalPages} ({totalItems} total tokens)
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => onPageChange && onPageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+              className="px-3 py-1.5 text-xs font-mono bg-white/[0.04] hover:bg-white/[0.08] disabled:opacity-30 disabled:hover:bg-white/[0.04] text-text-secondary hover:text-white border border-border rounded transition-colors flex items-center gap-1"
+            >
+              <ChevronLeft size={14} />
+              <span>Previous</span>
+            </button>
+
+            {/* Page number buttons */}
+            <div className="flex items-center gap-1">
+              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                let pageNum = i + 1;
+                if (totalPages > 5 && currentPage > 3) {
+                  pageNum = Math.min(currentPage - 2 + i, totalPages - (4 - i));
+                }
+                return (
+                  <button
+                    key={pageNum}
+                    onClick={() => onPageChange && onPageChange(pageNum)}
+                    className={cn(
+                      "w-8 h-8 text-xs font-mono rounded transition-colors",
+                      currentPage === pageNum
+                        ? "bg-accent text-white font-semibold"
+                        : "bg-white/[0.04] text-text-secondary hover:text-white border border-border"
+                    )}
+                  >
+                    {pageNum}
+                  </button>
+                );
+              })}
+            </div>
+
+            <button
+              onClick={() => onPageChange && onPageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className="px-3 py-1.5 text-xs font-mono bg-white/[0.04] hover:bg-white/[0.08] disabled:opacity-30 disabled:hover:bg-white/[0.04] text-text-secondary hover:text-white border border-border rounded transition-colors flex items-center gap-1"
+            >
+              <span>Next</span>
+              <ChevronRight size={14} />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

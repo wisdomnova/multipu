@@ -12,6 +12,7 @@ export default function ExplorePage() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [search, setSearch] = useState("");
   const [activeChain, setActiveChain] = useState<string>("all");
+  const [page, setPage] = useState<number>(1);
   const [error, setError] = useState<string | null>(null);
 
   // Quick Buy Modal state
@@ -19,14 +20,14 @@ export default function ExplorePage() {
   const [modalAmount, setModalAmount] = useState<number>(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const fetchExploreData = async (query = "", chain = activeChain, showSpinner = true) => {
+  const fetchExploreData = async (query = "", chain = activeChain, pageNum = page, showSpinner = true) => {
     if (showSpinner) setLoading(true);
     setIsRefreshing(true);
     try {
       const qParam = query ? `q=${encodeURIComponent(query)}` : "";
       const chainParam = chain !== "all" ? `chain=${encodeURIComponent(chain)}` : "";
-      const limitParam = `limit=45`;
-      const params = [qParam, chainParam, limitParam].filter(Boolean).join("&");
+      const pageParam = `page=${pageNum}`;
+      const params = [qParam, chainParam, pageParam].filter(Boolean).join("&");
       const url = `/api/launches/explore?${params}`;
 
       const res = await fetch(url);
@@ -45,16 +46,23 @@ export default function ExplorePage() {
   };
 
   useEffect(() => {
-    fetchExploreData(search, activeChain);
-  }, [activeChain]);
+    fetchExploreData(search, activeChain, page);
+  }, [activeChain, page]);
 
   const handleSearchChange = (val: string) => {
     setSearch(val);
-    fetchExploreData(val, activeChain, false);
+    setPage(1);
+    fetchExploreData(val, activeChain, 1, false);
   };
 
   const handleChainChange = (chain: string) => {
     setActiveChain(chain);
+    setPage(1);
+  };
+
+  const handlePageChange = (newPage: number) => {
+    setPage(newPage);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleQuickBuy = (token: any, solAmount: number) => {
@@ -119,7 +127,7 @@ export default function ExplorePage() {
           </div>
 
           <button
-            onClick={() => fetchExploreData(search, activeChain, false)}
+            onClick={() => fetchExploreData(search, activeChain, page, false)}
             disabled={isRefreshing}
             className="p-1.5 border border-border hover:border-border-hover bg-white/[0.02] text-text-muted hover:text-text-primary rounded transition-colors"
             title="Refresh"
@@ -156,6 +164,9 @@ export default function ExplorePage() {
               new_pairs: [],
             }
           }
+          columnCounts={data.column_counts}
+          pagination={data.pagination}
+          onPageChange={handlePageChange}
           onQuickBuy={handleQuickBuy}
         />
       )}
@@ -166,7 +177,7 @@ export default function ExplorePage() {
         token={modalToken}
         initialAmount={modalAmount}
         onClose={() => setIsModalOpen(false)}
-        onSuccess={() => fetchExploreData(search, activeChain, false)}
+        onSuccess={() => fetchExploreData(search, activeChain, page, false)}
       />
     </div>
   );

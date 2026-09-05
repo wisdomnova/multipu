@@ -1,4 +1,4 @@
-import { getAuth, getClientIp } from "@/lib/auth";
+import { getClientIp } from "@/lib/auth";
 import { apiLimiter } from "@/lib/rate-limit";
 import { createAdminSupabase } from "@/lib/supabase/server";
 import { getEnvironmentScope } from "@/lib/env-scope.server";
@@ -26,7 +26,7 @@ export async function GET(request: Request) {
     const chainFilter = (searchParams.get("chain") || "all").toLowerCase();
     const categoryFilter = (searchParams.get("category") || "all").toLowerCase();
     const page = Math.max(1, Number(searchParams.get("page") || 1));
-    const limit = Math.max(1, Number(searchParams.get("limit") || 30));
+    const itemsPerColumn = 10;
 
     const supabase = createAdminSupabase();
     const scope = getEnvironmentScope();
@@ -93,7 +93,7 @@ export async function GET(request: Request) {
       };
     });
 
-    // 2. Fetch live public memes from DexScreener & GeckoTerminal
+    // 2. Fetch wide public meme pools across multiple parallel endpoints
     const publicLaunches: any[] = [];
     const profilesMap = new Map<string, any>();
 
@@ -117,7 +117,6 @@ export async function GET(request: Request) {
 
             const pCreatedAt = p.pairCreatedAt ? Number(p.pairCreatedAt) : Date.now() - 3600000;
             const progressVal = Math.min(100, Math.max(10, Math.floor(((p.volume?.h24 || 1000) / 50000) * 100)));
-
             const isMigrated = p.dexId === "raydium" || p.dexId === "uniswap" || p.dexId === "pancakeswap";
             const cat = isMigrated ? "migrated" : progressVal >= 70 ? "final_stretch" : "new";
 
@@ -169,36 +168,63 @@ export async function GET(request: Request) {
           }
         }
       } else {
-        // Fetch real-time boosted tokens & latest profiles
-        const [profilesRes, boostsRes] = await Promise.allSettled([
-          fetch("https://api.dexscreener.com/token-profiles/latest/v1", { signal: AbortSignal.timeout(4000) }).then((r) => r.json()),
-          fetch("https://api.dexscreener.com/token-boosts/top/v1", { signal: AbortSignal.timeout(4000) }).then((r) => r.json()),
-        ]);
+        // Fetch wide pool across multiple free endpoints
+        const [topBoostsRes, latestBoostsRes, profilesRes, geckoSolTrending, geckoSolNew] =
+          await Promise.allSettled([
+            fetch("https://api.dexscreener.com/token-boosts/top/v1", { signal: AbortSignal.timeout(4000) }).then((r) => r.json()),
+            fetch("https://api.dexscreener.com/token-boosts/latest/v1", { signal: AbortSignal.timeout(4000) }).then((r) => r.json()),
+            fetch("https://api.dexscreener.com/token-profiles/latest/v1", { signal: AbortSignal.timeout(4000) }).then((r) => r.json()),
+            fetch("https://api.geckoterminal.com/api/v2/networks/solana/trending_pools?page=1", {
+              headers: { Accept: "application/json" },
+              signal: AbortSignal.timeout(4000),
+            }).then((r) => r.json()),
+            fetch("https://api.geckoterminal.com/api/v2/networks/solana/new_pools?page=1", {
+              headers: { Accept: "application/json" },
+              signal: AbortSignal.timeout(4000),
+            }).then((r) => r.json()),
+          ]);
 
+        const topBoostList = topBoostsRes.status === "fulfilled" && Array.isArray(topBoostsRes.value) ? topBoostsRes.value : [];
+        const latestBoostList = latestBoostsRes.status === "fulfilled" && Array.isArray(latestBoostsRes.value) ? latestBoostsRes.value : [];
         const profileList = profilesRes.status === "fulfilled" && Array.isArray(profilesRes.value) ? profilesRes.value : [];
-        const boostList = boostsRes.status === "fulfilled" && Array.isArray(boostsRes.value) ? boostsRes.value : [];
 
-        for (const pr of [...profileList, ...boostList]) {
+        for (const pr of [...profileList, ...topBoostList, ...latestBoostList]) {
           if (pr.tokenAddress) {
             profilesMap.set(pr.tokenAddress.toLowerCase(), pr);
           }
         }
 
-        const targetAddresses = Array.from(
-          new Set([...profileList.map((p: any) => p.tokenAddress), ...boostList.map((b: any) => b.tokenAddress)].filter(Boolean))
-        ).slice(0, 30);
+        const addressSet = new Set<string>();
+        topBoostList.forEach((t: any) => t.tokenAddress && addressSet.add(t.tokenAddress));
+        latestBoostList.forEach((t: any) => t.tokenAddress && addressSet.add(t.tokenAddress));
+        profileList.forEach((t: any) => t.tokenAddress && addressSet.add(t.tokenAddress));
 
-        if (targetAddresses.length > 0) {
-          const pairsRes = await fetch(
-            `https://api.dexscreener.com/latest/dex/tokens/${targetAddresses.join(",")}`,
-            { signal: AbortSignal.timeout(4500) }
-          );
+        if (geckoSolTrending.status === "fulfilled" && Array.isArray(geckoSolTrending.value?.data)) {
+          geckoSolTrending.value.data.forEach((p: any) => p.attributes?.address && addressSet.add(p.attributes.address));
+        }
+        if (geckoSolNew.status === "fulfilled" && Array.isArray(geckoSolNew.value?.data)) {
+          geckoSolNew.value.data.forEach((p: any) => p.attributes?.address && addressSet.add(p.attributes.address));
+        }
 
-          if (pairsRes.ok) {
-            const pairsData = await pairsRes.json();
-            const pairs = pairsData.pairs || [];
+        const allAddresses = Array.from(addressSet).slice(0, 90);
 
-            for (const p of pairs) {
+        // Batch in parallel chunks of 30 addresses
+        const chunks: string[] = [];
+        for (let i = 0; i < allAddresses.length; i += 30) {
+          chunks.push(allAddresses.slice(i, i + 30).join(","));
+        }
+
+        const batchResults = await Promise.allSettled(
+          chunks.map((chunk) =>
+            fetch(`https://api.dexscreener.com/latest/dex/tokens/${chunk}`, {
+              signal: AbortSignal.timeout(4500),
+            }).then((r) => r.json())
+          )
+        );
+
+        for (const res of batchResults) {
+          if (res.status === "fulfilled" && res.value?.pairs) {
+            for (const p of res.value.pairs) {
               const chain = p.chainId?.toLowerCase();
               const tokenAddr = p.baseToken?.address;
               if (!tokenAddr) continue;
@@ -212,8 +238,8 @@ export async function GET(request: Request) {
               const progressVal = Math.min(100, Math.max(15, Math.floor(((p.volume?.h24 || 5000) / 60000) * 100)));
 
               const isMigrated = p.dexId === "raydium" || p.dexId === "uniswap" || p.dexId === "pancakeswap";
-              const isNew = Date.now() - pCreatedAt < 7200000; // < 2 hours
-              const cat = isMigrated ? "migrated" : progressVal >= 70 ? "final_stretch" : isNew ? "new" : "trending";
+              const isNew = Date.now() - pCreatedAt < 10800000; // < 3 hours
+              const cat = isMigrated ? "migrated" : progressVal >= 60 ? "final_stretch" : isNew ? "new" : "trending";
 
               const buys = Number(p.txns?.h24?.buys || 0);
               const sells = Number(p.txns?.h24?.sells || 0);
@@ -302,44 +328,83 @@ export async function GET(request: Request) {
     // Sort by volume descending
     deduplicated.sort((a, b) => b.volume_24h - a.volume_24h);
 
-    // Dynamic Partitioning into Terminal Columns
-    const finalStretchTokens = deduplicated.filter(
-      (l) => l.category === "final_stretch" || (l.progress >= 70 && l.category !== "migrated")
+    // Dynamic Balanced Partitioning across the 3 columns
+    let finalStretchTokens = deduplicated.filter(
+      (l) => l.category === "final_stretch" || (l.progress >= 50 && l.category !== "migrated")
     );
-    const migratedTokens = deduplicated.filter(
+    let migratedTokens = deduplicated.filter(
       (l) => l.category === "migrated" || l.launchpad === "raydium" || l.launchpad === "uniswap" || l.launchpad === "pancakeswap"
     );
-    const newPairsTokens = deduplicated.filter(
+    let newPairsTokens = deduplicated.filter(
       (l) => l.category === "new" || l.progress < 50
     );
 
-    // If any column has fewer items, populate from top volume tokens
-    const finalStretchList = finalStretchTokens.length > 0 ? finalStretchTokens : deduplicated.slice(0, 10);
-    const migratedList = migratedTokens.length > 0 ? migratedTokens : deduplicated.slice(10, 20);
-    const newPairsList = newPairsTokens.length > 0 ? newPairsTokens : deduplicated.slice(20, 30);
+    // Ensure every column has a rich pool of tokens by distributing remaining tokens
+    if (finalStretchTokens.length < 15) {
+      const extras = deduplicated.filter(
+        (l) => !finalStretchTokens.some((f) => f.id === l.id) && l.category !== "migrated"
+      );
+      finalStretchTokens = [...finalStretchTokens, ...extras];
+    }
 
-    // Paginate results
-    const totalLaunches = deduplicated.length;
-    const totalPages = Math.ceil(totalLaunches / limit) || 1;
-    const startIndex = (page - 1) * limit;
-    const paginatedLaunches = deduplicated.slice(startIndex, startIndex + limit);
+    if (newPairsTokens.length < 15) {
+      const extras = deduplicated.filter(
+        (l) => !newPairsTokens.some((n) => n.id === l.id)
+      );
+      newPairsTokens = [...newPairsTokens, ...extras];
+    }
+
+    if (migratedTokens.length < 15) {
+      const extras = deduplicated.filter(
+        (l) => !migratedTokens.some((m) => m.id === l.id)
+      );
+      migratedTokens = [...migratedTokens, ...extras];
+    }
+
+    // Paginate per column
+    const maxColumnLength = Math.max(
+      finalStretchTokens.length,
+      migratedTokens.length,
+      newPairsTokens.length,
+      deduplicated.length
+    );
+    const totalPages = Math.max(1, Math.ceil(maxColumnLength / itemsPerColumn));
+    const startIndex = (page - 1) * itemsPerColumn;
+    const endIndex = startIndex + itemsPerColumn;
+
+    const getPageSlice = (arr: any[], start: number, end: number) => {
+      if (arr.length === 0) return [];
+      const slice = arr.slice(start, end);
+      if (slice.length > 0) return slice;
+      const modStart = start % arr.length;
+      return arr.slice(modStart, modStart + (end - start));
+    };
+
+    const pagedFinalStretch = getPageSlice(finalStretchTokens, startIndex, endIndex);
+    const pagedMigrated = getPageSlice(migratedTokens, startIndex, endIndex);
+    const pagedNewPairs = getPageSlice(newPairsTokens, startIndex, endIndex);
 
     return Response.json({
-      launches: paginatedLaunches,
+      launches: deduplicated.slice(startIndex, endIndex),
       all_launches: deduplicated,
       terminal_columns: {
-        final_stretch: finalStretchList.slice(0, 15),
-        migrated: migratedList.slice(0, 15),
-        new_pairs: newPairsList.slice(0, 15),
+        final_stretch: pagedFinalStretch,
+        migrated: pagedMigrated,
+        new_pairs: pagedNewPairs,
+      },
+      column_counts: {
+        final_stretch: finalStretchTokens.length,
+        migrated: migratedTokens.length,
+        new_pairs: newPairsTokens.length,
       },
       stats: {
         total_24h_volume: deduplicated.reduce((sum, l) => sum + (l.volume_24h || 0), 0),
-        active_tokens_count: totalLaunches,
+        active_tokens_count: deduplicated.length,
       },
       pagination: {
         page,
-        limit,
-        totalLaunches,
+        limit: itemsPerColumn,
+        totalLaunches: deduplicated.length,
         totalPages,
       },
     });
