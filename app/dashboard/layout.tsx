@@ -10,7 +10,6 @@ import {
   IconLayoutGrid,
   IconSearch,
   IconKey,
-  IconWallet,
 } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
@@ -22,7 +21,6 @@ const navItems = [
   { label: "Launches", icon: IconRocket, href: "/dashboard/launches" },
   { label: "Earnings", icon: IconTrendingUp, href: "/dashboard/earnings" },
   { label: "API Keys", icon: IconKey, href: "/dashboard/api" },
-  { label: "Dev Wallet", icon: IconWallet, href: "/dashboard/wallet" },
   { label: "Explore", icon: IconSearch, href: "/dashboard/explore" },
 ];
 
