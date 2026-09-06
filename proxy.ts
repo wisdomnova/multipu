@@ -2,18 +2,14 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 /**
- * Edge middleware — runs BEFORE every request.
+ * Next.js Edge Proxy & Route Guard — runs BEFORE every request.
  *
  * Responsibilities:
  * 1. Protect /dashboard and /launch routes (session cookie must exist)
- * 2. Add security headers
- *
- * Note: We check for cookie *existence* here (fast, edge-compatible).
- * The actual cookie *decryption + validation* happens in API routes
- * via iron-session. This is defense-in-depth — even if someone crafts
- * a fake cookie, the API routes will reject it.
+ * 2. Admin area access guard (admin session cookie)
+ * 3. Add security headers and request tracing IDs
  */
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // ─── Auth Guard ──────────────────────────────────
@@ -24,7 +20,6 @@ export function middleware(request: NextRequest) {
     const sessionCookie = request.cookies.get("multipu_session");
 
     if (!sessionCookie?.value) {
-      // No session cookie → redirect to home
       const loginUrl = new URL("/", request.url);
       loginUrl.searchParams.set("auth", "required");
       return NextResponse.redirect(loginUrl);
@@ -46,17 +41,16 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(adminUrl);
   }
 
-  // ─── API Rate-limit headers (actual limiting in route handlers) ─
+  // ─── Request Tracing & Security Headers ───────────
   const response = NextResponse.next();
 
-  // Request ID for tracing
-  response.headers.set(
-    "x-request-id",
-    crypto.randomUUID()
-  );
+  response.headers.set("x-request-id", crypto.randomUUID());
 
   return response;
 }
+
+// Backward-compatibility export for Next.js middleware runner
+export const middleware = proxy;
 
 export const config = {
   matcher: [
