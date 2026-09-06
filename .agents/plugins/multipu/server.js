@@ -99,7 +99,6 @@ async function handleMessage(msg) {
   }
 
   if (method === "notifications/initialized") {
-    // client completed handshakes
     return;
   }
 
@@ -108,13 +107,18 @@ async function handleMessage(msg) {
       tools: [
         {
           name: "multipu_get_live_memes",
-          description: "Search and retrieve a paginated directory of active token launches on Multipu.",
+          description: "Search and retrieve a paginated directory of active token launches on Multipu across Solana, BNB Chain, and Robinhood.",
           inputSchema: {
             type: "object",
             properties: {
               query: {
                 type: "string",
                 description: "Optional query term (e.g. 'pepe') to filter tokens by name or symbol."
+              },
+              chain: {
+                type: "string",
+                enum: ["all", "solana", "bsc", "robinhood"],
+                description: "Filter tokens by blockchain network."
               },
               page: {
                 type: "number",
@@ -124,16 +128,25 @@ async function handleMessage(msg) {
           }
         },
         {
-          name: "multipu_get_wallet_balance",
-          description: "Get the current public key, chain network, and token balance of the active server developer wallet.",
+          name: "multipu_get_wallet_balances",
+          description: "Get real-time wallet balances across all supported chains (Solana SOL, BNB Chain BNB, and Robinhood ETH).",
           inputSchema: {
             type: "object",
-            properties: {}
+            properties: {
+              solAddress: {
+                type: "string",
+                description: "Optional Solana public key to query."
+              },
+              evmAddress: {
+                type: "string",
+                description: "Optional EVM public address (0x...) to query."
+              }
+            }
           }
         },
         {
           name: "multipu_swap_tokens",
-          description: "Execute a swap trade (buy or sell) against an active token launch pool.",
+          description: "Execute a swap trade (buy or sell) against an active bonding curve pool on Multipu.",
           inputSchema: {
             type: "object",
             properties: {
@@ -144,25 +157,39 @@ async function handleMessage(msg) {
               action: {
                 type: "string",
                 enum: ["buy", "sell"],
-                description: "The swap transaction type: 'buy' (spend SOL/BNB to receive meme token) or 'sell' (spend meme token to receive SOL/BNB)."
+                description: "The swap transaction type: 'buy' or 'sell'."
               },
               amount: {
                 type: "number",
-                description: "The amount of input asset to spend (base gas currency for buy, or token amount for sell)."
+                description: "Amount of input asset to spend."
               }
             },
             required: ["launchId", "action", "amount"]
           }
         },
         {
+          name: "olaxbt_get_strategy_signals",
+          description: "Query OlaXBT Nexus market strategy intelligence, momentum alpha score, and trend predictions for a token ticker.",
+          inputSchema: {
+            type: "object",
+            properties: {
+              symbol: {
+                type: "string",
+                description: "The token ticker symbol (e.g., 'GPU', 'DOGGO', 'POOH')."
+              }
+            },
+            required: ["symbol"]
+          }
+        },
+        {
           name: "multipu_generate_api_key",
-          description: "Generate a new programmatic developer API Key label.",
+          description: "Generate a new programmatic developer API key.",
           inputSchema: {
             type: "object",
             properties: {
               name: {
                 type: "string",
-                description: "The label description for the key (e.g. 'Arbitrage Bot')."
+                description: "The label description for the key."
               }
             },
             required: ["name"]
@@ -178,8 +205,9 @@ async function handleMessage(msg) {
     try {
       if (name === "multipu_get_live_memes") {
         const queryStr = args.query ? `q=${encodeURIComponent(args.query)}` : "";
+        const chainStr = args.chain && args.chain !== "all" ? `chain=${encodeURIComponent(args.chain)}` : "";
         const pageStr = args.page ? `page=${args.page}` : "";
-        const qs = [queryStr, pageStr].filter(Boolean).join("&");
+        const qs = [queryStr, chainStr, pageStr].filter(Boolean).join("&");
         const endpoint = `/api/launches/explore${qs ? `?${qs}` : ""}`;
         
         const data = await callApi(endpoint);
@@ -193,8 +221,14 @@ async function handleMessage(msg) {
         });
       }
 
-      if (name === "multipu_get_wallet_balance") {
-        const data = await callApi("/api/developer/wallet");
+      if (name === "multipu_get_wallet_balances") {
+        const paramsList = [];
+        if (args.solAddress) paramsList.push(`solAddress=${encodeURIComponent(args.solAddress)}`);
+        if (args.evmAddress) paramsList.push(`evmAddress=${encodeURIComponent(args.evmAddress)}`);
+        const qs = paramsList.join("&");
+        const endpoint = `/api/wallet/balances${qs ? `?${qs}` : ""}`;
+
+        const data = await callApi(endpoint);
         return sendResponse(id, {
           content: [
             {
@@ -224,6 +258,19 @@ async function handleMessage(msg) {
             {
               type: "text",
               text: `Swap executed successfully!\nDetails: ${JSON.stringify(data, null, 2)}`
+            }
+          ]
+        });
+      }
+
+      if (name === "olaxbt_get_strategy_signals") {
+        const endpoint = `/api/olaxbt/signals?symbol=${encodeURIComponent(args.symbol)}`;
+        const data = await callApi(endpoint);
+        return sendResponse(id, {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(data, null, 2)
             }
           ]
         });
