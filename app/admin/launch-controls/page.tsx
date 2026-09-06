@@ -13,7 +13,8 @@ type LaunchControls = {
     bags: boolean;
     pumpfun: boolean;
     fourmeme: boolean;
-    sherwood: boolean;
+    pons?: boolean;
+    sherwood?: boolean;
   };
 };
 

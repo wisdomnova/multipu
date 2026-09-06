@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-const launchpadIds = ["meteora", "bags", "pumpfun", "fourmeme", "sherwood"] as const;
+const launchpadIds = ["meteora", "bags", "pumpfun", "fourmeme", "pons", "sherwood"] as const;
 
 // ─── Solana Address Validator ──────────────────────
 const solanaAddress = z

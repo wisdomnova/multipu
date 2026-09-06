@@ -13,7 +13,7 @@ const featureGroups = [
   {
     label: "Multi-Launch",
     title: "Multi-Launchpad Push",
-    description: "Select Meteora, Bags, Pump.fun, Four.meme or Sherwood. Auto-fill details and launch simultaneously.",
+    description: "Select Meteora, Bags, Pump.fun, Four.meme or Pons. Auto-fill details and launch simultaneously.",
     link: "EXPLORE POLARIS >"
   },
   {

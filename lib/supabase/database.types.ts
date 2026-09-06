@@ -16,6 +16,7 @@ export type LaunchpadId =
   | "bags"
   | "pumpfun"
   | "fourmeme"
+  | "pons"
   | "sherwood";
 export type LaunchStatus = "pending" | "confirming" | "live" | "failed";
 export type TokenStatus = "active" | "pending" | "failed";

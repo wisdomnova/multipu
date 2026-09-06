@@ -167,7 +167,7 @@ export default function ApiKeysPage() {
     },
     launches: {
       title: "Orchestrate Launches",
-      description: "Create and confirm launches on Meteora, Bags, Pump.fun, Four.meme or Sherwood.",
+      description: "Create and confirm launches on Meteora, Bags, Pump.fun, Four.meme or Pons.",
       curl: `# 1. Create a pending launch record
 curl -X POST https://multipu.fun/api/launches \\
   -H "x-api-key: mp_live_abc123xyz" \\

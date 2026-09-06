@@ -59,11 +59,11 @@ const launchpads = [
     ],
   },
   {
-    name: "Sherwood",
+    name: "Pons",
     chain: "Robinhood Chain",
     description: "Robinhood Chain L2 meme launchpad featuring time-prioritized sequencing and 24/7 liquidity trading.",
     status: "Supported",
-    image: "/sherwood.png",
+    image: "/pons.png",
     features: [
       "Robinhood Chain target",
       "Arbitrum Orbit stack speed",

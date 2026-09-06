@@ -2,7 +2,18 @@
 
 import { Interface, id } from "ethers";
 
-type EvmLaunchpadId = "fourmeme" | "sherwood";
+type EvmLaunchpadId = "fourmeme" | "pons" | "sherwood";
+
+const robinhoodConfig = {
+  chainId: "0x1237", // 4663
+  chainName: "Robinhood Chain",
+  nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
+  rpcUrls: [process.env.NEXT_PUBLIC_ROBINHOOD_RPC_URL ?? "https://rpc.mainnet.chain.robinhood.com"],
+  blockExplorerUrls: ["https://robinhoodchain.blockscout.com"],
+  launcherAddress: process.env.NEXT_PUBLIC_PONS_LAUNCHER_ADDRESS || process.env.NEXT_PUBLIC_SHERWOOD_LAUNCHER_ADDRESS,
+  functionSignature: process.env.NEXT_PUBLIC_PONS_LAUNCH_FUNCTION_SIGNATURE || process.env.NEXT_PUBLIC_SHERWOOD_LAUNCH_FUNCTION_SIGNATURE,
+  argTemplate: process.env.NEXT_PUBLIC_PONS_LAUNCH_ARG_TEMPLATE || process.env.NEXT_PUBLIC_SHERWOOD_LAUNCH_ARG_TEMPLATE,
+} as const;
 
 const EVM_CHAIN_CONFIG = {
   fourmeme: {
@@ -15,16 +26,8 @@ const EVM_CHAIN_CONFIG = {
     functionSignature: process.env.NEXT_PUBLIC_FOURMEME_LAUNCH_FUNCTION_SIGNATURE,
     argTemplate: process.env.NEXT_PUBLIC_FOURMEME_LAUNCH_ARG_TEMPLATE,
   },
-  sherwood: {
-    chainId: "0x1237", // 4663
-    chainName: "Robinhood Chain",
-    nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
-    rpcUrls: [process.env.NEXT_PUBLIC_ROBINHOOD_RPC_URL ?? "https://rpc.mainnet.chain.robinhood.com"],
-    blockExplorerUrls: ["https://robinhoodchain.blockscout.com"],
-    launcherAddress: process.env.NEXT_PUBLIC_SHERWOOD_LAUNCHER_ADDRESS,
-    functionSignature: process.env.NEXT_PUBLIC_SHERWOOD_LAUNCH_FUNCTION_SIGNATURE,
-    argTemplate: process.env.NEXT_PUBLIC_SHERWOOD_LAUNCH_ARG_TEMPLATE,
-  },
+  pons: robinhoodConfig,
+  sherwood: robinhoodConfig,
 } as const;
 
 type EthereumProvider = {

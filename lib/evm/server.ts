@@ -19,14 +19,14 @@ function getRpcUrl(network: EvmNetwork) {
 
 function getExpectedLauncherAddress(network: EvmNetwork) {
   if (network === "robinhood") {
-    return process.env.NEXT_PUBLIC_SHERWOOD_LAUNCHER_ADDRESS;
+    return process.env.NEXT_PUBLIC_PONS_LAUNCHER_ADDRESS || process.env.NEXT_PUBLIC_SHERWOOD_LAUNCHER_ADDRESS;
   }
   return process.env.NEXT_PUBLIC_FOURMEME_LAUNCHER_ADDRESS;
 }
 
 function getExpectedFunctionSignature(network: EvmNetwork) {
   if (network === "robinhood") {
-    return process.env.NEXT_PUBLIC_SHERWOOD_LAUNCH_FUNCTION_SIGNATURE;
+    return process.env.NEXT_PUBLIC_PONS_LAUNCH_FUNCTION_SIGNATURE || process.env.NEXT_PUBLIC_SHERWOOD_LAUNCH_FUNCTION_SIGNATURE;
   }
   return process.env.NEXT_PUBLIC_FOURMEME_LAUNCH_FUNCTION_SIGNATURE;
 }

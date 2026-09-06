@@ -16,7 +16,8 @@ const launchControlsSchema = z.object({
     bags: z.boolean(),
     pumpfun: z.boolean(),
     fourmeme: z.boolean(),
-    sherwood: z.boolean(),
+    pons: z.boolean().optional(),
+    sherwood: z.boolean().optional(),
   }),
 });
 

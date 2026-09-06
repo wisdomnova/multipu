@@ -4,7 +4,7 @@ Multipu is a multi-chain token launch orchestrator and real-time DEX trading ter
 
 ## Features
 
-- **Multi-Chain Token Orchestrator**: One-click dispatch to launchpads across Solana (Pump.fun, Raydium, Meteora, Bags), BNB Chain (Four.meme), and Robinhood Chain (Sherwood).
+- **Multi-Chain Token Orchestrator**: One-click dispatch to launchpads across Solana (Pump.fun, Raydium, Meteora, Bags), BNB Chain (Four.meme), and Robinhood Chain (Pons).
 - **Terminal Trading & Live Explorer**: Real-time DEX data, bonding curve progress tracker, candlestick charts, and instant snipes.
 - **Unified Multi-Chain Balances**: Live balance monitoring for Solana (SOL), BNB Chain (BNB), and Robinhood Chain (ETH) directly on the dashboard header.
 - **Developer API & Webhooks**: Programmatic token deployments, portfolio tracking, and analytics endpoints.
@@ -16,7 +16,7 @@ Multipu is a multi-chain token launch orchestrator and real-time DEX trading ter
 | :--- | :--- | :--- |
 | **Solana** | `SOL` | Pump.fun, Raydium, Meteora, Bags |
 | **BNB Chain (BSC)** | `BNB` | Four.meme, PancakeSwap |
-| **Robinhood Chain** | `ETH` | Sherwood DEX |
+| **Robinhood Chain** | `ETH` | Pons DEX & Launchpad |
 
 ## Setup & Local Development
 

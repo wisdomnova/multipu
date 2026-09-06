@@ -9,6 +9,7 @@ import { meteoraService } from "./meteora";
 import { bagsService } from "./bags";
 import { pumpfunService } from "./pumpfun";
 import { fourmemeService } from "./fourmeme";
+import { ponsService } from "./pons";
 import { sherwoodService } from "./sherwood";
 import type { LaunchpadService } from "./types";
 
@@ -19,6 +20,7 @@ export const launchpads: Record<string, LaunchpadService> = {
   bags: bagsService,
   pumpfun: pumpfunService,
   fourmeme: fourmemeService,
+  pons: ponsService,
   sherwood: sherwoodService,
 };
 
@@ -64,10 +66,19 @@ export const LAUNCHPAD_META = [
     ready: true,
   },
   {
+    id: "pons" as const,
+    name: "Pons",
+    description: "Robinhood Chain meme launchpad featuring time-prioritized sequencing.",
+    image: "/pons.png",
+    estimatedFee: "~0.0001 ETH",
+    network: "Robinhood Chain",
+    ready: true,
+  },
+  {
     id: "sherwood" as const,
-    name: "Sherwood",
-    description: "Robinhood Chain meme launchpad with time-prioritized transactions.",
-    image: "/sherwood.png",
+    name: "Pons",
+    description: "Robinhood Chain meme launchpad featuring time-prioritized sequencing.",
+    image: "/pons.png",
     estimatedFee: "~0.0001 ETH",
     network: "Robinhood Chain",
     ready: true,

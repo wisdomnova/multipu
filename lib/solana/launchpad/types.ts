@@ -29,7 +29,7 @@ export interface LaunchResult {
 
 export interface LaunchpadService {
   name: string;
-  id: "meteora" | "bags" | "pumpfun" | "fourmeme" | "sherwood";
+  id: "meteora" | "bags" | "pumpfun" | "fourmeme" | "pons" | "sherwood";
   /** Build the unsigned launch transaction */
   createLaunchTransaction(
     connection: Connection,
