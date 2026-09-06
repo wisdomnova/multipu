@@ -16,9 +16,34 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://multipu.fun"),
   title: "Multipu - Deploy Once, Launch Everywhere",
   description:
-    "The multi-launchpad deployer for Solana tokens. Create your token, select launchpads, and track everything from one dashboard.",
+    "Multi-chain token launchpad orchestrator, real-time DEX terminal, and autonomous AI trading protocol across Solana, BNB Chain, and Robinhood Chain.",
+  openGraph: {
+    title: "Multipu - Deploy Once, Launch Everywhere",
+    description:
+      "Multi-chain token launchpad orchestrator, real-time DEX terminal, and autonomous AI trading protocol across Solana, BNB Chain, and Robinhood Chain.",
+    url: "https://multipu.fun",
+    siteName: "Multipu",
+    images: [
+      {
+        url: "/og.png",
+        width: 1200,
+        height: 630,
+        alt: "Multipu - Multi-Chain Token Orchestrator",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Multipu - Deploy Once, Launch Everywhere",
+    description:
+      "Multi-chain token launchpad orchestrator, real-time DEX terminal, and autonomous AI trading protocol.",
+    images: ["/og.png"],
+  },
 };
 
 export default function RootLayout({
