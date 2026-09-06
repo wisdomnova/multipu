@@ -48,7 +48,7 @@ export function DashboardHeader() {
         </div>
 
         {/* Supported Chain Balances - Prominent & Bold */}
-        <div className="flex items-center gap-1 sm:gap-2 bg-elevated/80 border border-border px-3 sm:px-4 py-1.5 sm:py-2 rounded-sm shadow-sm">
+        <div className="flex items-center gap-1 sm:gap-2 bg-elevated/80 border border-border px-3 sm:px-4 py-1.5 sm:py-2 rounded-sm">
           {chains.map((chain, index) => {
             const hasBalance = chain.data.balance > 0;
             return (

@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { KeeperHubBadge } from "@/components/trade/keeperhub-badge";
 
 interface TradeFormProps {
   launch: {
@@ -186,9 +185,6 @@ export function TradeForm({ launch, onTradeSuccess }: TradeFormProps) {
             />
           </div>
         </div>
-
-        {/* KeeperHub Deterministic Execution & MEV Shield Badge */}
-        <KeeperHubBadge />
 
         {/* Submit Swap Button */}
         <button

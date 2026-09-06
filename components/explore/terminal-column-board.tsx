@@ -2,9 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { IconCopy, IconCheck, IconChevronLeft, IconChevronRight, IconChartBar } from "@tabler/icons-react";
+import { IconCopy, IconCheck, IconChevronLeft, IconChevronRight } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
-import { calculateStrategySignal } from "@/lib/olaxbt/client";
 
 export interface TerminalToken {
   id: string;
@@ -223,26 +222,6 @@ export function TerminalColumnBoard({
                         </div>
                       </div>
                     </div>
-
-                    {/* OlaXBT Strategy & Alpha Signal */}
-                    {(() => {
-                      const signal = calculateStrategySignal(t.symbol, item.progress, item.volume_24h);
-                      return (
-                        <div className="flex items-center justify-between px-2.5 py-1 bg-accent/5 border border-accent/20 rounded text-[10px] font-mono">
-                          <div className="flex items-center gap-1.5 truncate">
-                            <IconChartBar size={11} className="text-accent flex-shrink-0" />
-                            <span className="text-text-dim">OlaXBT:</span>
-                            <span className="text-text-primary font-medium truncate">{signal.strategyName}</span>
-                          </div>
-                          <span className={cn(
-                            "font-semibold flex-shrink-0 ml-2",
-                            signal.trendDirection === "bullish" ? "text-emerald-400" : signal.trendDirection === "bearish" ? "text-error" : "text-amber-400"
-                          )}>
-                            {signal.recommendation} ({signal.momentumScore})
-                          </span>
-                        </div>
-                      );
-                    })()}
 
                     {/* Middle Row: On-chain Holder Metrics */}
                     <div className="grid grid-cols-4 gap-2 py-2 px-2.5 bg-white/[0.02] rounded border border-border text-[10px] font-mono text-text-muted">
