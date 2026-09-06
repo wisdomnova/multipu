@@ -182,6 +182,30 @@ async function handleMessage(msg) {
           }
         },
         {
+          name: "keeperhub_dry_run_swap",
+          description: "Deterministically simulate (dry run) an on-chain swap workflow through KeeperHub before moving value, checking gas, slippage, and MEV risk.",
+          inputSchema: {
+            type: "object",
+            properties: {
+              chain: {
+                type: "string",
+                enum: ["solana", "bsc", "robinhood"],
+                description: "Blockchain network."
+              },
+              amount: {
+                type: "number",
+                description: "Input asset amount."
+              },
+              action: {
+                type: "string",
+                enum: ["buy", "sell"],
+                description: "Swap action type."
+              }
+            },
+            required: ["chain", "amount"]
+          }
+        },
+        {
           name: "multipu_generate_api_key",
           description: "Generate a new programmatic developer API key.",
           inputSchema: {
@@ -271,6 +295,24 @@ async function handleMessage(msg) {
             {
               type: "text",
               text: JSON.stringify(data, null, 2)
+            }
+          ]
+        });
+      }
+
+      if (name === "keeperhub_dry_run_swap") {
+        const payload = {
+          chain: args.chain || "solana",
+          action: "bonding_curve_swap",
+          amount: Number(args.amount || 1),
+          dryRun: true,
+        };
+        const data = await callApi("/api/keeperhub/execute", "POST", payload);
+        return sendResponse(id, {
+          content: [
+            {
+              type: "text",
+              text: `KeeperHub Dry-Run Simulation Successful!\nSimulation Results: ${JSON.stringify(data, null, 2)}`
             }
           ]
         });

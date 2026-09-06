@@ -7,9 +7,9 @@
   "description": "Multi-chain token launch orchestrator and DEX trading terminal across Solana, BNB Chain, and Robinhood, powered by OlaXBT Nexus strategy intelligence and autonomous MCP tools.",
   "repository": "https://github.com/wisdomnova/multipu",
   "deployment": {
-    "url": "https://multipu.vercel.app",
-    "healthEndpoint": "https://multipu.vercel.app/api/health",
-    "signalsEndpoint": "https://multipu.vercel.app/api/olaxbt/signals"
+    "url": "https://multipu.fun",
+    "healthEndpoint": "https://multipu.fun/api/health",
+    "signalsEndpoint": "https://multipu.fun/api/olaxbt/signals"
   },
   "mcp": {
     "serverName": "multipu-mcp",

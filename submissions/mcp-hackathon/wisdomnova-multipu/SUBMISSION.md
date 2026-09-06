@@ -3,8 +3,8 @@
 **Track:** OlaXBT × X-Agent Trading Challenge & General MCP Innovation  
 **Team / Builder:** wisdomnova  
 **Project Slug:** `wisdomnova-multipu`  
-**Live URL:** [https://multipu.vercel.app](https://multipu.vercel.app)  
-**Public Health & Verification Endpoint:** [https://multipu.vercel.app/api/health](https://multipu.vercel.app/api/health)  
+**Live URL:** [https://multipu.fun](https://multipu.fun)  
+**Public Health & Verification Endpoint:** [https://multipu.fun/api/health](https://multipu.fun/api/health)  
 **GitHub Repository:** [https://github.com/wisdomnova/multipu](https://github.com/wisdomnova/multipu)  
 
 ---
@@ -44,7 +44,7 @@ Multipu utilizes OlaXBT Nexus market data to surface AI Alpha metrics directly i
 
 ### Health Check (Public Verification)
 ```bash
-curl -s https://multipu.vercel.app/api/health
+curl -s https://multipu.fun/api/health
 ```
 
 **Expected JSON Response:**
@@ -68,7 +68,7 @@ curl -s https://multipu.vercel.app/api/health
 
 ### Query OlaXBT Nexus Signal
 ```bash
-curl -s "https://multipu.vercel.app/api/olaxbt/signals?symbol=GPU"
+curl -s "https://multipu.fun/api/olaxbt/signals?symbol=GPU"
 ```
 
 ### Run MCP Server Locally

@@ -7,7 +7,7 @@ This document contains reproducible test calls and expected output for reviewers
 ## 1. Public Health Check
 
 ```bash
-curl -X GET https://multipu.vercel.app/api/health \
+curl -X GET https://multipu.fun/api/health \
   -H "Accept: application/json"
 ```
 
@@ -19,7 +19,7 @@ curl -X GET https://multipu.vercel.app/api/health \
 ## 2. OlaXBT Nexus Strategy Signal API
 
 ```bash
-curl -X GET "https://multipu.vercel.app/api/olaxbt/signals?symbol=GPU" \
+curl -X GET "https://multipu.fun/api/olaxbt/signals?symbol=GPU" \
   -H "Accept: application/json"
 ```
 
@@ -35,7 +35,7 @@ curl -X GET "https://multipu.vercel.app/api/olaxbt/signals?symbol=GPU" \
 ## 3. Multi-Chain Wallet Balances API
 
 ```bash
-curl -X GET "https://multipu.vercel.app/api/wallet/balances" \
+curl -X GET "https://multipu.fun/api/wallet/balances" \
   -H "Accept: application/json"
 ```
 

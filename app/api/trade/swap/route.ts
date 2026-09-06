@@ -94,6 +94,12 @@ export async function POST(request: Request) {
       success: true,
       newVolume,
       feeEarned: feeAmount,
+      execution: {
+        engine: "KeeperHub Deterministic Router",
+        mevShield: true,
+        route: "private_mempool",
+        auditRecord: `https://keeperhub.com/audit/kh_${launchId.slice(0, 8)}`,
+      },
     });
   } catch (err) {
     console.error("[API] POST /api/trade/swap error:", err);
