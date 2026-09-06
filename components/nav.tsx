@@ -39,7 +39,7 @@ export function Nav() {
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2.5 group">
             <div className="relative w-7 h-7 flex-shrink-0">
-              <Image src="/1.jpg" alt="" fill sizes="28px" className="object-cover rounded-md" />
+              <Image src="/logo.png" alt="Multipu" fill sizes="28px" className="object-contain" />
             </div>
             <span className="text-lg font-semibold tracking-tight text-text-primary">
               Multipu

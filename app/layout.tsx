@@ -4,6 +4,7 @@ import "./globals.css";
 import { SolanaProvider } from "@/components/wallet-provider";
 import { AuthProvider } from "@/hooks/use-auth";
 import { Toaster } from "sonner";
+import { SitelinksJsonLd } from "@/components/sitelinks-json-ld";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -56,6 +57,9 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
+      <head>
+        <SitelinksJsonLd />
+      </head>
       <body className="min-h-full flex flex-col bg-background text-foreground">
         <SolanaProvider>
           <AuthProvider>{children}</AuthProvider>
