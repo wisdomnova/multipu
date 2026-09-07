@@ -14,11 +14,13 @@ import {
   IconKey,
   IconMenu2,
   IconX,
+  IconBell,
 } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
 import { WalletButton } from "@/components/wallet-button";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
+import { NotificationsSidebar } from "@/components/dashboard/notifications-sidebar";
 
 const navItems = [
   { label: "Dashboard", icon: IconLayoutGrid, href: "/dashboard" },
@@ -37,16 +39,33 @@ export default function DashboardLayout({
   const pathname = usePathname();
   const { session } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [hasUnread, setHasUnread] = useState(true);
 
   // Close mobile sidebar on route change
   useEffect(() => {
     setMobileOpen(false);
   }, [pathname]);
 
+  // Check unread notifications count
+  useEffect(() => {
+    fetch("/api/notifications")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.unreadCount > 0) {
+          setHasUnread(true);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   // Close on escape key
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setMobileOpen(false);
+      if (e.key === "Escape") {
+        setMobileOpen(false);
+        setNotificationsOpen(false);
+      }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
@@ -192,6 +211,25 @@ export default function DashboardLayout({
                     );
                   })}
 
+                  {/* Activity & Notifications Drawer Button */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMobileOpen(false);
+                      setNotificationsOpen(true);
+                      setHasUnread(false);
+                    }}
+                    className="w-full flex items-center justify-between px-3.5 py-3 text-sm rounded-sm transition-colors font-medium text-text-secondary hover:text-text-primary hover:bg-elevated cursor-pointer"
+                  >
+                    <div className="flex items-center gap-3">
+                      <IconBell size={18} />
+                      <span>Activity &amp; Tracking</span>
+                    </div>
+                    {hasUnread && (
+                      <span className="w-2 h-2 rounded-full bg-accent" />
+                    )}
+                  </button>
+
                   {/* Launch Token Action */}
                   <div className="pt-4 mt-4 border-t border-border">
                     <Link
@@ -233,14 +271,14 @@ export default function DashboardLayout({
 
         {/* Main content */}
         <main className="flex-1 h-full overflow-y-auto min-w-0 flex flex-col">
-          {/* Top bar (mobile) with Hamburger Menu */}
+          {/* Top bar (mobile) with Hamburger Menu, Activity Bell & Wallet */}
           <div className="lg:hidden border-b border-border bg-[rgba(5,5,5,0.85)] backdrop-blur-xl sticky top-0 z-40">
-            <div className="flex items-center justify-between px-4 sm:px-6 h-14 sm:h-16">
-              <div className="flex items-center gap-3">
+            <div className="flex items-center justify-between px-3 sm:px-6 h-14 sm:h-16 gap-2">
+              <div className="flex items-center gap-2.5">
                 {/* Hamburger Trigger */}
                 <button
                   onClick={() => setMobileOpen(true)}
-                  className="p-2 -ml-2 text-text-secondary hover:text-text-primary hover:bg-white/[0.05] rounded-sm transition-colors"
+                  className="p-1.5 -ml-1 text-text-secondary hover:text-text-primary hover:bg-white/[0.05] rounded-sm transition-colors cursor-pointer"
                   aria-label="Open navigation menu"
                 >
                   <IconMenu2 size={20} />
@@ -256,18 +294,48 @@ export default function DashboardLayout({
                 </Link>
               </div>
 
-              <WalletButton />
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                {/* Activity Bell on Mobile Navbar */}
+                <button
+                  onClick={() => {
+                    setNotificationsOpen(true);
+                    setHasUnread(false);
+                  }}
+                  className="relative p-2 text-text-dim hover:text-text-primary hover:bg-white/[0.05] rounded-sm transition-colors cursor-pointer"
+                  title="Activity Feed"
+                  aria-label="Activity Feed"
+                >
+                  <IconBell size={18} />
+                  {hasUnread && (
+                    <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-accent animate-pulse" />
+                  )}
+                </button>
+
+                <WalletButton />
+              </div>
             </div>
           </div>
 
           {/* Unified Header with Supported Chain Balances */}
-          <DashboardHeader />
+          <DashboardHeader
+            onOpenNotifications={() => {
+              setNotificationsOpen(true);
+              setHasUnread(false);
+            }}
+            hasUnreadNotifications={hasUnread}
+          />
 
           <div className="flex-1 min-w-0">
             {children}
           </div>
         </main>
       </div>
+
+      {/* Global Notifications Sidebar */}
+      <NotificationsSidebar
+        isOpen={notificationsOpen}
+        onClose={() => setNotificationsOpen(false)}
+      />
     </div>
   );
 }

@@ -64,7 +64,7 @@ export function NotificationsSidebar({ isOpen, onClose }: NotificationsSidebarPr
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 overflow-hidden">
+        <div className="fixed inset-0 z-[60] overflow-hidden">
           {/* Backdrop (no shadow, no border) */}
           <motion.div
             initial={{ opacity: 0 }}
@@ -72,7 +72,7 @@ export function NotificationsSidebar({ isOpen, onClose }: NotificationsSidebarPr
             exit={{ opacity: 0 }}
             transition={{ duration: 0.15 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/60"
+            className="fixed inset-0 bg-black/70 backdrop-blur-xs"
             aria-hidden="true"
           />
 
@@ -82,7 +82,7 @@ export function NotificationsSidebar({ isOpen, onClose }: NotificationsSidebarPr
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", damping: 28, stiffness: 320 }}
-            className="fixed top-0 right-0 bottom-0 w-full sm:w-[420px] max-w-[100vw] bg-[#07080b] z-50 flex flex-col select-none"
+            className="fixed top-0 right-0 bottom-0 w-full sm:w-[420px] max-w-[100vw] bg-[#07080b] z-[60] flex flex-col select-none"
           >
             {/* Top Bar Header */}
             <div className="p-6 pb-4 flex items-center justify-between">
