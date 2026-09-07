@@ -30,6 +30,7 @@ interface Launch {
     name: string;
     symbol: string;
     mint_address: string | null;
+    image_url?: string | null;
   };
 }
 
@@ -217,12 +218,14 @@ export default function LaunchesPage() {
                 >
                   <div className="p-5 md:p-6">
                     <div className="flex items-center gap-4">
-                      <div className="relative w-10 h-10 rounded-lg overflow-hidden border border-border flex-shrink-0">
+                      <div className="relative w-10 h-10 rounded-lg overflow-hidden border border-border flex-shrink-0 bg-elevated">
                         <Image
                           src={
-                            launchpadImages[launch.launchpad] || "/meteora.png"
+                            launch.token?.image_url ||
+                            launchpadImages[launch.launchpad] ||
+                            "/meteora.png"
                           }
-                          alt={launch.launchpad}
+                          alt={launch.token?.name || launch.launchpad}
                           fill
                           className="object-cover"
                         />

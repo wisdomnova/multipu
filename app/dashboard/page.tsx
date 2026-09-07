@@ -26,6 +26,7 @@ interface DashboardToken {
   name: string;
   symbol: string;
   mint_address: string | null;
+  image_url?: string | null;
   supply: string;
   status: string;
   created_at: string;
@@ -240,8 +241,18 @@ export default function DashboardPage() {
                         }
                         className="w-full text-left p-5 flex items-center gap-4"
                       >
-                        <div className="w-10 h-10 rounded-lg bg-accent/10 border border-accent/20 flex items-center justify-center flex-shrink-0">
-                          <IconCoins size={16} className="text-accent" />
+                        <div className="relative w-10 h-10 rounded-lg bg-accent/10 border border-accent/20 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                          {token.image_url ? (
+                            <Image
+                              src={token.image_url}
+                              alt={token.name}
+                              fill
+                              sizes="40px"
+                              className="object-cover"
+                            />
+                          ) : (
+                            <IconCoins size={16} className="text-accent" />
+                          )}
                         </div>
 
                         <div className="flex-1 min-w-0">

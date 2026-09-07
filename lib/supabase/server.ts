@@ -38,9 +38,15 @@ export async function createServerSupabase() {
  * Only use in trusted server contexts (webhooks, cron jobs).
  */
 export function createAdminSupabase() {
+  const serviceKey =
+    process.env.SUPABASE_SERVICE_ROLE_KEY ||
+    process.env.SUPABASE_SERVICE_KEY ||
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
   return createClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_KEY!, 
+    serviceKey!,
     { auth: { persistSession: false } }
   );
 }
+

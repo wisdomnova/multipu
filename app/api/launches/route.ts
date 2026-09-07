@@ -29,7 +29,7 @@ export async function GET(request: Request) {
     const scope = getEnvironmentScope();
     const { data: launches, error } = await supabase
       .from("launches")
-      .select("*, tokens(name, symbol, mint_address)")
+      .select("*, tokens(name, symbol, mint_address, image_url)")
       .eq("wallet_address", auth.walletAddress)
       .eq("app_phase", scope.appPhase)
       .order("created_at", { ascending: false });

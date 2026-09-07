@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import { fadeUp, stagger } from "@/components/motion";
 import {
@@ -23,6 +24,7 @@ interface Token {
   name: string;
   symbol: string;
   mint_address: string | null;
+  image_url?: string | null;
   supply: string;
   decimals: number;
   status: string;
@@ -144,8 +146,18 @@ export default function TokensPage() {
             >
               <div className="p-5 md:p-6">
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-lg bg-accent/10 border border-accent/20 flex items-center justify-center flex-shrink-0">
-                    <IconCoins size={20} className="text-accent" />
+                  <div className="relative w-12 h-12 rounded-lg bg-accent/10 border border-accent/20 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                    {token.image_url ? (
+                      <Image
+                        src={token.image_url}
+                        alt={token.name}
+                        fill
+                        sizes="48px"
+                        className="object-cover"
+                      />
+                    ) : (
+                      <IconCoins size={20} className="text-accent" />
+                    )}
                   </div>
 
                   <div className="flex-1 min-w-0">

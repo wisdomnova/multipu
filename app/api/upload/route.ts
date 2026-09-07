@@ -27,7 +27,7 @@ export async function POST(request: Request) {
     );
   }
 
-  const auth = await getAuth();
+  const auth = await getAuth(request);
   if (!auth.isLoggedIn) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
@@ -58,9 +58,10 @@ export async function POST(request: Request) {
 
     const supabase = createAdminSupabase();
 
-    // Generate unique filename
-    const ext = file.name.split(".").pop() || "png";
-    const filename = `${auth.walletAddress}/${crypto.randomUUID()}.${ext}`;
+    // Generate unique filename (sanitize wallet address prefix)
+    const ext = file.name.split(".").pop()?.toLowerCase() || "png";
+    const cleanWallet = auth.walletAddress.replace(/[^a-zA-Z0-9]/g, "_");
+    const filename = `${cleanWallet}/${Date.now()}-${crypto.randomUUID()}.${ext}`;
 
     const buffer = Buffer.from(await file.arrayBuffer());
 
@@ -68,7 +69,7 @@ export async function POST(request: Request) {
       .from("token-images")
       .upload(filename, buffer, {
         contentType: file.type,
-        upsert: false,
+        upsert: true,
       });
 
     if (uploadError) throw uploadError;
