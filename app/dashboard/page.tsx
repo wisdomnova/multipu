@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { fadeUp, stagger } from "@/components/motion";
 import {
   IconPlus,
@@ -14,6 +14,8 @@ import {
   IconCopy,
   IconChevronDown,
   IconActivity,
+  IconEdit,
+  IconArrowRight,
 } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 import { useApi } from "@/hooks/use-api";
@@ -59,12 +61,16 @@ const launchpadImages: Record<string, string> = {
   meteora: "/meteora.png",
   bags: "/bags.png",
   pumpfun: "/pumpfun.png",
+  fourmeme: "/four-meme.png",
+  pons: "/pons.png",
 };
 
 const launchpadNames: Record<string, string> = {
   meteora: "Meteora",
   bags: "Bags",
   pumpfun: "Pump.fun",
+  fourmeme: "Four.meme",
+  pons: "Pons",
 };
 
 function formatAddress(addr: string | null) {
@@ -85,9 +91,25 @@ function timeAgo(dateStr: string) {
 export default function DashboardPage() {
   const { data, loading, error, refetch } = useApi<DashboardData>("/api/dashboard");
   const [selectedToken, setSelectedToken] = useState<string | null>(null);
+  const [sortBy, setSortBy] = useState<"newest" | "oldest" | "name" | "launches">("newest");
+  const [sortOpen, setSortOpen] = useState(false);
 
   const stats = data?.stats;
-  const tokens = data?.tokens || [];
+  const rawTokens = data?.tokens || [];
+
+  const tokens = useMemo(() => {
+    const list = [...rawTokens];
+    if (sortBy === "newest") {
+      list.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    } else if (sortBy === "oldest") {
+      list.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+    } else if (sortBy === "name") {
+      list.sort((a, b) => a.name.localeCompare(b.name));
+    } else if (sortBy === "launches") {
+      list.sort((a, b) => (b.launches?.length || 0) - (a.launches?.length || 0));
+    }
+    return list;
+  }, [rawTokens, sortBy]);
 
   const statItems = [
     {
@@ -144,7 +166,7 @@ export default function DashboardPage() {
           </div>
           <Link
             href="/launch"
-            className="hidden md:inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold bg-accent hover:bg-accent-hover text-white rounded-full transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(139,92,246,0.3)]"
+            className="hidden md:inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold bg-accent hover:bg-accent-hover text-white rounded-full transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(139,92,246,0.3)] cursor-pointer"
           >
             <IconPlus size={16} />
             Launch Token
@@ -208,14 +230,44 @@ export default function DashboardPage() {
           <motion.div initial="hidden" animate="visible" variants={stagger}>
             <motion.div
               variants={fadeUp}
-              className="flex items-center justify-between mb-4"
+              className="flex items-center justify-between mb-4 relative"
             >
               <h2 className="text-base font-semibold text-text-primary">
                 Your Tokens
               </h2>
-              <button className="font-mono text-xs text-text-muted hover:text-text-primary transition-colors flex items-center gap-1">
-                Sort by <IconChevronDown size={12} />
-              </button>
+
+              {/* Functional Sort Dropdown */}
+              <div className="relative">
+                <button
+                  onClick={() => setSortOpen(!sortOpen)}
+                  className="font-mono text-xs text-text-muted hover:text-text-primary transition-colors flex items-center gap-1.5 px-3 py-1.5 border border-border bg-white/[0.01] hover:bg-white/[0.04] rounded-sm cursor-pointer"
+                >
+                  <span>Sort by: <strong className="text-text-primary uppercase font-bold">{sortBy}</strong></span>
+                  <IconChevronDown size={12} className={cn(sortOpen && "rotate-180 transition-transform")} />
+                </button>
+
+                {sortOpen && (
+                  <div className="absolute right-0 top-full mt-1.5 z-30 w-36 bg-[#0c0d12] border border-border rounded-sm shadow-xl py-1 font-mono text-xs">
+                    {(["newest", "oldest", "name", "launches"] as const).map((s) => (
+                      <button
+                        key={s}
+                        onClick={() => {
+                          setSortBy(s);
+                          setSortOpen(false);
+                        }}
+                        className={cn(
+                          "w-full text-left px-3 py-1.5 uppercase tracking-wider text-[11px] transition-colors cursor-pointer",
+                          sortBy === s
+                            ? "bg-accent/10 text-accent font-semibold"
+                            : "text-text-dim hover:text-text-primary hover:bg-white/[0.03]"
+                        )}
+                      >
+                        {s}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             </motion.div>
 
             {tokens.length > 0 ? (
@@ -224,22 +276,20 @@ export default function DashboardPage() {
                 className="border border-border divide-y divide-border"
               >
                 {tokens.map((token) => {
-                  const totalLive = token.launches.filter(
+                  const totalLive = (token.launches || []).filter(
                     (l) => l.status === "live"
                   ).length;
+                  const isExpanded = selectedToken === token.id;
+                  const isPending = token.status === "pending" || totalLive === 0;
 
                   return (
                     <div
                       key={token.id}
-                      className="group hover:bg-elevated transition-colors"
+                      className="group hover:bg-elevated/80 transition-colors"
                     >
-                      <button
-                        onClick={() =>
-                          setSelectedToken(
-                            selectedToken === token.id ? null : token.id
-                          )
-                        }
-                        className="w-full text-left p-5 flex items-center gap-4"
+                      <div
+                        onClick={() => setSelectedToken(isExpanded ? null : token.id)}
+                        className="w-full text-left p-5 flex items-center gap-4 cursor-pointer select-none"
                       >
                         <div className="relative w-10 h-10 rounded-lg bg-accent/10 border border-accent/20 flex items-center justify-center flex-shrink-0 overflow-hidden">
                           {token.image_url ? (
@@ -257,12 +307,17 @@ export default function DashboardPage() {
 
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
-                            <span className="text-sm font-semibold text-text-primary">
+                            <span className="text-sm font-semibold text-text-primary truncate">
                               {token.name}
                             </span>
                             <span className="font-mono text-xs text-text-muted">
                               ${token.symbol}
                             </span>
+                            {token.status === "pending" && (
+                              <span className="font-mono text-[10px] px-1.5 py-0.2 text-warning bg-warning/10 border border-warning/20 rounded">
+                                Draft
+                              </span>
+                            )}
                           </div>
                           <div className="flex items-center gap-3 mt-1">
                             <span className="font-mono text-[11px] text-text-dim">
@@ -274,26 +329,37 @@ export default function DashboardPage() {
                           </div>
                         </div>
 
-                        <div className="hidden md:flex items-center gap-2">
-                          {token.launches.map((launch) => (
-                            <div
-                              key={launch.id}
-                              className="flex items-center gap-1.5 px-2.5 py-1 border border-border text-xs"
+                        {/* Quick action buttons on row */}
+                        <div className="hidden sm:flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                          {isPending ? (
+                            <Link
+                              href={`/launch?resume=${token.id}`}
+                              className="inline-flex items-center gap-1.5 px-3 py-1 bg-accent/10 hover:bg-accent text-accent hover:text-white border border-accent/30 text-xs font-mono font-semibold rounded-sm transition-all cursor-pointer"
                             >
-                              <span
-                                className={cn(
-                                  "w-1.5 h-1.5 rounded-full",
-                                  launch.status === "live"
-                                    ? "bg-success"
-                                    : "bg-warning"
-                                )}
-                              />
-                              <span className="text-text-secondary font-mono">
-                                {launchpadNames[launch.launchpad] ||
-                                  launch.launchpad}
-                              </span>
-                            </div>
-                          ))}
+                              <IconRocket size={13} />
+                              <span>Launch</span>
+                            </Link>
+                          ) : (
+                            token.launches.map((launch) => (
+                              <div
+                                key={launch.id}
+                                className="flex items-center gap-1.5 px-2.5 py-1 border border-border text-xs"
+                              >
+                                <span
+                                  className={cn(
+                                    "w-1.5 h-1.5 rounded-full",
+                                    launch.status === "live"
+                                      ? "bg-success"
+                                      : "bg-warning"
+                                  )}
+                                />
+                                <span className="text-text-secondary font-mono">
+                                  {launchpadNames[launch.launchpad] ||
+                                    launch.launchpad}
+                                </span>
+                              </div>
+                            ))
+                          )}
                         </div>
 
                         <div className="text-right flex-shrink-0">
@@ -306,137 +372,166 @@ export default function DashboardPage() {
                         </div>
 
                         <IconChevronDown
-                          size={14}
+                          size={15}
                           className={cn(
-                            "text-text-dim transition-transform flex-shrink-0",
-                            selectedToken === token.id && "rotate-180"
+                            "text-text-dim transition-transform flex-shrink-0 cursor-pointer",
+                            isExpanded && "rotate-180 text-text-primary"
                           )}
                         />
-                      </button>
+                      </div>
 
-                      {selectedToken === token.id && (
-                        <motion.div
-                          initial={{ opacity: 0, height: 0 }}
-                          animate={{ opacity: 1, height: "auto" }}
-                          className="border-t border-border bg-elevated"
-                        >
-                          <div className="p-5 grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="space-y-3">
-                              <span className="font-mono text-[0.65rem] text-text-dim uppercase tracking-[0.15em]">
-                                // Token Details
-                              </span>
-                              <div className="space-y-2">
-                                {[
-                                  {
-                                    label: "Address",
-                                    value: formatAddress(token.mint_address),
-                                  },
-                                  { label: "Supply", value: Number(token.supply).toLocaleString() },
-                                  {
-                                    label: "Deployed",
-                                    value: timeAgo(token.created_at),
-                                  },
-                                  { label: "Status", value: token.status },
-                                ].map((row) => (
-                                  <div
-                                    key={row.label}
-                                    className="flex items-center justify-between text-xs"
+                      {/* Expandable Token Details Panel */}
+                      <AnimatePresence>
+                        {isExpanded && (
+                          <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: "auto" }}
+                            exit={{ opacity: 0, height: 0 }}
+                            className="border-t border-border bg-elevated/40"
+                          >
+                            <div className="p-5 grid grid-cols-1 md:grid-cols-2 gap-6">
+                              <div className="space-y-3">
+                                <div className="flex items-center justify-between">
+                                  <span className="font-mono text-[0.65rem] text-text-dim uppercase tracking-[0.15em]">
+                                    // Token Details
+                                  </span>
+                                  <Link
+                                    href="/dashboard/tokens"
+                                    className="text-[11px] font-mono text-accent hover:underline flex items-center gap-1"
                                   >
-                                    <span className="text-text-muted">
-                                      {row.label}
-                                    </span>
-                                    <span className="font-mono text-text-primary flex items-center gap-1.5">
-                                      {row.value}
-                                      {row.label === "Address" &&
-                                        token.mint_address && (
-                                          <IconCopy
-                                            size={10}
-                                            className="text-text-dim hover:text-text-muted cursor-pointer"
-                                            onClick={() => {
-                                              navigator.clipboard.writeText(
-                                                token.mint_address!
-                                              );
-                                              toast.success("Copied!");
-                                            }}
-                                          />
-                                        )}
-                                    </span>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-
-                            <div className="space-y-3">
-                              <span className="font-mono text-[0.65rem] text-text-dim uppercase tracking-[0.15em]">
-                                // Launches
-                              </span>
-                              <div className="space-y-2">
-                                {token.launches.map((launch) => (
-                                  <div
-                                    key={launch.id}
-                                    className="flex items-center justify-between p-3 border border-border"
-                                  >
-                                    <div className="flex items-center gap-2.5">
-                                      <div className="relative w-6 h-6 rounded-md overflow-hidden">
-                                        <Image
-                                          src={
-                                            launchpadImages[launch.launchpad] ||
-                                            "/meteora.png"
-                                          }
-                                          alt={launch.launchpad}
-                                          fill
-                                          className="object-cover"
-                                        />
-                                      </div>
-                                      <span className="text-xs font-medium text-text-primary">
-                                        {launchpadNames[launch.launchpad] ||
-                                          launch.launchpad}
+                                    <span>Manage in Tokens</span>
+                                    <IconArrowRight size={11} />
+                                  </Link>
+                                </div>
+                                <div className="space-y-2">
+                                  {[
+                                    {
+                                      label: "Address",
+                                      value: formatAddress(token.mint_address),
+                                    },
+                                    { label: "Supply", value: Number(token.supply).toLocaleString() },
+                                    {
+                                      label: "Created",
+                                      value: timeAgo(token.created_at),
+                                    },
+                                    { label: "Status", value: token.status },
+                                  ].map((row) => (
+                                    <div
+                                      key={row.label}
+                                      className="flex items-center justify-between text-xs"
+                                    >
+                                      <span className="text-text-muted">
+                                        {row.label}
                                       </span>
-                                      <span
-                                        className={cn(
-                                          "flex items-center gap-1 font-mono text-[10px]",
-                                          launch.status === "live"
-                                            ? "text-success"
-                                            : "text-warning"
-                                        )}
-                                      >
-                                        <span
-                                          className={cn(
-                                            "w-1 h-1 rounded-full",
-                                            launch.status === "live"
-                                              ? "bg-success"
-                                              : "bg-warning"
+                                      <span className="font-mono text-text-primary flex items-center gap-1.5">
+                                        {row.value}
+                                        {row.label === "Address" &&
+                                          token.mint_address && (
+                                            <IconCopy
+                                              size={12}
+                                              className="text-text-dim hover:text-text-primary cursor-pointer"
+                                              onClick={(e) => {
+                                                e.stopPropagation();
+                                                navigator.clipboard.writeText(
+                                                  token.mint_address!
+                                                );
+                                                toast.success("Mint Address copied!");
+                                              }}
+                                            />
                                           )}
-                                        />
-                                        {launch.status}
                                       </span>
                                     </div>
-                                    <div className="flex items-center gap-3">
-                                      {launch.status === "live" && (
-                                        <Link
-                                          href={`/dashboard/trade/${launch.id}`}
-                                          className="text-xs font-mono text-accent hover:text-accent-hover transition-colors font-normal"
-                                        >
-                                          Trade
-                                        </Link>
-                                      )}
-                                      <span className="font-mono text-xs text-text-dim">
-                                        {formatAddress(launch.pool_address)}
-                                      </span>
-                                      {launch.pool_address && (
-                                        <IconExternalLink
-                                          size={10}
-                                          className="text-text-dim hover:text-text-muted cursor-pointer"
-                                        />
-                                      )}
+                                  ))}
+                                </div>
+                              </div>
+
+                              <div className="space-y-3">
+                                <span className="font-mono text-[0.65rem] text-text-dim uppercase tracking-[0.15em]">
+                                  // Launches &amp; DEX Pools
+                                </span>
+                                <div className="space-y-2">
+                                  {token.launches && token.launches.length > 0 ? (
+                                    token.launches.map((launch) => (
+                                      <div
+                                        key={launch.id}
+                                        className="flex items-center justify-between p-3 border border-border bg-white/[0.01]"
+                                      >
+                                        <div className="flex items-center gap-2.5">
+                                          <div className="relative w-6 h-6 rounded-md overflow-hidden">
+                                            <Image
+                                              src={
+                                                launchpadImages[launch.launchpad] ||
+                                                "/meteora.png"
+                                              }
+                                              alt={launch.launchpad}
+                                              fill
+                                              className="object-cover"
+                                            />
+                                          </div>
+                                          <span className="text-xs font-medium text-text-primary">
+                                            {launchpadNames[launch.launchpad] ||
+                                              launch.launchpad}
+                                          </span>
+                                          <span
+                                            className={cn(
+                                              "flex items-center gap-1 font-mono text-[10px]",
+                                              launch.status === "live"
+                                                ? "text-success"
+                                                : "text-warning"
+                                            )}
+                                          >
+                                            <span
+                                              className={cn(
+                                                "w-1 h-1 rounded-full",
+                                                launch.status === "live"
+                                                  ? "bg-success"
+                                                  : "bg-warning"
+                                              )}
+                                            />
+                                            {launch.status}
+                                          </span>
+                                        </div>
+                                        <div className="flex items-center gap-3">
+                                          {launch.status === "live" && (
+                                            <Link
+                                              href={`/dashboard/trade/${launch.id}`}
+                                              className="text-xs font-mono text-accent hover:text-accent-hover transition-colors font-semibold px-2 py-0.5 border border-accent/20 bg-accent/5 rounded-sm cursor-pointer"
+                                            >
+                                              Trade
+                                            </Link>
+                                          )}
+                                          <span className="font-mono text-xs text-text-dim">
+                                            {formatAddress(launch.pool_address)}
+                                          </span>
+                                          {launch.pool_address && (
+                                            <IconExternalLink
+                                              size={12}
+                                              className="text-text-dim hover:text-text-primary cursor-pointer"
+                                            />
+                                          )}
+                                        </div>
+                                      </div>
+                                    ))
+                                  ) : (
+                                    <div className="p-4 border border-dashed border-border text-center space-y-3 bg-white/[0.01]">
+                                      <div className="text-xs text-text-muted">
+                                        No active pools dispatched yet for this token.
+                                      </div>
+                                      <Link
+                                        href={`/launch?resume=${token.id}`}
+                                        className="inline-flex items-center gap-1.5 px-4 py-2 bg-accent hover:bg-accent-hover text-white text-xs font-mono font-semibold rounded-sm transition-all shadow-sm cursor-pointer"
+                                      >
+                                        <IconRocket size={14} />
+                                        <span>Dispatch to Launchpads</span>
+                                      </Link>
                                     </div>
-                                  </div>
-                                ))}
+                                  )}
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        </motion.div>
-                      )}
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                     </div>
                   );
                 })}
@@ -452,7 +547,7 @@ export default function DashboardPage() {
                 </p>
                 <Link
                   href="/launch"
-                  className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold bg-accent hover:bg-accent-hover text-white rounded-full transition-all"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold bg-accent hover:bg-accent-hover text-white rounded-full transition-all cursor-pointer"
                 >
                   <IconPlus size={16} />
                   Launch Token
