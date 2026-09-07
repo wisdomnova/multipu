@@ -103,13 +103,20 @@ export function SitelinksJsonLd() {
           {
             "@type": "SiteNavigationElement",
             "position": 7,
+            "name": "Developer Documentation & MCP Protocol",
+            "description": "Comprehensive REST API guides, KeeperHub MCP schemas, and multi-chain integration docs.",
+            "url": "https://docs.multipu.fun",
+          },
+          {
+            "@type": "SiteNavigationElement",
+            "position": 8,
             "name": "Multi-Chain Portfolio Dashboard",
             "description": "Unified dashboard for Solana SOL, BNB, and Robinhood Chain ETH balances.",
             "url": "https://multipu.fun/dashboard",
           },
           {
             "@type": "SiteNavigationElement",
-            "position": 8,
+            "position": 9,
             "name": "Creator Fee Earnings",
             "description": "Track creator royalties, launchpad fee accruals, and revenue analytics.",
             "url": "https://multipu.fun/dashboard/earnings",
