@@ -46,6 +46,38 @@ export const createTokenSchema = z.object({
 
 export type CreateTokenInput = z.infer<typeof createTokenSchema>;
 
+// ─── Update Pending Token ──────────────────────────
+export const updatePendingTokenSchema = z.object({
+  tokenId: z.string().uuid(),
+  name: z
+    .string()
+    .min(1, "Name is required")
+    .max(32, "Name must be 32 chars or less")
+    .trim()
+    .optional(),
+  symbol: z
+    .string()
+    .min(1, "Symbol is required")
+    .max(10, "Symbol must be 10 chars or less")
+    .toUpperCase()
+    .trim()
+    .optional(),
+  supply: z
+    .string()
+    .regex(/^\d+$/, "Supply must be a whole number")
+    .refine((s) => BigInt(s) > 0n, "Supply must be greater than 0")
+    .refine(
+      (s) => BigInt(s) <= 1_000_000_000_000_000n,
+      "Supply exceeds maximum (1 quadrillion)"
+    )
+    .optional(),
+  decimals: z.coerce.number().int().min(0).max(9).optional(),
+  description: z.string().max(500, "Description too long").optional(),
+  imageUrl: z.string().url().optional().nullable(),
+});
+
+export type UpdatePendingTokenInput = z.infer<typeof updatePendingTokenSchema>;
+
 // ─── Confirm Token Mint ────────────────────────────
 export const confirmTokenSchema = z.object({
   tokenId: z.string().uuid(),

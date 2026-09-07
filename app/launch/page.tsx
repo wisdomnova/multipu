@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
@@ -81,6 +81,36 @@ export default function LaunchPage() {
 
   const isEvmPad = (padId: string) =>
     LAUNCHPAD_META.find((m) => m.id === padId)?.network !== "Solana";
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const resumeId = params.get("resume");
+    if (!resumeId) return;
+
+    fetch("/api/tokens")
+      .then((res) => res.json())
+      .then((data) => {
+        const found = (data.tokens || []).find((t: any) => t.id === resumeId);
+        if (found) {
+          setTokenData({
+            name: found.name || "",
+            symbol: found.symbol || "",
+            supply: found.supply || "",
+            decimals: String(found.decimals ?? "9"),
+            description: found.description || "",
+          });
+          if (found.image_url) {
+            setImagePreview(found.image_url);
+          }
+          if (session.isLoggedIn) {
+            setCurrentStep("create");
+          }
+          toast.info(`Loaded draft token: ${found.name}`);
+        }
+      })
+      .catch(() => {});
+  }, [session.isLoggedIn]);
 
   const goNext = () => {
     setError(null);
