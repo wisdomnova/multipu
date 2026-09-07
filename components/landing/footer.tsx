@@ -3,33 +3,33 @@
 import Link from "next/link";
 import Image from "next/image";
 
-const sitelinks = {
+const footerSections = {
   products: [
-    { label: "Token Orchestrator", href: "/launch" },
-    { label: "Meme Coin Explorer", href: "/dashboard/explore" },
-    { label: "DEX Trading Terminal", href: "/dashboard/trade" },
-    { label: "Multi-Chain Balances", href: "/dashboard" },
-    { label: "Creator Earnings", href: "/dashboard/earnings" },
+    "Token Orchestrator",
+    "Meme Coin Explorer",
+    "DEX Trading Terminal",
+    "Multi-Chain Balances",
+    "Creator Earnings",
   ],
   protocols: [
-    { label: "Pump.fun (Solana)", href: "/launch" },
-    { label: "Meteora DLMM (Solana)", href: "/launch" },
-    { label: "Bags App (Solana)", href: "/launch" },
-    { label: "Four.meme (BNB Chain)", href: "/launch" },
-    { label: "Pons Protocol (Robinhood)", href: "/launch" },
+    "Pump.fun (Solana)",
+    "Meteora DLMM (Solana)",
+    "Bags App (Solana)",
+    "Four.meme (BNB Chain)",
+    "Pons Protocol (Robinhood)",
   ],
   developers: [
-    { label: "REST API Reference", href: "/dashboard/api" },
-    { label: "KeeperHub MCP Server", href: "/dashboard/api" },
-    { label: "OlaXBT Strategy Signals", href: "/dashboard/api" },
-    { label: "Webhooks & Events", href: "/dashboard/api" },
-    { label: "Developer Keys", href: "/dashboard/api" },
+    "REST API Reference",
+    "KeeperHub MCP Server",
+    "OlaXBT Strategy Signals",
+    "Webhooks & Events",
+    "Developer Keys",
   ],
   ecosystem: [
-    { label: "Token Manager", href: "/dashboard/tokens" },
-    { label: "Launch History", href: "/dashboard/launches" },
+    { label: "Token Manager" },
+    { label: "Launch History" },
     { label: "GitHub Repository", href: "https://github.com/wisdomnova/multipu" },
-    { label: "Network Telemetry", href: "/dashboard" },
+    { label: "Network Telemetry" },
   ],
 };
 
@@ -62,14 +62,9 @@ export function Footer() {
               Platform
             </div>
             <ul className="space-y-2 text-xs">
-              {sitelinks.products.map((item) => (
-                <li key={item.label}>
-                  <Link
-                    href={item.href}
-                    className="hover:text-white transition-colors duration-150"
-                  >
-                    {item.label}
-                  </Link>
+              {footerSections.products.map((item) => (
+                <li key={item} className="text-text-muted/90 font-normal select-none">
+                  {item}
                 </li>
               ))}
             </ul>
@@ -81,14 +76,9 @@ export function Footer() {
               Launchpads
             </div>
             <ul className="space-y-2 text-xs">
-              {sitelinks.protocols.map((item) => (
-                <li key={item.label}>
-                  <Link
-                    href={item.href}
-                    className="hover:text-white transition-colors duration-150"
-                  >
-                    {item.label}
-                  </Link>
+              {footerSections.protocols.map((item) => (
+                <li key={item} className="text-text-muted/90 font-normal select-none">
+                  {item}
                 </li>
               ))}
             </ul>
@@ -100,14 +90,9 @@ export function Footer() {
               Agents &amp; API
             </div>
             <ul className="space-y-2 text-xs">
-              {sitelinks.developers.map((item) => (
-                <li key={item.label}>
-                  <Link
-                    href={item.href}
-                    className="hover:text-white transition-colors duration-150"
-                  >
-                    {item.label}
-                  </Link>
+              {footerSections.developers.map((item) => (
+                <li key={item} className="text-text-muted/90 font-normal select-none">
+                  {item}
                 </li>
               ))}
             </ul>
@@ -119,24 +104,21 @@ export function Footer() {
               Ecosystem
             </div>
             <ul className="space-y-2 text-xs">
-              {sitelinks.ecosystem.map((item) => (
+              {footerSections.ecosystem.map((item) => (
                 <li key={item.label}>
-                  {item.href.startsWith("http") ? (
+                  {item.href ? (
                     <a
                       href={item.href}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="hover:text-white transition-colors duration-150"
+                      className="text-text-muted hover:text-white transition-colors duration-150 inline-flex items-center gap-1.5"
                     >
                       {item.label}
                     </a>
                   ) : (
-                    <Link
-                      href={item.href}
-                      className="hover:text-white transition-colors duration-150"
-                    >
+                    <span className="text-text-muted/90 font-normal select-none">
                       {item.label}
-                    </Link>
+                    </span>
                   )}
                 </li>
               ))}
@@ -151,17 +133,11 @@ export function Footer() {
             &copy; {new Date().getFullYear()} Multipu. All rights reserved.
           </div>
           <div className="flex items-center gap-6">
-            <Link href="/dashboard/api" className="hover:text-white transition-colors">
-              API
-            </Link>
-            <Link href="/dashboard/explore" className="hover:text-white transition-colors">
-              Explorer
-            </Link>
             <a
               href="https://github.com/wisdomnova/multipu"
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:text-white transition-colors"
+              className="text-text-muted hover:text-white transition-colors"
             >
               GitHub
             </a>
