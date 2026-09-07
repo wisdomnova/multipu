@@ -28,6 +28,7 @@ const footerSections = {
   ecosystem: [
     { label: "Token Manager" },
     { label: "Launch History" },
+    { label: "Documentation", href: "https://docs.multipu.fun" },
     { label: "GitHub Repository", href: "https://github.com/wisdomnova/multipu" },
     { label: "Network Telemetry" },
   ],
@@ -133,6 +134,14 @@ export function Footer() {
             &copy; {new Date().getFullYear()} Multipu. All rights reserved.
           </div>
           <div className="flex items-center gap-6">
+            <a
+              href="https://docs.multipu.fun"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-text-muted hover:text-white transition-colors"
+            >
+              Docs
+            </a>
             <a
               href="https://github.com/wisdomnova/multipu"
               target="_blank"
