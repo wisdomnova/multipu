@@ -5,26 +5,14 @@ import type { NextRequest } from "next/server";
  * Next.js Edge Proxy & Route Guard — runs BEFORE every request.
  *
  * Responsibilities:
- * 1. Protect /dashboard and /launch routes (session cookie must exist)
- * 2. Admin area access guard (admin session cookie)
- * 3. Add security headers and request tracing IDs
+ * 1. Admin area access guard (enforces admin session cookie for /admin)
+ * 2. Request tracing & security headers (x-request-id)
+ *
+ * Note: User authentication is managed seamlessly via Web3 wallet sessions
+ * and verified per API route without disruptive route bounces.
  */
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
-
-  // ─── Auth Guard ──────────────────────────────────
-  const protectedPrefixes = ["/dashboard", "/launch"];
-  const isProtected = protectedPrefixes.some((p) => pathname.startsWith(p));
-
-  if (isProtected) {
-    const sessionCookie = request.cookies.get("multipu_session");
-
-    if (!sessionCookie?.value) {
-      const loginUrl = new URL("/", request.url);
-      loginUrl.searchParams.set("auth", "required");
-      return NextResponse.redirect(loginUrl);
-    }
-  }
 
   // ─── Admin Guard (password session cookie) ─────────
   const isAdminLogin = pathname === "/admin/login";
