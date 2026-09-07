@@ -11,15 +11,10 @@ import {
   IconLock,
   IconArrowUpRight,
   IconBook,
-  IconServer,
-  IconRocket,
-  IconActivity,
-  IconCode,
 } from "@tabler/icons-react";
 import { fadeUp, stagger } from "@/components/motion";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
-import Link from "next/link";
 
 interface ApiKeyData {
   id: string;
@@ -125,7 +120,7 @@ export default function ApiKeysPage() {
         initial="hidden"
         animate="visible"
         variants={stagger}
-        className="mb-10"
+        className="mb-8"
       >
         <motion.div
           variants={fadeUp}
@@ -200,199 +195,91 @@ export default function ApiKeysPage() {
         )}
       </AnimatePresence>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* API Key management */}
-        <div className="lg:col-span-1 space-y-6">
-          <div className="border border-border p-5 md:p-6 space-y-6">
-            <h2 className="text-sm font-semibold text-text-primary flex items-center gap-2">
-              <IconKey size={14} className="text-text-muted" /> API Key Controls
-            </h2>
+      {/* Full-Width API Key Controls */}
+      <div className="w-full space-y-6">
+        <div className="border border-border p-6 md:p-8 space-y-6 bg-white/[0.005]">
+          <h2 className="text-sm font-semibold text-text-primary flex items-center gap-2">
+            <IconKey size={16} className="text-accent" /> API Key Controls
+          </h2>
 
-            {/* Create API Key Form */}
-            <form onSubmit={handleCreateKey} className="space-y-4">
-              <div className="space-y-2">
-                <label className="text-[10px] text-text-dim uppercase tracking-wider font-mono block">
-                  New Key Label
-                </label>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    placeholder="e.g. My Agent Worker"
-                    value={newKeyName}
-                    onChange={(e) => setNewKeyName(e.target.value)}
-                    className="flex-1 bg-transparent border border-border hover:border-border-hover focus:border-accent/50 focus:outline-none px-3.5 py-2 text-xs text-text-primary placeholder:text-text-dim transition-colors font-mono"
-                  />
-                  <button
-                    type="submit"
-                    disabled={isGenerating}
-                    className="px-3.5 py-2 border border-border hover:border-border-hover text-text-muted hover:text-text-primary text-xs font-mono font-semibold transition-colors flex items-center gap-1 cursor-pointer disabled:opacity-50"
-                  >
-                    {isGenerating ? "..." : <><IconPlus size={14} /> Add</>}
-                  </button>
-                </div>
+          {/* Create API Key Form */}
+          <form onSubmit={handleCreateKey} className="space-y-4 max-w-xl">
+            <div className="space-y-2">
+              <label className="text-[10px] text-text-dim uppercase tracking-wider font-mono block">
+                New Key Label
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  placeholder="e.g. Trading Bot / Agent Worker"
+                  value={newKeyName}
+                  onChange={(e) => setNewKeyName(e.target.value)}
+                  className="flex-1 bg-transparent border border-border hover:border-border-hover focus:border-accent/50 focus:outline-none px-4 py-2.5 text-xs text-text-primary placeholder:text-text-dim transition-colors font-mono"
+                />
+                <button
+                  type="submit"
+                  disabled={isGenerating}
+                  className="px-5 py-2.5 border border-border hover:border-border-hover bg-white/[0.02] hover:bg-white/[0.05] text-text-primary text-xs font-mono font-semibold transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                >
+                  {isGenerating ? "Generating..." : <><IconPlus size={14} /> Add Key</>}
+                </button>
               </div>
-            </form>
+            </div>
+          </form>
 
-            {/* Keys list */}
-            <div className="space-y-3">
+          {/* Keys list */}
+          <div className="space-y-3 pt-4 border-t border-border">
+            <div className="flex items-center justify-between">
               <label className="text-[10px] text-text-dim uppercase tracking-wider font-mono block">
                 Active Keys ({keys.length})
               </label>
+              <span className="text-[11px] font-mono text-text-muted">
+                Authenticated non-custodial keys
+              </span>
+            </div>
 
-              {loading ? (
-                <div className="text-xs text-text-dim font-mono py-2">Loading keys...</div>
-              ) : keys.length === 0 ? (
-                <div className="text-xs text-text-dim font-mono py-6 border border-dashed border-border text-center">
-                  No active keys.
-                </div>
-              ) : (
-                <div className="space-y-2 max-h-[350px] overflow-y-auto pr-1">
-                  {keys.map((key) => (
-                    <div
-                      key={key.id}
-                      className="p-3 border border-border hover:bg-elevated transition-colors flex items-center justify-between group"
-                    >
-                      <div className="space-y-1 min-w-0">
-                        <div className="text-xs font-semibold text-text-primary truncate">
-                          {key.name}
-                        </div>
-                        <div className="font-mono text-[10px] text-text-dim select-all">
-                          {key.api_key}
-                        </div>
+            {loading ? (
+              <div className="text-xs text-text-dim font-mono py-4">Loading keys...</div>
+            ) : keys.length === 0 ? (
+              <div className="text-xs text-text-dim font-mono py-10 border border-dashed border-border text-center">
+                No active keys. Create a key above to authenticate your API and MCP requests.
+              </div>
+            ) : (
+              <div className="space-y-2.5">
+                {keys.map((key) => (
+                  <div
+                    key={key.id}
+                    className="p-4 border border-border hover:bg-elevated/80 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-3 group"
+                  >
+                    <div className="space-y-1 min-w-0">
+                      <div className="text-xs font-semibold text-text-primary">
+                        {key.name}
                       </div>
+                      <div className="font-mono text-xs text-text-dim select-all break-all">
+                        {key.api_key}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 self-end sm:self-auto flex-shrink-0">
+                      <button
+                        onClick={() => copyToClipboard(key.api_key)}
+                        className="px-2.5 py-1.5 text-xs text-text-dim hover:text-text-primary bg-white/[0.02] hover:bg-white/[0.06] border border-border rounded-sm transition-colors flex items-center gap-1 font-mono cursor-pointer"
+                        title="Copy Key"
+                      >
+                        <IconCopy size={12} />
+                        <span>Copy</span>
+                      </button>
                       <button
                         onClick={() => handleRevokeKey(key.id)}
-                        className="text-text-muted hover:text-error hover:bg-error/5 p-1 border border-transparent hover:border-error/10 transition-colors ml-2 cursor-pointer"
+                        className="p-1.5 text-text-muted hover:text-error hover:bg-error/5 border border-transparent hover:border-error/20 rounded-sm transition-colors cursor-pointer"
                         title="Revoke Key"
                       >
-                        <IconTrash size={13} />
+                        <IconTrash size={14} />
                       </button>
                     </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Developer Documentation Link Card */}
-        <div className="lg:col-span-2 space-y-6">
-          <div className="border border-border p-6 md:p-8 space-y-6 flex flex-col justify-between min-h-[380px] bg-white/[0.005]">
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="p-1.5 bg-accent/10 border border-accent/20 rounded-sm">
-                    <IconBook size={16} className="text-accent" />
                   </div>
-                  <span className="font-mono text-xs uppercase tracking-wider font-bold text-text-primary">
-                    Documentation Portal
-                  </span>
-                </div>
-                <span className="text-[11px] font-mono text-accent bg-accent/10 px-2 py-0.5 border border-accent/20">
-                  docs.multipu.fun
-                </span>
+                ))}
               </div>
-
-              <div className="space-y-2">
-                <h2 className="text-lg md:text-xl font-bold tracking-tight text-text-primary">
-                  Official Multipu API &amp; KeeperHub MCP Reference
-                </h2>
-                <p className="text-xs md:text-sm text-text-secondary leading-relaxed max-w-2xl">
-                  Explore complete API endpoint specifications, KeeperHub Model Context Protocol (MCP) schemas for autonomous AI agents, interactive playground sandboxes, and multi-chain launchpad orchestration guides.
-                </p>
-              </div>
-
-              {/* Feature Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-                <a
-                  href="https://docs.multipu.fun/#api-reference"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="p-3.5 border border-border hover:border-border-hover bg-white/[0.01] hover:bg-white/[0.02] transition-colors group cursor-pointer"
-                >
-                  <div className="flex items-center justify-between mb-1.5">
-                    <div className="flex items-center gap-1.5 text-xs font-semibold text-text-primary">
-                      <IconCode size={14} className="text-accent" />
-                      REST API Endpoints
-                    </div>
-                    <IconArrowUpRight size={13} className="text-text-dim group-hover:text-text-primary transition-colors" />
-                  </div>
-                  <p className="text-[11px] text-text-muted leading-relaxed">
-                    Automate token creation, launchpool dispatches, instant DEX swaps, and balances query.
-                  </p>
-                </a>
-
-                <a
-                  href="https://docs.multipu.fun/#keeperhub-mcp"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="p-3.5 border border-border hover:border-border-hover bg-white/[0.01] hover:bg-white/[0.02] transition-colors group cursor-pointer"
-                >
-                  <div className="flex items-center justify-between mb-1.5">
-                    <div className="flex items-center gap-1.5 text-xs font-semibold text-text-primary">
-                      <IconServer size={14} className="text-purple-400" />
-                      KeeperHub MCP Server
-                    </div>
-                    <IconArrowUpRight size={13} className="text-text-dim group-hover:text-text-primary transition-colors" />
-                  </div>
-                  <p className="text-[11px] text-text-muted leading-relaxed">
-                    Connect Claude Desktop, Cursor, or custom AI agents directly into on-chain liquidity tools.
-                  </p>
-                </a>
-
-                <a
-                  href="https://docs.multipu.fun/#multi-launch"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="p-3.5 border border-border hover:border-border-hover bg-white/[0.01] hover:bg-white/[0.02] transition-colors group cursor-pointer"
-                >
-                  <div className="flex items-center justify-between mb-1.5">
-                    <div className="flex items-center gap-1.5 text-xs font-semibold text-text-primary">
-                      <IconRocket size={14} className="text-emerald-400" />
-                      Multi-Launchpad Matrix
-                    </div>
-                    <IconArrowUpRight size={13} className="text-text-dim group-hover:text-text-primary transition-colors" />
-                  </div>
-                  <p className="text-[11px] text-text-muted leading-relaxed">
-                    Architecture for Pump.fun, Meteora DLMM, Bags, Four.meme, and Pons Protocol.
-                  </p>
-                </a>
-
-                <a
-                  href="https://docs.multipu.fun/#olaxbt-signals"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="p-3.5 border border-border hover:border-border-hover bg-white/[0.01] hover:bg-white/[0.02] transition-colors group cursor-pointer"
-                >
-                  <div className="flex items-center justify-between mb-1.5">
-                    <div className="flex items-center gap-1.5 text-xs font-semibold text-text-primary">
-                      <IconActivity size={14} className="text-amber-400" />
-                      OlaXBT Alpha Signals
-                    </div>
-                    <IconArrowUpRight size={13} className="text-text-dim group-hover:text-text-primary transition-colors" />
-                  </div>
-                  <p className="text-[11px] text-text-muted leading-relaxed">
-                    Query real-time momentum alpha, volume spikes, and holder concentration signals.
-                  </p>
-                </a>
-              </div>
-            </div>
-
-            {/* Bottom CTA */}
-            <div className="pt-4 border-t border-border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-              <div className="text-[11px] font-mono text-text-dim">
-                Base URL: <code className="text-text-primary font-semibold">https://multipu.fun/api</code>
-              </div>
-              <a
-                href="https://docs.multipu.fun"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-5 py-2.5 bg-accent hover:bg-accent-hover text-white text-xs font-mono font-semibold transition-all shadow-sm cursor-pointer"
-              >
-                <span>Read Full Documentation</span>
-                <IconArrowUpRight size={14} />
-              </a>
-            </div>
+            )}
           </div>
         </div>
       </div>
