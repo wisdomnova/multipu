@@ -8,12 +8,16 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 
+import { useRouter } from "next/navigation";
+
 interface SignInModalProps {
   isOpen: boolean;
   onClose: () => void;
+  redirectTo?: string;
 }
 
-export function SignInModal({ isOpen, onClose }: SignInModalProps) {
+export function SignInModal({ isOpen, onClose, redirectTo }: SignInModalProps) {
+  const router = useRouter();
   const { wallets, connecting, select } = useWallet();
   const { connectEvmWallet, signInWithSolana, signInWithEvm, signInDemo, session } = useAuth();
   const [selectedMethod, setSelectedMethod] = useState<string | null>(null);
@@ -34,17 +38,20 @@ export function SignInModal({ isOpen, onClose }: SignInModalProps) {
     };
   }, [isOpen]);
 
-  // Close modal when successfully signed in
+  // Close modal when successfully signed in and optionally redirect
   useEffect(() => {
-    if (session.isLoggedIn) {
+    if (session.isLoggedIn && isOpen) {
       const timer = setTimeout(() => {
         onClose();
         setSelectedMethod(null);
         setIsConnecting(false);
-      }, 600);
+        if (redirectTo) {
+          router.push(redirectTo);
+        }
+      }, 500);
       return () => clearTimeout(timer);
     }
-  }, [session.isLoggedIn, onClose]);
+  }, [session.isLoggedIn, isOpen, onClose, redirectTo, router]);
 
   const handleSolanaSignIn = async () => {
     if (wallets.length === 0) {

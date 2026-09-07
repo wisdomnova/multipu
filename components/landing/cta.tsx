@@ -1,11 +1,26 @@
 "use client";
 
-import Link from "next/link";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { fadeUp, stagger } from "@/components/motion";
-import { IconArrowRight, IconBolt } from "@tabler/icons-react";
+import { IconArrowRight } from "@tabler/icons-react";
+import { useAuth } from "@/hooks/use-auth";
+import { SignInModal } from "@/components/signin-modal";
 
 export function CTA() {
+  const { session } = useAuth();
+  const router = useRouter();
+  const [showSignInModal, setShowSignInModal] = useState(false);
+
+  const handleStartLaunching = () => {
+    if (session.isLoggedIn) {
+      router.push("/launch");
+    } else {
+      setShowSignInModal(true);
+    }
+  };
+
   return (
     <section className="relative py-24 md:py-32 dot-grid overflow-hidden">
       {/* Gradient orb */}
@@ -48,19 +63,25 @@ export function CTA() {
             variants={fadeUp}
             className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4"
           >
-            <Link
-              href="/launch"
-              className="group inline-flex items-center gap-2 px-8 py-4 text-sm font-semibold bg-accent hover:bg-accent-hover text-white rounded-full transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_12px_32px_rgba(139,92,246,0.35)]"
+            <button
+              onClick={handleStartLaunching}
+              className="group inline-flex items-center gap-2 px-8 py-4 text-sm font-semibold bg-accent hover:bg-accent-hover text-white rounded-full transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_12px_32px_rgba(139,92,246,0.35)] cursor-pointer"
             >
               Start Launching
               <IconArrowRight
                 size={16}
                 className="group-hover:translate-x-0.5 transition-transform"
               />
-            </Link>
+            </button>
           </motion.div>
         </div>
       </motion.div>
+
+      <SignInModal
+        isOpen={showSignInModal}
+        onClose={() => setShowSignInModal(false)}
+        redirectTo="/launch"
+      />
     </section>
   );
 }

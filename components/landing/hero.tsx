@@ -1,10 +1,27 @@
 "use client";
 
-import Link from "next/link";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { fadeUp, stagger } from "@/components/motion";
+import { useAuth } from "@/hooks/use-auth";
+import { SignInModal } from "@/components/signin-modal";
 
 export function Hero() {
+  const { session } = useAuth();
+  const router = useRouter();
+  const [showSignInModal, setShowSignInModal] = useState(false);
+  const [targetDestination, setTargetDestination] = useState<string>("/launch");
+
+  const handleActionClick = (destination: string) => {
+    if (session.isLoggedIn) {
+      router.push(destination);
+    } else {
+      setTargetDestination(destination);
+      setShowSignInModal(true);
+    }
+  };
+
   return (
     <section className="relative min-h-[90vh] flex items-center pt-24 pb-20 border-b border-white/[0.05]">
       {/* Background patterns */}
@@ -32,7 +49,7 @@ export function Hero() {
                 variants={fadeUp}
                 className="text-[clamp(2.5rem,7vw,5.5rem)] font-normal leading-[1.0] tracking-tight text-white mb-10 max-w-4xl"
               >
-                Deploy once. <br/> Launch & Trade everywhere.
+                Deploy once. <br/> Launch &amp; Trade everywhere.
               </motion.h1>
 
               <motion.p
@@ -48,18 +65,18 @@ export function Hero() {
                 variants={fadeUp}
                 className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4"
               >
-                <Link
-                  href="/launch"
-                  className="px-8 py-4 bg-white text-black text-[11px] font-mono tracking-[0.2em] font-bold hover:bg-accent hover:text-white transition-all text-center uppercase"
+                <button
+                  onClick={() => handleActionClick("/launch")}
+                  className="px-8 py-4 bg-white text-black text-[11px] font-mono tracking-[0.2em] font-bold hover:bg-accent hover:text-white transition-all text-center uppercase cursor-pointer"
                 >
-                  Start Launching {">"}
-                </Link>
-                <Link
-                  href="/dashboard/explore"
-                  className="px-8 py-4 border border-white/20 text-white text-[11px] font-mono tracking-[0.2em] hover:bg-white/5 transition-all text-center uppercase"
+                  Start Launching &gt;
+                </button>
+                <button
+                  onClick={() => handleActionClick("/dashboard/explore")}
+                  className="px-8 py-4 border border-white/20 text-white text-[11px] font-mono tracking-[0.2em] hover:bg-white/5 transition-all text-center uppercase cursor-pointer"
                 >
-                  Explore & Trade
-                </Link>
+                  Explore &amp; Trade
+                </button>
               </motion.div>
             </motion.div>
           </div>
@@ -94,6 +111,13 @@ export function Hero() {
 
         </div>
       </div>
+
+      {/* Auth Modal for protected actions */}
+      <SignInModal
+        isOpen={showSignInModal}
+        onClose={() => setShowSignInModal(false)}
+        redirectTo={targetDestination}
+      />
     </section>
   );
 }
