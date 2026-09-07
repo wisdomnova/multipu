@@ -73,6 +73,12 @@ export default function LaunchPage() {
   const launchRestricted = !isMainnetLaunchAllowedOnClient();
   const evmLaunchesEnabled = areEvmLaunchesEnabledOnClient();
 
+  const isDemo = Boolean(
+    session.isLoggedIn &&
+      (session.walletAddress?.toLowerCase().includes("demo") ||
+        (!connected && !evmAddress))
+  );
+
   const isEvmPad = (padId: string) =>
     LAUNCHPAD_META.find((m) => m.id === padId)?.network !== "Solana";
 
@@ -97,17 +103,19 @@ export default function LaunchPage() {
       toast.error(`${launchpadMeta?.name ?? pad} integration is not live yet`);
       return;
     }
-    if (isEvmPad(pad) && !evmLaunchesEnabled) {
-      toast.error("EVM launch adapters are disabled for this deployment.");
-      return;
-    }
-    if (session.walletKind === "solana" && isEvmPad(pad)) {
-      toast.error("Use SIWB (EVM wallet) for Four.meme.");
-      return;
-    }
-    if (session.walletKind === "evm" && !isEvmPad(pad)) {
-      toast.error("Use SIWS (Solana wallet) for Solana launchpads.");
-      return;
+    if (!isDemo) {
+      if (isEvmPad(pad) && !evmLaunchesEnabled) {
+        toast.error("EVM launch adapters are disabled for this deployment.");
+        return;
+      }
+      if (session.walletKind === "solana" && isEvmPad(pad)) {
+        toast.error("Use SIWB (EVM wallet) for Four.meme and Pons.");
+        return;
+      }
+      if (session.walletKind === "evm" && !isEvmPad(pad)) {
+        toast.error("Use SIWS (Solana wallet) for Solana launchpads.");
+        return;
+      }
     }
     setSelectedPads((prev) =>
       prev.includes(pad) ? prev.filter((p) => p !== pad) : [...prev, pad]
@@ -117,13 +125,14 @@ export default function LaunchPage() {
   const canProceed = () => {
     if (currentStep === "connect") {
       if (!session.isLoggedIn) return false;
+      if (isDemo) return true;
       if (session.walletKind === "evm") return Boolean(evmAddress);
       return connected;
     }
     if (currentStep === "create")
-      return tokenData.name && tokenData.symbol && tokenData.supply;
+      return Boolean(tokenData.name && tokenData.symbol && tokenData.supply);
     if (currentStep === "launchpads") return selectedPads.length > 0;
-    if (currentStep === "confirm") return !launchRestricted;
+    if (currentStep === "confirm") return isDemo || !launchRestricted;
     return false;
   };
 
@@ -148,6 +157,113 @@ export default function LaunchPage() {
 
   // ─── Deploy Flow ───────────────────────────────────
   const handleDeploy = useCallback(async () => {
+    if (isDemo) {
+      setIsDeploying(true);
+      setError(null);
+      try {
+        setDeployProgress("Uploading token icon...");
+        let imageUrl: string | null = null;
+        if (imageFile) {
+          try {
+            const formData = new FormData();
+            formData.append("file", imageFile);
+            const uploadRes = await fetch("/api/upload", {
+              method: "POST",
+              body: formData,
+            });
+            if (uploadRes.ok) {
+              const { url } = await uploadRes.json();
+              imageUrl = url;
+            }
+          } catch {
+            console.warn("Image upload skipped for demo mode");
+          }
+        }
+
+        setDeployProgress("Preparing simulated token on testnet...");
+        await new Promise((r) => setTimeout(r, 600));
+
+        const demoMint =
+          "Demo" +
+          Math.random().toString(36).substring(2, 8).toUpperCase() +
+          "MintToken77";
+        const demoSig =
+          "5Demo" +
+          Math.random().toString(36).substring(2, 12) +
+          "TxSig";
+
+        setMintAddress(demoMint);
+        setMintTx(demoSig);
+
+        try {
+          const tokenRes = await fetch("/api/tokens", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              name: tokenData.name,
+              symbol: tokenData.symbol,
+              supply: tokenData.supply,
+              decimals: parseInt(tokenData.decimals) || 9,
+              description: tokenData.description,
+              imageUrl,
+            }),
+          });
+          if (tokenRes.ok) {
+            const { token } = await tokenRes.json();
+            if (token?.id) {
+              await fetch("/api/tokens", {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  tokenId: token.id,
+                  mintAddress: demoMint,
+                  mintTx: demoSig,
+                }),
+              });
+              for (const padId of selectedPads) {
+                await fetch("/api/launches", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    tokenId: token.id,
+                    launchpad: padId,
+                    initialLiquidity: 1,
+                  }),
+                });
+              }
+            }
+          }
+        } catch {
+          // Demo DB persistence fallback
+        }
+
+        for (const padId of selectedPads) {
+          const padMeta = LAUNCHPAD_META.find((m) => m.id === padId);
+          setDeployProgress(`Dispatching to ${padMeta?.name || padId}...`);
+          await new Promise((r) => setTimeout(r, 600));
+        }
+
+        const simResults = selectedPads.map((padId) => ({
+          launchpad: padId,
+          poolAddress:
+            "DemoPool" +
+            Math.random().toString(36).substring(2, 8).toUpperCase(),
+          status: "live" as const,
+        }));
+
+        setLaunchResults(simResults);
+        setDeployProgress("");
+        setIsDeploying(false);
+        setCurrentStep("success");
+        toast.success("Demo token created & launched successfully!");
+        return;
+      } catch (err) {
+        setIsDeploying(false);
+        setError(err instanceof Error ? err.message : "Demo deployment failed");
+        return;
+      }
+    }
+
     const isSolanaAuth = session.walletKind === "solana";
     const isEvmAuth = session.walletKind === "evm";
 
@@ -548,11 +664,11 @@ export default function LaunchPage() {
                     <div className="flex items-center gap-3">
                       <div className="w-2 h-2 rounded-full bg-success" />
                       <span className="font-mono text-sm text-text-primary">
-                        {session.walletAddress.slice(0, 4)}...
+                        {session.walletAddress.slice(0, 6)}...
                         {session.walletAddress.slice(-4)}
                       </span>
                       <span className="font-mono text-xs text-success ml-auto">
-                        Connected & Signed In
+                        {isDemo ? "Demo Session Ready" : "Connected & Signed In"}
                       </span>
                       <IconCheck size={14} className="text-success" />
                     </div>
@@ -850,7 +966,7 @@ export default function LaunchPage() {
                 variants={fadeUp}
                 className="mt-10 border border-border divide-y divide-border"
               >
-                {launchRestricted && (
+                {launchRestricted && !isDemo && (
                   <div className="p-6 bg-error/5 border-b border-error/20">
                     <p className="text-sm text-error font-medium">
                       Mainnet safety lock is enabled
@@ -861,6 +977,16 @@ export default function LaunchPage() {
                       `NEXT_PUBLIC_ENABLE_MAINNET_LAUNCHES=true` are explicitly
                       enabled.
                     </p>
+                  </div>
+                )}
+                {isDemo && (
+                  <div className="p-4 bg-accent/5 border-b border-accent/20 flex items-center justify-between">
+                    <span className="font-mono text-xs text-accent font-medium">
+                      Demo Simulation Mode
+                    </span>
+                    <span className="text-xs text-text-muted">
+                      Sandbox testnet launch preview
+                    </span>
                   </div>
                 )}
                 <div className="p-6">
