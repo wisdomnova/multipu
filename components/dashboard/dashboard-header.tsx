@@ -1,8 +1,10 @@
 "use client";
 
-import { IconRefresh } from "@tabler/icons-react";
+import { useState, useEffect } from "react";
+import { IconRefresh, IconBell } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 import { useWalletBalances } from "@/hooks/use-wallet-balances";
+import { NotificationsSidebar } from "@/components/dashboard/notifications-sidebar";
 
 function formatBalance(val: number) {
   if (val === 0) return "0.00";
@@ -14,6 +16,19 @@ function formatBalance(val: number) {
 
 export function DashboardHeader() {
   const { balances, isLoading, refresh } = useWalletBalances();
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [hasUnread, setHasUnread] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/notifications")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.unreadCount > 0) {
+          setHasUnread(true);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const chains = [
     {
@@ -37,59 +52,85 @@ export function DashboardHeader() {
   ];
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-border bg-background/95 backdrop-blur-md">
-      <div className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-3.5">
-        
-        {/* Title: Balance */}
-        <div className="flex items-center gap-2">
-          <span className="text-xs sm:text-sm font-bold font-mono tracking-wider text-text-primary uppercase">
-            Balance
-          </span>
-        </div>
+    <>
+      <header className="sticky top-0 z-40 w-full border-b border-border bg-background/95 backdrop-blur-md">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-3.5 gap-3">
+          
+          {/* Title: Balance */}
+          <div className="flex items-center gap-2">
+            <span className="text-xs sm:text-sm font-bold font-mono tracking-wider text-text-primary uppercase">
+              Balance
+            </span>
+          </div>
 
-        {/* Supported Chain Balances - Prominent & Bold */}
-        <div className="flex items-center gap-1 sm:gap-2 bg-elevated/80 border border-border px-3 sm:px-4 py-1.5 sm:py-2 rounded-sm">
-          {chains.map((chain, index) => {
-            const hasBalance = chain.data.balance > 0;
-            return (
-              <div
-                key={chain.key}
-                className={cn(
-                  "flex items-baseline gap-2 px-2 sm:px-3 py-0.5 font-mono whitespace-nowrap transition-colors",
-                  index > 0 && "border-l border-border pl-3 sm:pl-4",
-                  hasBalance ? "text-text-primary" : "text-text-muted"
-                )}
-                title={`${chain.label}: ${chain.data.balance} ${chain.symbol}`}
+          <div className="flex items-center gap-3">
+            {/* Supported Chain Balances - Prominent & Bold */}
+            <div className="flex items-center gap-1 sm:gap-2 bg-elevated/80 border border-border px-3 sm:px-4 py-1.5 sm:py-2 rounded-sm">
+              {chains.map((chain, index) => {
+                const hasBalance = chain.data.balance > 0;
+                return (
+                  <div
+                    key={chain.key}
+                    className={cn(
+                      "flex items-baseline gap-2 px-2 sm:px-3 py-0.5 font-mono whitespace-nowrap transition-colors",
+                      index > 0 && "border-l border-border pl-3 sm:pl-4",
+                      hasBalance ? "text-text-primary" : "text-text-muted"
+                    )}
+                    title={`${chain.label}: ${chain.data.balance} ${chain.symbol}`}
+                  >
+                    <span className="text-xs font-semibold uppercase tracking-wider text-text-dim">
+                      {chain.symbol}
+                    </span>
+                    <span className={cn(
+                      "text-sm sm:text-base font-bold font-mono tracking-tight",
+                      hasBalance ? "text-accent" : "text-text-secondary"
+                    )}>
+                      {formatBalance(chain.data.balance)}
+                    </span>
+                  </div>
+                );
+              })}
+
+              {/* Refresh balances button */}
+              <button
+                onClick={refresh}
+                disabled={isLoading}
+                className="p-1.5 text-text-dim hover:text-text-primary hover:bg-white/[0.04] rounded transition-colors disabled:opacity-50 ml-1.5 sm:ml-2"
+                title="Refresh balances"
+                aria-label="Refresh balances"
               >
-                <span className="text-xs font-semibold uppercase tracking-wider text-text-dim">
-                  {chain.symbol}
-                </span>
-                <span className={cn(
-                  "text-sm sm:text-base font-bold font-mono tracking-tight",
-                  hasBalance ? "text-accent" : "text-text-secondary"
-                )}>
-                  {formatBalance(chain.data.balance)}
-                </span>
-              </div>
-            );
-          })}
+                <IconRefresh
+                  size={15}
+                  className={cn(isLoading && "animate-spin text-accent")}
+                />
+              </button>
+            </div>
 
-          {/* Refresh balances button */}
-          <button
-            onClick={refresh}
-            disabled={isLoading}
-            className="p-1.5 text-text-dim hover:text-text-primary hover:bg-white/[0.04] rounded transition-colors disabled:opacity-50 ml-1.5 sm:ml-2"
-            title="Refresh balances"
-            aria-label="Refresh balances"
-          >
-            <IconRefresh
-              size={15}
-              className={cn(isLoading && "animate-spin text-accent")}
-            />
-          </button>
+            {/* Activity Stream Notification Button */}
+            <button
+              onClick={() => {
+                setNotificationsOpen(true);
+                setHasUnread(false);
+              }}
+              className="relative p-2 text-text-dim hover:text-text-primary hover:bg-white/[0.04] rounded transition-colors"
+              title="Activity Stream & Notifications"
+              aria-label="Activity Stream & Notifications"
+            >
+              <IconBell size={18} />
+              {hasUnread && (
+                <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-accent" />
+              )}
+            </button>
+          </div>
+
         </div>
+      </header>
 
-      </div>
-    </header>
+      {/* Notifications Sidebar */}
+      <NotificationsSidebar
+        isOpen={notificationsOpen}
+        onClose={() => setNotificationsOpen(false)}
+      />
+    </>
   );
 }
