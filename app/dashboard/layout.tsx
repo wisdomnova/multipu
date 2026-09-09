@@ -21,6 +21,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { WalletButton } from "@/components/wallet-button";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { NotificationsSidebar } from "@/components/dashboard/notifications-sidebar";
+import { TradingAgentCopilot } from "@/components/dashboard/trading-agent-copilot";
 
 const navItems = [
   { label: "Dashboard", icon: IconLayoutGrid, href: "/dashboard" },
@@ -336,6 +337,9 @@ export default function DashboardLayout({
         isOpen={notificationsOpen}
         onClose={() => setNotificationsOpen(false)}
       />
+
+      {/* Live AI Trading Agent Copilot */}
+      <TradingAgentCopilot />
     </div>
   );
 }

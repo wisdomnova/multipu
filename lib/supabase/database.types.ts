@@ -345,6 +345,131 @@ export interface Database {
           }
         ];
       };
+      trading_agents: {
+        Row: {
+          id: string;
+          user_id: string | null;
+          wallet_address: string;
+          name: string;
+          description: string | null;
+          prompt: string;
+          mode: "paper" | "live";
+          status: "active" | "paused" | "completed" | "failed";
+          chain: string;
+          launchpads: string[];
+          strategy_config: Json;
+          budget_allocated: number;
+          budget_spent: number;
+          total_pnl_pct: number;
+          total_trades: number;
+          successful_trades: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id?: string | null;
+          wallet_address: string;
+          name: string;
+          description?: string | null;
+          prompt: string;
+          mode?: "paper" | "live";
+          status?: "active" | "paused" | "completed" | "failed";
+          chain?: string;
+          launchpads?: string[];
+          strategy_config?: Json;
+          budget_allocated?: number;
+          budget_spent?: number;
+          total_pnl_pct?: number;
+          total_trades?: number;
+          successful_trades?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          name?: string;
+          description?: string | null;
+          mode?: "paper" | "live";
+          status?: "active" | "paused" | "completed" | "failed";
+          chain?: string;
+          launchpads?: string[];
+          strategy_config?: Json;
+          budget_allocated?: number;
+          budget_spent?: number;
+          total_pnl_pct?: number;
+          total_trades?: number;
+          successful_trades?: number;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "trading_agents_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+      agent_trades: {
+        Row: {
+          id: string;
+          agent_id: string | null;
+          token_symbol: string;
+          token_mint: string | null;
+          action: string;
+          launchpad: string;
+          chain: string;
+          amount_in: number;
+          amount_out: number;
+          pnl_pct: number | null;
+          pnl_sol: number | null;
+          tx_signature: string | null;
+          mode: "paper" | "live";
+          execution_log: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          agent_id?: string | null;
+          token_symbol: string;
+          token_mint?: string | null;
+          action: string;
+          launchpad: string;
+          chain?: string;
+          amount_in: number;
+          amount_out: number;
+          pnl_pct?: number | null;
+          pnl_sol?: number | null;
+          tx_signature?: string | null;
+          mode?: "paper" | "live";
+          execution_log?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          token_symbol?: string;
+          token_mint?: string | null;
+          action?: string;
+          launchpad?: string;
+          chain?: string;
+          amount_in?: number;
+          amount_out?: number;
+          pnl_pct?: number | null;
+          pnl_sol?: number | null;
+          tx_signature?: string | null;
+          mode?: "paper" | "live";
+          execution_log?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "agent_trades_agent_id_fkey";
+            columns: ["agent_id"];
+            isOneToOne: false;
+            referencedRelation: "trading_agents";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
@@ -366,9 +491,14 @@ export type Launch = Database["public"]["Tables"]["launches"]["Row"];
 export type Earning = Database["public"]["Tables"]["earnings"]["Row"];
 export type DeveloperApiKey = Database["public"]["Tables"]["developer_api_keys"]["Row"];
 export type DeveloperWallet = Database["public"]["Tables"]["developer_wallets"]["Row"];
+export type DBTradingAgent = Database["public"]["Tables"]["trading_agents"]["Row"];
+export type DBAgentTrade = Database["public"]["Tables"]["agent_trades"]["Row"];
 
 export type TokenInsert = Database["public"]["Tables"]["tokens"]["Insert"];
 export type LaunchInsert = Database["public"]["Tables"]["launches"]["Insert"];
 export type EarningInsert = Database["public"]["Tables"]["earnings"]["Insert"];
 export type DeveloperApiKeyInsert = Database["public"]["Tables"]["developer_api_keys"]["Insert"];
 export type DeveloperWalletInsert = Database["public"]["Tables"]["developer_wallets"]["Insert"];
+export type DBTradingAgentInsert = Database["public"]["Tables"]["trading_agents"]["Insert"];
+export type DBAgentTradeInsert = Database["public"]["Tables"]["agent_trades"]["Insert"];
+
