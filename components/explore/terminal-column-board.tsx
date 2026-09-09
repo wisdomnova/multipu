@@ -2,7 +2,16 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { IconCopy, IconCheck, IconChevronLeft, IconChevronRight } from "@tabler/icons-react";
+import {
+  IconCopy,
+  IconCheck,
+  IconChevronLeft,
+  IconChevronRight,
+  IconWorld,
+  IconBrandX,
+  IconBrandTelegram,
+  IconChartCandle,
+} from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 
 export interface TerminalToken {
@@ -262,16 +271,17 @@ export function TerminalColumnBoard({
 
                     {/* Bottom Row: Social links + Actions */}
                     <div className="flex items-center justify-between pt-1 border-t border-border">
-                      {/* Socials */}
-                      <div className="flex items-center gap-2 text-[10px] font-mono text-text-muted">
+                      {/* Social & DEX Icons */}
+                      <div className="flex items-center gap-1 text-text-dim">
                         {t.socials.website && (
                           <a
                             href={t.socials.website}
                             target="_blank"
                             rel="noreferrer"
-                            className="hover:text-text-primary transition-colors"
+                            title="Website"
+                            className="p-1 hover:text-text-primary hover:bg-white/[0.05] rounded transition-colors"
                           >
-                            Web
+                            <IconWorld size={14} />
                           </a>
                         )}
                         {t.socials.twitter && (
@@ -279,9 +289,10 @@ export function TerminalColumnBoard({
                             href={t.socials.twitter}
                             target="_blank"
                             rel="noreferrer"
-                            className="hover:text-text-primary transition-colors"
+                            title="X (Twitter)"
+                            className="p-1 hover:text-text-primary hover:bg-white/[0.05] rounded transition-colors"
                           >
-                            X
+                            <IconBrandX size={14} />
                           </a>
                         )}
                         {t.socials.telegram && (
@@ -289,18 +300,20 @@ export function TerminalColumnBoard({
                             href={t.socials.telegram}
                             target="_blank"
                             rel="noreferrer"
-                            className="hover:text-text-primary transition-colors"
+                            title="Telegram"
+                            className="p-1 hover:text-text-primary hover:bg-white/[0.05] rounded transition-colors"
                           >
-                            TG
+                            <IconBrandTelegram size={14} />
                           </a>
                         )}
                         <a
                           href={`https://dexscreener.com/${item.network.toLowerCase()}/${item.id}`}
                           target="_blank"
                           rel="noreferrer"
-                          className="hover:text-text-primary transition-colors"
+                          title="DexScreener"
+                          className="p-1 hover:text-text-primary hover:bg-white/[0.05] rounded transition-colors"
                         >
-                          Dex
+                          <IconChartCandle size={14} />
                         </a>
                       </div>
 
