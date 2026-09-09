@@ -160,16 +160,8 @@ export default function LaunchesPage() {
           >
             {[
               { label: "Total Launches", value: launches.length.toString() },
-              {
-                label: "Live",
-                value: liveCount.toString(),
-                color: "text-success",
-              },
-              {
-                label: "Pending",
-                value: pendingCount.toString(),
-                color: "text-warning",
-              },
+              { label: "Live", value: liveCount.toString() },
+              { label: "Pending", value: pendingCount.toString() },
             ].map((stat) => (
               <motion.div
                 key={stat.label}
@@ -179,12 +171,7 @@ export default function LaunchesPage() {
                 <span className="font-mono text-[0.65rem] text-text-muted uppercase tracking-wider block mb-2">
                   {stat.label}
                 </span>
-                <span
-                  className={cn(
-                    "text-2xl font-bold font-mono",
-                    stat.color || "text-text-primary"
-                  )}
-                >
+                <span className="text-2xl font-bold font-mono text-text-primary">
                   {stat.value}
                 </span>
               </motion.div>
@@ -312,21 +299,13 @@ export default function LaunchesPage() {
 
           {/* Empty state */}
           {launches.length === 0 && (
-            <div className="border border-dashed border-border p-12 text-center">
-              <IconRocket size={32} className="text-text-dim mx-auto mb-4" />
-              <h3 className="text-base font-semibold text-text-primary mb-2">
+            <div className="border border-border p-12 text-center bg-white/[0.01]">
+              <h3 className="text-sm font-semibold text-text-primary mb-1">
                 No launches yet
               </h3>
-              <p className="text-sm text-text-secondary mb-6">
+              <p className="text-xs text-text-secondary font-mono">
                 Deploy a token and push it to a launchpad.
               </p>
-              <Link
-                href="/launch"
-                className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold bg-accent hover:bg-accent-hover text-white rounded-full transition-all"
-              >
-                <IconPlus size={16} />
-                Launch Token
-              </Link>
             </div>
           )}
         </>

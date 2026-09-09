@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
@@ -42,6 +43,7 @@ const stepsMeta: { id: Step; label: string; number: string }[] = [
 ];
 
 export default function LaunchPage() {
+  const router = useRouter();
   const { connection } = useConnection();
   const { publicKey, signTransaction, connected } = useWallet();
   const { session, evmAddress } = useAuth();
@@ -548,13 +550,19 @@ export default function LaunchPage() {
       {/* Nav bar */}
       <nav className="border-b border-border bg-[rgba(5,5,5,0.8)] backdrop-blur-xl sticky top-0 z-50">
         <div className="mx-auto max-w-[1000px] px-6 md:px-10 flex items-center justify-between h-16">
-          <Link
-            href="/"
-            className="flex items-center gap-2 text-text-secondary hover:text-text-primary transition-colors text-sm"
+          <button
+            onClick={() => {
+              if (typeof window !== "undefined" && window.history.length > 1) {
+                router.back();
+              } else {
+                router.push("/");
+              }
+            }}
+            className="flex items-center gap-2 text-text-secondary hover:text-text-primary transition-colors text-sm cursor-pointer"
           >
             <IconArrowLeft size={16} />
-            <span className="hidden sm:inline">Back to home</span>
-          </Link>
+            <span>Back</span>
+          </button>
           <div className="flex items-center gap-2.5">
             <div className="relative w-6 h-6 flex-shrink-0">
               <Image
