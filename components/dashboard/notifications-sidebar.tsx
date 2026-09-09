@@ -36,6 +36,8 @@ export function NotificationsSidebar({ isOpen, onClose }: NotificationsSidebarPr
   useEffect(() => {
     if (isOpen) {
       fetchNotifications();
+      const interval = setInterval(fetchNotifications, 8000);
+      return () => clearInterval(interval);
     }
   }, [isOpen]);
 
