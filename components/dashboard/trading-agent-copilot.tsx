@@ -13,6 +13,7 @@ import {
   IconCircleCheck,
   IconCircleCheckFilled,
   IconTerminal2,
+  IconChevronLeft,
 } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -257,7 +258,7 @@ export function TradingAgentCopilot() {
           <span className="text-white font-semibold">
             {isAgentRunning
               ? `Agent Active (${totalPnl >= 0 ? "+" : ""}${totalPnl}%)`
-              : "AI Copilot"}
+              : "Multipu AI"}
           </span>
         </button>
       </div>
@@ -273,17 +274,37 @@ export function TradingAgentCopilot() {
             className="fixed bottom-20 right-6 z-50 w-[420px] max-w-[calc(100vw-32px)] h-[580px] max-h-[calc(100vh-120px)] bg-[#0c0d12] border border-border rounded-xl shadow-2xl flex flex-col overflow-hidden font-sans"
           >
             {/* Header */}
-            <div className="px-4 py-3.5 border-b border-border flex items-center justify-between bg-[#101117]">
-              <div className="flex items-center gap-2">
-                <span
-                  className={cn(
-                    "w-2 h-2 rounded-full",
-                    isAgentRunning ? "bg-emerald-400" : "bg-text-dim"
-                  )}
-                />
-                <h3 className="text-xs font-semibold text-text-primary font-mono uppercase tracking-wider">
-                  Strategy Copilot
-                </h3>
+            <div className="px-4 py-3 border-b border-border flex items-center justify-between bg-[#101117]">
+              <div className="flex items-center gap-2.5">
+                {messages.length > 0 && (
+                  <button
+                    onClick={() => {
+                      setMessages([]);
+                      setActiveStrategy(null);
+                      setIsAgentRunning(false);
+                    }}
+                    className="p-1 -ml-1 text-text-muted hover:text-text-primary rounded transition-colors cursor-pointer"
+                    title="Back to start"
+                  >
+                    <IconChevronLeft size={16} />
+                  </button>
+                )}
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span
+                      className={cn(
+                        "w-2 h-2 rounded-full",
+                        isAgentRunning ? "bg-emerald-400" : "bg-text-dim"
+                      )}
+                    />
+                    <h3 className="text-xs font-semibold text-text-primary font-mono uppercase tracking-wider">
+                      Multipu AI
+                    </h3>
+                  </div>
+                  <span className="text-[10px] font-mono text-text-dim block leading-tight mt-0.5">
+                    Powered by KeeperHub MCP &amp; OlaXBT
+                  </span>
+                </div>
               </div>
 
               <div className="flex items-center gap-2">
