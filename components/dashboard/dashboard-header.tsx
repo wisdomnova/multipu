@@ -76,63 +76,62 @@ export function DashboardHeader({
   return (
     <>
       <header className="sticky top-0 z-30 w-full border-b border-border bg-background/95 backdrop-blur-md">
-        <div className="flex items-center justify-end w-full px-3 sm:px-6 py-2.5 sm:py-3.5 gap-2 sm:gap-3">
-
-          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-            {/* Supported Chain Balances - Responsive & Scrollable on mobile */}
-            <div className="flex items-center gap-1 sm:gap-2 bg-elevated/80 border border-border px-2 sm:px-4 py-1 sm:py-2 rounded-sm overflow-x-auto scrollbar-none max-w-[calc(100vw-130px)] sm:max-w-none">
-              {chains.map((chain, index) => {
-                const hasBalance = chain.data.balance > 0;
-                return (
-                  <div
-                    key={chain.key}
+        <div className="flex items-center justify-between w-full px-3 sm:px-6 py-2.5 sm:py-3.5 gap-2 sm:gap-3">
+          {/* Supported Chain Balances - On the left */}
+          <div className="flex items-center gap-1 sm:gap-2 bg-elevated/80 border border-border px-2 sm:px-4 py-1 sm:py-2 rounded-sm overflow-x-auto scrollbar-none max-w-[calc(100vw-130px)] sm:max-w-none">
+            {chains.map((chain, index) => {
+              const hasBalance = chain.data.balance > 0;
+              return (
+                <div
+                  key={chain.key}
+                  className={cn(
+                    "flex items-baseline gap-1.5 sm:gap-2 px-1.5 sm:px-3 py-0.5 font-mono whitespace-nowrap transition-colors",
+                    index > 0 && "border-l border-border pl-2 sm:pl-4",
+                    hasBalance ? "text-text-primary" : "text-text-muted"
+                  )}
+                  title={`${chain.label}: ${chain.data.balance} ${chain.symbol}`}
+                >
+                  <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-text-dim">
+                    {chain.symbol}
+                  </span>
+                  <span
                     className={cn(
-                      "flex items-baseline gap-1.5 sm:gap-2 px-1.5 sm:px-3 py-0.5 font-mono whitespace-nowrap transition-colors",
-                      index > 0 && "border-l border-border pl-2 sm:pl-4",
-                      hasBalance ? "text-text-primary" : "text-text-muted"
+                      "text-xs sm:text-base font-bold font-mono tracking-tight",
+                      hasBalance ? "text-accent" : "text-text-secondary"
                     )}
-                    title={`${chain.label}: ${chain.data.balance} ${chain.symbol}`}
                   >
-                    <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-text-dim">
-                      {chain.symbol}
-                    </span>
-                    <span
-                      className={cn(
-                        "text-xs sm:text-base font-bold font-mono tracking-tight",
-                        hasBalance ? "text-accent" : "text-text-secondary"
-                      )}
-                    >
-                      {formatBalance(chain.data.balance)}
-                    </span>
-                  </div>
-                );
-              })}
+                    {formatBalance(chain.data.balance)}
+                  </span>
+                </div>
+              );
+            })}
 
-              {/* Refresh balances button */}
-              <button
-                onClick={refresh}
-                disabled={isLoading}
-                className="p-1 sm:p-1.5 text-text-dim hover:text-text-primary hover:bg-white/[0.04] rounded transition-colors disabled:opacity-50 ml-1 sm:ml-2 flex-shrink-0 cursor-pointer"
-                title="Refresh balances"
-                aria-label="Refresh balances"
-              >
-                <IconRefresh
-                  size={14}
-                  className={cn(isLoading && "animate-spin text-accent")}
-                />
-              </button>
-            </div>
+            {/* Refresh balances button */}
+            <button
+              onClick={refresh}
+              disabled={isLoading}
+              className="p-1 sm:p-1.5 text-text-dim hover:text-text-primary hover:bg-white/[0.04] rounded transition-colors disabled:opacity-50 ml-1 sm:ml-2 flex-shrink-0 cursor-pointer"
+              title="Refresh balances"
+              aria-label="Refresh balances"
+            >
+              <IconRefresh
+                size={14}
+                className={cn(isLoading && "animate-spin text-accent")}
+              />
+            </button>
+          </div>
 
-            {/* Activity Stream Notification Button */}
+          {/* Activity Stream Notification Button - On the right */}
+          <div className="flex items-center gap-2 flex-shrink-0">
             <button
               onClick={handleOpenNotifications}
-              className="relative p-1.5 sm:p-2 text-text-dim hover:text-text-primary hover:bg-white/[0.04] rounded transition-colors flex-shrink-0 cursor-pointer"
+              className="relative p-2 text-text-dim hover:text-text-primary hover:bg-white/[0.05] rounded-sm transition-colors cursor-pointer"
               title="Activity Stream & Notifications"
               aria-label="Activity Stream & Notifications"
             >
-              <IconBell size={18} />
+              <IconBell size={21} />
               {hasUnread && (
-                <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-accent animate-pulse" />
+                <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-accent animate-pulse" />
               )}
             </button>
           </div>

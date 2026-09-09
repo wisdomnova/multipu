@@ -154,8 +154,7 @@ export default function EarningsPage() {
                 variants={fadeUp}
                 className="bg-background p-5 md:p-6 hover:bg-elevated transition-colors"
               >
-                <div className="flex items-center gap-2 mb-3">
-                  <IconTrendingUp size={14} className="text-text-muted" />
+                <div className="mb-3">
                   <span className="font-mono text-[0.65rem] text-text-muted uppercase tracking-wider">
                     {stat.label}
                   </span>
