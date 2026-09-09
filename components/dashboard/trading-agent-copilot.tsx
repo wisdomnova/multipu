@@ -245,19 +245,16 @@ export function TradingAgentCopilot() {
         <button
           onClick={() => setIsOpen(!isOpen)}
           className={cn(
-            "flex items-center gap-2.5 px-4 py-2.5 rounded-full text-xs font-mono font-medium transition-all shadow-lg border cursor-pointer",
-            isAgentRunning
-              ? "bg-[#141816] border-emerald-500/40 text-emerald-300 hover:bg-[#1a201d]"
-              : "bg-[#121318] border-border text-text-primary hover:bg-[#181920]"
+            "flex items-center gap-2.5 px-4 py-2.5 rounded-full text-xs font-mono font-medium transition-all shadow-lg border border-purple-400/30 cursor-pointer text-white bg-purple-600 hover:bg-purple-700 active:scale-95"
           )}
         >
           <span
             className={cn(
               "w-2 h-2 rounded-full",
-              isAgentRunning ? "bg-emerald-400 animate-pulse" : "bg-text-muted"
+              isAgentRunning ? "bg-emerald-300 animate-pulse" : "bg-white/80"
             )}
           />
-          <span>
+          <span className="text-white font-semibold">
             {isAgentRunning
               ? `Agent Active (${totalPnl >= 0 ? "+" : ""}${totalPnl}%)`
               : "AI Copilot"}
