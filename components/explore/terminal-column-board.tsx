@@ -166,7 +166,8 @@ export function TerminalColumnBoard({
               {col.tokens.map((item) => {
                 const t = item.tokens;
                 const isCopied = copiedId === item.id;
-                const gas = item.network.toLowerCase() === "bsc" ? "BNB" : "SOL";
+                const net = item.network?.toLowerCase() || "";
+                const gas = net === "bsc" ? "BNB" : net === "robinhood" ? "ROBIN" : "SOL";
 
                 return (
                   <div

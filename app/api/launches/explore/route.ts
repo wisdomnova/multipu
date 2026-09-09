@@ -14,6 +14,137 @@ function formatTimeAgo(timestampMs: number): string {
   return `${diffDays}d`;
 }
 
+// Known curated Robinhood Chain (Sherwood / Pons / DEX) active meme tokens
+const ROBINHOOD_MEME_TOKENS = [
+  {
+    address: "0x80bAa4b3bfAC6f4978700dF824B1B3d98e889136",
+    name: "Crumbs",
+    symbol: "CRUMBS",
+    dexId: "sherwood",
+    volume24h: 18460000,
+    marketCap: 310000,
+    holders: 24314,
+    website: "https://crumbs.family/",
+    twitter: "https://x.com/crumbsfamily",
+    telegram: "https://t.me/crumbsfamily",
+  },
+  {
+    address: "0xb97D9e5Ad6244d27588Fe0A624A8C78E512934eE",
+    name: "RECEIPT",
+    symbol: "RECEIPT",
+    dexId: "sherwood",
+    volume24h: 4140000,
+    marketCap: 1740000,
+    holders: 7995,
+    website: "https://receipt.family/",
+    twitter: "https://x.com/receiptfamily",
+  },
+  {
+    address: "0xaEE120c50a0A212b071D71483aea4B4a8e9179F3",
+    name: "Be like Jacob",
+    symbol: "Jacob",
+    dexId: "pons",
+    volume24h: 2160000,
+    marketCap: 2700,
+    holders: 18136,
+    website: "https://belikejacob.lol/",
+    twitter: "https://x.com/BelikeJacobRH",
+    telegram: "https://t.me/BelikeJacobRH",
+  },
+  {
+    address: "0xcEcF8c51DED79d15EB14a08b704D8Fd265fea700",
+    name: "CLAWDHOOD",
+    symbol: "CLAWDHOOD",
+    dexId: "sherwood",
+    volume24h: 1980000,
+    marketCap: 3000,
+    holders: 9543,
+    website: "https://www.clawdhood.site/",
+    twitter: "https://x.com/CLAWDHOODx",
+  },
+  {
+    address: "0x97C59c0a7eAe72592EE5Ae13fd2057C7BAd7F0D9",
+    name: "Golden Inu",
+    symbol: "GI",
+    dexId: "sherwood",
+    volume24h: 1410000,
+    marketCap: 6100,
+    holders: 4924,
+    website: "https://goldeninu.io/",
+    twitter: "https://x.com/goldeninuio",
+    telegram: "https://t.me/goldeninurobin",
+  },
+  {
+    address: "0x32B5DDF44A732C52c97F1542077954Ba79Fd3bff",
+    name: "Shitapple",
+    symbol: "SHIT",
+    dexId: "pons",
+    volume24h: 1320000,
+    marketCap: 166900,
+    holders: 842,
+    website: "http://shitapple.site/",
+    twitter: "http://x.com/shitapple1g",
+    telegram: "https://t.me/shitapple",
+  },
+  {
+    address: "0x25cd2901B6d16cB33185E7667F984dbc35BcF354",
+    name: "Artificial Shiba",
+    symbol: "ASHIBA",
+    dexId: "sherwood",
+    volume24h: 1150000,
+    marketCap: 216700,
+    holders: 4427,
+    website: "https://artificialshiba.com/",
+    twitter: "https://x.com/ASHIBA_COIN",
+    telegram: "https://t.me/ArtificialShiba_Portal",
+  },
+  {
+    address: "0x6a50F139F3eD4C9c7bDa0D067c5Ed09De1EEBbeA",
+    name: "CLAWNCH",
+    symbol: "CLAWNCH",
+    dexId: "sherwood",
+    volume24h: 973500,
+    marketCap: 336600,
+    holders: 3913,
+    website: "https://clawn.ch/",
+    twitter: "https://x.com/Clawnch_Bot",
+  },
+  {
+    address: "0x792ff19204EF6C756b4D8Efe2441D050F5eCe818",
+    name: "Sir Bag",
+    symbol: "BAG",
+    dexId: "pons",
+    volume24h: 800900,
+    marketCap: 587300,
+    holders: 2248,
+    website: "https://sirbag.com/",
+    twitter: "https://x.com/Sirbagonhood",
+    telegram: "https://t.me/SirBagonHood",
+  },
+  {
+    address: "0x83D38b519308FE02158F043952B58A6B16A4a30E",
+    name: "REEL",
+    symbol: "REEL",
+    dexId: "sherwood",
+    volume24h: 786200,
+    marketCap: 10100,
+    holders: 4561,
+    website: "https://www.reel.tips/",
+    twitter: "https://x.com/reel_tips",
+  },
+  {
+    address: "0x41bF9BfA1BB13758BdeF159486c218bcAbF2B79c",
+    name: "Robinary",
+    symbol: "ROBINARY",
+    dexId: "pons",
+    volume24h: 6000,
+    marketCap: 4800,
+    holders: 36,
+    website: "https://robinary.xyz/",
+    twitter: "https://x.com/robinary_xyz",
+  },
+];
+
 export async function GET(request: Request) {
   const ip = getClientIp(request);
   if (!apiLimiter.check(ip)) {
@@ -22,7 +153,7 @@ export async function GET(request: Request) {
 
   try {
     const { searchParams } = new URL(request.url);
-    const query = (searchParams.get("q") || "").trim();
+    const query = (searchParams.get("q") || "").trim().toLowerCase();
     const chainFilter = (searchParams.get("chain") || "all").toLowerCase();
     const categoryFilter = (searchParams.get("category") || "all").toLowerCase();
     const page = Math.max(1, Number(searchParams.get("page") || 1));
@@ -53,10 +184,14 @@ export async function GET(request: Request) {
       const createdAtMs = l.launched_at ? new Date(l.launched_at).getTime() : Date.now() - 1800000;
       const progressVal = Math.min(100, Math.max(10, Math.floor((vol / 500) * 100)));
 
+      let normChain = "Solana";
+      if (l.network?.toLowerCase().includes("bsc")) normChain = "BSC";
+      else if (l.network?.toLowerCase().includes("robinhood")) normChain = "Robinhood";
+
       return {
-        id: l.id,
-        launchpad: l.launchpad || "multipu",
-        network: l.network || "Solana",
+        id: l.tokens.mint_address || l.pool_address || l.id,
+        launchpad: l.launchpad || "pumpfun",
+        network: normChain,
         pool_address: l.pool_address,
         volume_24h: vol,
         market_cap: vol * 12.5 || 50000,
@@ -93,13 +228,65 @@ export async function GET(request: Request) {
       };
     });
 
-    // 2. Fetch wide public meme pools across multiple parallel endpoints
+    // 2. Fetch wide public meme pools across Solana, BNB, and Robinhood
     const publicLaunches: any[] = [];
     const profilesMap = new Map<string, any>();
 
+    // Add Robinhood Chain pairs
+    for (const rh of ROBINHOOD_MEME_TOKENS) {
+      if (
+        !query ||
+        rh.name.toLowerCase().includes(query) ||
+        rh.symbol.toLowerCase().includes(query) ||
+        rh.address.toLowerCase().includes(query) ||
+        query === "robinhood" ||
+        query === "sherwood" ||
+        query === "pons"
+      ) {
+        publicLaunches.push({
+          id: rh.address,
+          launchpad: rh.dexId,
+          network: "Robinhood",
+          pool_address: rh.address,
+          volume_24h: rh.volume24h,
+          market_cap: rh.marketCap,
+          fdv: rh.marketCap,
+          price_usd: rh.marketCap / 1000000000,
+          price_change_24h: 12.5,
+          price_change_1h: 3.2,
+          price_change_5m: 0.8,
+          txns_24h: { buys: 120, sells: 45 },
+          created_at: new Date(Date.now() - 3600000 * 12).toISOString(),
+          time_ago: "12h",
+          category: rh.volume24h > 1000000 ? "migrated" : rh.volume24h > 50000 ? "final_stretch" : "new",
+          progress: 100,
+          dev_holding_pct: 0.4,
+          top_10_pct: 15.0,
+          snipers_pct: 6.0,
+          holders_count: rh.holders,
+          tokens: {
+            id: rh.address,
+            name: rh.name,
+            symbol: rh.symbol,
+            mint_address: rh.address,
+            supply: "1000000000",
+            decimals: 18,
+            image_url: `https://api.dicebear.com/7.x/identicon/svg?seed=${rh.symbol}`,
+            header_url: null,
+            description: `${rh.name} ($${rh.symbol}) on Robinhood Chain via ${rh.dexId.toUpperCase()}`,
+            socials: {
+              website: rh.website || "",
+              twitter: rh.twitter || "",
+              telegram: rh.telegram || "",
+            },
+          },
+        });
+      }
+    }
+
     try {
       if (query) {
-        // Direct search query
+        // Search across DexScreener (queries all chains including solana, bsc, robinhood)
         const searchRes = await fetch(
           `https://api.dexscreener.com/latest/dex/search?q=${encodeURIComponent(query)}`,
           { signal: AbortSignal.timeout(4500) }
@@ -112,8 +299,10 @@ export async function GET(request: Request) {
             const tokenAddr = p.baseToken?.address;
             if (!tokenAddr) continue;
 
-            const normalizedNetwork =
-              chain === "solana" ? "Solana" : chain === "bsc" ? "BSC" : chain === "robinhood" ? "Robinhood" : chain === "base" ? "Base" : "Solana";
+            let normalizedNetwork = "Solana";
+            if (chain === "bsc") normalizedNetwork = "BSC";
+            else if (chain === "robinhood" || p.dexId === "sherwood" || p.dexId === "pons") normalizedNetwork = "Robinhood";
+            else if (chain === "base") normalizedNetwork = "Base";
 
             const pCreatedAt = p.pairCreatedAt ? Number(p.pairCreatedAt) : Date.now() - 3600000;
             const progressVal = Math.min(100, Math.max(10, Math.floor(((p.volume?.h24 || 1000) / 50000) * 100)));
@@ -152,7 +341,7 @@ export async function GET(request: Request) {
                 symbol: p.baseToken.symbol,
                 mint_address: tokenAddr,
                 supply: "1000000000",
-                decimals: 9,
+                decimals: chain === "solana" ? 9 : 18,
                 image_url:
                   p.info?.imageUrl ||
                   `https://api.dicebear.com/7.x/identicon/svg?seed=${p.baseToken.symbol}`,
@@ -168,8 +357,8 @@ export async function GET(request: Request) {
           }
         }
       } else {
-        // Fetch wide pool across multiple free endpoints
-        const [topBoostsRes, latestBoostsRes, profilesRes, geckoSolTrending, geckoSolNew] =
+        // Fetch wide pool across multiple free endpoints for Solana and BSC
+        const [topBoostsRes, latestBoostsRes, profilesRes, geckoSolTrending, geckoBscTrending] =
           await Promise.allSettled([
             fetch("https://api.dexscreener.com/token-boosts/top/v1", { signal: AbortSignal.timeout(4000) }).then((r) => r.json()),
             fetch("https://api.dexscreener.com/token-boosts/latest/v1", { signal: AbortSignal.timeout(4000) }).then((r) => r.json()),
@@ -178,7 +367,7 @@ export async function GET(request: Request) {
               headers: { Accept: "application/json" },
               signal: AbortSignal.timeout(4000),
             }).then((r) => r.json()),
-            fetch("https://api.geckoterminal.com/api/v2/networks/solana/new_pools?page=1", {
+            fetch("https://api.geckoterminal.com/api/v2/networks/bsc/trending_pools?page=1", {
               headers: { Accept: "application/json" },
               signal: AbortSignal.timeout(4000),
             }).then((r) => r.json()),
@@ -202,8 +391,8 @@ export async function GET(request: Request) {
         if (geckoSolTrending.status === "fulfilled" && Array.isArray(geckoSolTrending.value?.data)) {
           geckoSolTrending.value.data.forEach((p: any) => p.attributes?.address && addressSet.add(p.attributes.address));
         }
-        if (geckoSolNew.status === "fulfilled" && Array.isArray(geckoSolNew.value?.data)) {
-          geckoSolNew.value.data.forEach((p: any) => p.attributes?.address && addressSet.add(p.attributes.address));
+        if (geckoBscTrending.status === "fulfilled" && Array.isArray(geckoBscTrending.value?.data)) {
+          geckoBscTrending.value.data.forEach((p: any) => p.attributes?.address && addressSet.add(p.attributes.address));
         }
 
         const allAddresses = Array.from(addressSet).slice(0, 90);
@@ -231,8 +420,10 @@ export async function GET(request: Request) {
 
               const profileMeta = profilesMap.get(tokenAddr.toLowerCase()) || {};
 
-              const normalizedNetwork =
-                chain === "solana" ? "Solana" : chain === "bsc" ? "BSC" : chain === "robinhood" ? "Robinhood" : chain === "base" ? "Base" : "Solana";
+              let normalizedNetwork = "Solana";
+              if (chain === "bsc") normalizedNetwork = "BSC";
+              else if (chain === "robinhood" || p.dexId === "sherwood" || p.dexId === "pons") normalizedNetwork = "Robinhood";
+              else if (chain === "base") normalizedNetwork = "Base";
 
               const pCreatedAt = p.pairCreatedAt ? Number(p.pairCreatedAt) : Date.now() - 3600000;
               const progressVal = Math.min(100, Math.max(15, Math.floor(((p.volume?.h24 || 5000) / 60000) * 100)));
@@ -279,7 +470,7 @@ export async function GET(request: Request) {
                   symbol: p.baseToken.symbol,
                   mint_address: tokenAddr,
                   supply: "1000000000",
-                  decimals: 9,
+                  decimals: chain === "solana" ? 9 : 18,
                   image_url: imgUrl,
                   header_url: p.info?.header || profileMeta.header || null,
                   description: p.info?.description || profileMeta.description || "",
@@ -333,7 +524,7 @@ export async function GET(request: Request) {
       (l) => l.category === "final_stretch" || (l.progress >= 50 && l.category !== "migrated")
     );
     let migratedTokens = deduplicated.filter(
-      (l) => l.category === "migrated" || l.launchpad === "raydium" || l.launchpad === "uniswap" || l.launchpad === "pancakeswap"
+      (l) => l.category === "migrated" || l.launchpad === "raydium" || l.launchpad === "uniswap" || l.launchpad === "pancakeswap" || l.launchpad === "sherwood"
     );
     let newPairsTokens = deduplicated.filter(
       (l) => l.category === "new" || l.progress < 50
