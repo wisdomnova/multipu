@@ -1,29 +1,28 @@
-import { Nav } from "@/components/nav";
-import { Hero } from "@/components/landing/hero";
-import { Features } from "@/components/landing/features";
-import { TerminalShowcase } from "@/components/landing/terminal-showcase";
-import { AgentMcpEngine } from "@/components/landing/agent-mcp-engine";
-import { StrategyIntelligence } from "@/components/landing/strategy-intelligence";
-import { HowItWorks } from "@/components/landing/how-it-works";
-import { Launchpads } from "@/components/landing/launchpads";
-import { CTA } from "@/components/landing/cta";
-import { Footer } from "@/components/landing/footer";
+import { MinimalNav } from "@/components/landing/minimal-nav";
+import { HeroStatus } from "@/components/landing/hero-status";
+import { InlineEditorial } from "@/components/landing/inline-editorial";
+import { BauhausShowcase } from "@/components/landing/bauhaus-showcase";
+import { LaunchImpact } from "@/components/landing/launch-impact";
+import { MinimalFooter } from "@/components/landing/minimal-footer";
 
 export default function Home() {
   return (
-    <>
-      <Nav />
+    <div className="min-h-screen bg-black text-white selection:bg-accent selection:text-white">
+      <MinimalNav />
       <main className="flex-1">
-        <Hero />
-        <Features />
-        <TerminalShowcase />
-        <AgentMcpEngine />
-        <StrategyIntelligence />
-        <HowItWorks />
-        <Launchpads />
-        <CTA />
+        {/* Screenshot 1: Editorial typography, custom cursor SVG, proof stats & squiggle */}
+        <HeroStatus />
+
+        {/* Screenshot 2: Headline with inline graphic tags & 3-card monitoring/AI showcase */}
+        <InlineEditorial />
+
+        {/* Screenshot 3: Dark canvas, Bauhaus abstract vector composition & 2x2 colored tile grid */}
+        <BauhausShowcase />
+
+        {/* Screenshots 4 & 5: Split headline, dark token constellation & lavender metrics card with partner strip */}
+        <LaunchImpact />
       </main>
-      <Footer />
-    </>
+      <MinimalFooter />
+    </div>
   );
 }
