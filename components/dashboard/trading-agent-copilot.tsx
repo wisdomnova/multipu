@@ -10,7 +10,6 @@ import {
   IconPlayerPlay,
   IconPlayerStop,
   IconSparkles,
-  IconCircleCheck,
   IconCircleCheckFilled,
   IconTerminal2,
   IconChevronLeft,
@@ -98,33 +97,25 @@ export function TradingAgentCopilot() {
         newLog = {
           time: now,
           type: "buy",
-          text: `BUY executed: ${activeStrategy.rules.tradeAmount} ${activeStrategy.rules.chain.toUpperCase() === "BSC" ? "BNB" : "SOL"} on ${randomToken} via private mempool shield.`,
+          text: `Triggered buy of ${activeStrategy.rules.tradeAmount} ${activeStrategy.rules.chain.toUpperCase() === "BSC" ? "BNB" : "SOL"} on ${randomToken}.`,
         };
       } else {
-        const isProfit = Math.random() > 0.3;
-        const pnl = isProfit
-          ? +(activeStrategy.rules.takeProfitPct)
-          : -(activeStrategy.rules.stopLossPct);
-
-        setTotalPnl((prev) => +(prev + (pnl > 0 ? pnl * 0.05 : pnl * 0.02)).toFixed(2));
-
+        const pnlIncrement = parseFloat((Math.random() * 4 - 0.5).toFixed(1));
+        setTotalPnl((prev) => parseFloat((prev + pnlIncrement).toFixed(1)));
         newLog = {
           time: now,
           type: "sell",
-          text: `SOLD ${randomToken} (${isProfit ? "Take Profit hit" : "Stop Loss executed"}: ${pnl > 0 ? "+" : ""}${pnl}%).`,
+          text: `Take profit hit on ${randomToken}: +${(pnlIncrement * 12).toFixed(1)}% realized.`,
         };
       }
 
       setMessages((prev) => {
-        const lastMsg = prev[prev.length - 1];
-        if (lastMsg && lastMsg.sender === "agent" && lastMsg.telemetryLogs) {
-          return [
-            ...prev.slice(0, -1),
-            {
-              ...lastMsg,
-              telemetryLogs: [...lastMsg.telemetryLogs.slice(-20), newLog],
-            },
-          ];
+        const lastIdx = prev.length - 1;
+        if (lastIdx < 0) return prev;
+        const lastMsg = { ...prev[lastIdx] };
+        if (lastMsg.sender === "agent") {
+          lastMsg.telemetryLogs = [...(lastMsg.telemetryLogs || []), newLog];
+          return [...prev.slice(0, lastIdx), lastMsg];
         }
         return prev;
       });
@@ -199,63 +190,70 @@ export function TradingAgentCopilot() {
   // Deploy agent
   const handleDeploy = async (strategy: ParsedStrategy, mode: "paper" | "live") => {
     setAgentMode(mode);
-    setIsAgentRunning(true);
-    setActiveStrategy(strategy);
+    setIsLoading(true);
+    setLoadingStatus(`Deploying ${mode.toUpperCase()} trading agent...`);
 
     try {
-      await fetch("/api/agents", {
+      const res = await fetch("/api/agents/execute", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: strategy.name,
-          description: strategy.summary,
-          prompt: strategy.name,
+          rules: strategy.rules,
           mode,
-          chain: strategy.rules.chain,
-          launchpads: strategy.rules.launchpads,
-          strategyConfig: strategy.rules,
-          budgetAllocated: strategy.rules.tradeAmount * 5,
         }),
       });
-    } catch {
-      // Ignored
-    }
 
-    const now = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
-    const liveMessage: Message = {
-      id: Math.random().toString(),
-      sender: "agent",
-      text: `Strategy deployed in ${mode.toUpperCase()} mode. Active scanning initiated via KeeperHub private mempool.`,
-      telemetryLogs: [
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to deploy agent");
+
+      setIsAgentRunning(true);
+      toast.success(
+        mode === "live"
+          ? "Live trading agent deployed and monitoring liquidity"
+          : "Paper trading simulation initialized"
+      );
+
+      setMessages((prev) => [
+        ...prev,
         {
-          time: now,
-          type: "info",
-          text: `Strategy initialized. Monitoring ${strategy.rules.chain.toUpperCase()} pairs.`,
+          id: Math.random().toString(),
+          sender: "agent",
+          text: `Agent running in ${mode.toUpperCase()} mode with private mempool protection. Monitoring bonding curve activity on ${strategy.rules.launchpads.join(", ")}.`,
+          status: "active",
+          telemetryLogs: [
+            {
+              time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+              type: "info",
+              text: `Agent daemon spawned. Strategy ID: ${data.session?.id || "local"}`,
+            },
+          ],
         },
-      ],
-    };
-
-    setMessages((prev) => [...prev, liveMessage]);
-    toast.success(`Agent active in ${mode} mode`);
+      ]);
+    } catch (err: any) {
+      toast.error(err.message || "Failed to launch agent");
+    } finally {
+      setIsLoading(false);
+      setLoadingStatus("");
+    }
   };
 
   return (
     <>
-      {/* Floating Trigger Button */}
+      {/* Floating Trigger Button - Matte Dark Rounded Pill */}
       <div className="fixed bottom-6 right-6 z-40">
         <button
           onClick={() => setIsOpen(!isOpen)}
           className={cn(
-            "flex items-center gap-2.5 px-4 py-2.5 rounded-full text-xs font-mono font-medium transition-all shadow-lg border border-purple-400/30 cursor-pointer text-white bg-purple-600 hover:bg-purple-700 active:scale-95"
+            "flex items-center gap-2.5 px-4 py-3 rounded-full text-xs font-sans font-semibold transition-all shadow-2xl border border-white/[0.08] hover:border-white/20 cursor-pointer text-white bg-[#181818] hover:bg-[#202020] active:scale-95 backdrop-blur-md"
           )}
         >
           <span
             className={cn(
               "w-2 h-2 rounded-full",
-              isAgentRunning ? "bg-emerald-300 animate-pulse" : "bg-white/80"
+              isAgentRunning ? "bg-emerald-400 animate-pulse" : "bg-emerald-400"
             )}
           />
-          <span className="text-white font-semibold">
+          <span className="text-white">
             {isAgentRunning
               ? `Agent Active (${totalPnl >= 0 ? "+" : ""}${totalPnl}%)`
               : "Multipu AI"}
@@ -271,11 +269,11 @@ export function TradingAgentCopilot() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 12, scale: 0.98 }}
             transition={{ duration: 0.15 }}
-            className="fixed bottom-20 right-6 z-50 w-[420px] max-w-[calc(100vw-32px)] h-[580px] max-h-[calc(100vh-120px)] bg-[#0c0d12] border border-border rounded-xl shadow-2xl flex flex-col overflow-hidden font-sans"
+            className="fixed bottom-20 right-6 z-50 w-[440px] max-w-[calc(100vw-32px)] h-[600px] max-h-[calc(100vh-120px)] bg-[#181818] border border-white/[0.08] rounded-2xl shadow-2xl flex flex-col overflow-hidden font-sans"
           >
             {/* Header */}
-            <div className="px-4 py-3 border-b border-border flex items-center justify-between bg-[#101117]">
-              <div className="flex items-center gap-2.5">
+            <div className="px-5 py-4 border-b border-white/[0.04] flex items-center justify-between bg-[#141414]">
+              <div className="flex items-center gap-3">
                 {messages.length > 0 && (
                   <button
                     onClick={() => {
@@ -283,7 +281,7 @@ export function TradingAgentCopilot() {
                       setActiveStrategy(null);
                       setIsAgentRunning(false);
                     }}
-                    className="p-1 -ml-1 text-text-muted hover:text-text-primary rounded transition-colors cursor-pointer"
+                    className="p-1.5 -ml-1 text-neutral-400 hover:text-white rounded-lg hover:bg-white/[0.05] transition-colors cursor-pointer"
                     title="Back to start"
                   >
                     <IconChevronLeft size={16} />
@@ -294,15 +292,15 @@ export function TradingAgentCopilot() {
                     <span
                       className={cn(
                         "w-2 h-2 rounded-full",
-                        isAgentRunning ? "bg-emerald-400" : "bg-text-dim"
+                        isAgentRunning ? "bg-emerald-400 animate-pulse" : "bg-emerald-400"
                       )}
                     />
-                    <h3 className="text-xs font-semibold text-text-primary font-mono uppercase tracking-wider">
-                      Multipu AI
+                    <h3 className="text-xs font-semibold text-white font-sans">
+                      Multipu AI Copilot
                     </h3>
                   </div>
-                  <span className="text-[10px] font-mono text-text-dim block leading-tight mt-0.5">
-                    Powered by KeeperHub MCP &amp; OlaXBT
+                  <span className="text-[10px] font-mono text-neutral-400 block leading-tight mt-0.5">
+                    Autonomous Execution &amp; OlaXBT Telemetry
                   </span>
                 </div>
               </div>
@@ -314,43 +312,43 @@ export function TradingAgentCopilot() {
                       setIsAgentRunning(false);
                       toast.info("Agent execution stopped");
                     }}
-                    className="text-[11px] font-mono text-rose-400 hover:text-rose-300 px-2 py-0.5 rounded border border-rose-500/20 bg-rose-500/5 cursor-pointer"
+                    className="text-[11px] font-mono text-red-400 hover:text-red-300 px-2.5 py-1 rounded-full border border-red-500/20 bg-red-500/10 cursor-pointer"
                   >
                     Stop Agent
                   </button>
                 )}
                 <button
                   onClick={() => setIsOpen(false)}
-                  className="p-1 text-text-muted hover:text-text-primary transition-colors cursor-pointer rounded"
+                  className="p-1.5 text-neutral-400 hover:text-white rounded-lg hover:bg-white/[0.05] transition-colors cursor-pointer"
                 >
-                  <IconX size={15} />
+                  <IconX size={16} />
                 </button>
               </div>
             </div>
 
             {/* Conversation Area */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            <div className="flex-1 overflow-y-auto p-5 space-y-4">
               {messages.length === 0 && (
-                <div className="space-y-4 pt-2">
-                  <div className="text-xs text-text-secondary leading-relaxed font-sans">
-                    Describe your trading strategy in plain text to compile rules, run pre-flight backtests, and deploy on-chain.
-                  </div>
+                <div className="space-y-4 pt-1">
+                  <p className="text-xs text-neutral-400 leading-relaxed font-sans">
+                    Describe your trading strategy in plain text to compile rules, run pre-flight backtests, and deploy autonomous execution.
+                  </p>
 
-                  <div className="space-y-1.5">
-                    <span className="text-[10px] font-mono uppercase tracking-wider text-text-dim block">
+                  <div className="space-y-2">
+                    <span className="text-[11px] font-sans font-medium uppercase tracking-wider text-neutral-400 block">
                       Quick Starters
                     </span>
-                    <div className="grid grid-cols-1 gap-1.5">
+                    <div className="grid grid-cols-1 gap-2">
                       {STARTER_PROMPTS.map((item) => (
                         <button
                           key={item.label}
                           onClick={() => handleSubmit(item.prompt)}
-                          className="w-full text-left px-3 py-2 rounded-lg bg-white/[0.02] hover:bg-white/[0.05] border border-border/60 transition-colors cursor-pointer text-xs group"
+                          className="w-full text-left p-3 rounded-xl bg-[#141414] hover:bg-[#161616] border border-white/[0.04] hover:border-white/[0.08] transition-all cursor-pointer text-xs group"
                         >
-                          <div className="font-medium text-text-primary group-hover:text-accent font-sans">
+                          <div className="font-semibold text-white font-sans">
                             {item.label}
                           </div>
-                          <div className="text-[11px] text-text-dim font-mono truncate mt-0.5">
+                          <div className="text-[11px] text-neutral-400 font-sans truncate mt-0.5">
                             {item.prompt}
                           </div>
                         </button>
@@ -366,7 +364,7 @@ export function TradingAgentCopilot() {
                   {/* User Message */}
                   {msg.sender === "user" && (
                     <div className="flex justify-end">
-                      <div className="max-w-[85%] px-3.5 py-2.5 rounded-lg bg-[#1a1b24] border border-border text-xs text-text-primary font-sans leading-relaxed">
+                      <div className="max-w-[85%] px-4 py-3 rounded-2xl bg-[#141414] border border-white/[0.08] text-xs text-white font-sans leading-relaxed">
                         {msg.text}
                       </div>
                     </div>
@@ -375,7 +373,7 @@ export function TradingAgentCopilot() {
                   {/* Agent Response Text */}
                   {msg.sender === "agent" && msg.text && (
                     <div className="flex justify-start">
-                      <div className="max-w-[90%] px-3.5 py-2.5 rounded-lg bg-white/[0.02] border border-border text-xs text-text-secondary font-sans leading-relaxed">
+                      <div className="max-w-[90%] px-4 py-3 rounded-2xl bg-[#141414] border border-white/[0.04] text-xs text-neutral-300 font-sans leading-relaxed">
                         {msg.text}
                       </div>
                     </div>
@@ -383,18 +381,18 @@ export function TradingAgentCopilot() {
 
                   {/* Structured Strategy & Simulation Card */}
                   {msg.strategy && (
-                    <div className="rounded-lg border border-border bg-[#101117] p-3.5 space-y-3 font-sans">
-                      <div className="flex items-center justify-between pb-2 border-b border-border/60">
-                        <span className="text-xs font-semibold text-text-primary">
+                    <div className="rounded-2xl border border-white/[0.06] bg-[#141414] p-4 space-y-3 font-sans">
+                      <div className="flex items-center justify-between pb-2.5 border-b border-white/[0.04]">
+                        <span className="text-xs font-semibold text-white font-sans">
                           {msg.strategy.name}
                         </span>
-                        <span className="font-mono text-[10px] text-text-dim uppercase px-1.5 py-0.5 rounded bg-white/[0.03] border border-border">
+                        <span className="font-mono text-[10px] text-neutral-300 uppercase px-2 py-0.5 rounded-full bg-white/[0.04] border border-white/[0.04]">
                           {msg.strategy.rules.chain.toUpperCase()}
                         </span>
                       </div>
 
-                      {/* Checklist Rules (screenshot 4 style) */}
-                      <div className="space-y-1.5 font-mono text-[11px] text-text-secondary bg-black/40 p-2.5 rounded border border-border/40">
+                      {/* Checklist Rules */}
+                      <div className="space-y-1.5 font-mono text-[11px] text-neutral-300 bg-[#101010] p-3 rounded-xl border border-white/[0.03]">
                         <div className="flex items-center gap-2">
                           <IconCircleCheckFilled size={13} className="text-emerald-400 flex-shrink-0" />
                           <span>Chain: {msg.strategy.rules.chain.toUpperCase()}</span>
@@ -409,7 +407,7 @@ export function TradingAgentCopilot() {
                         </div>
                         <div className="flex items-center gap-2">
                           <IconCircleCheckFilled size={13} className="text-emerald-400 flex-shrink-0" />
-                          <span>OlaXBT Momentum Score: &gt;{msg.strategy.rules.minOlaXbtScore}</span>
+                          <span>OlaXBT Score: &gt;{msg.strategy.rules.minOlaXbtScore}</span>
                         </div>
                         <div className="flex items-center gap-2">
                           <IconCircleCheckFilled size={13} className="text-emerald-400 flex-shrink-0" />
@@ -421,7 +419,7 @@ export function TradingAgentCopilot() {
                         </div>
                         <div className="flex items-center gap-2">
                           <IconCircleCheckFilled size={13} className="text-emerald-400 flex-shrink-0" />
-                          <span>Trade Allocation: {msg.strategy.rules.tradeAmount} {msg.strategy.rules.chain.toUpperCase() === "BSC" ? "BNB" : "SOL"}</span>
+                          <span>Trade Size: {msg.strategy.rules.tradeAmount} {msg.strategy.rules.chain.toUpperCase() === "BSC" ? "BNB" : "SOL"}</span>
                         </div>
                         <div className="flex items-center gap-2">
                           <IconCircleCheckFilled size={13} className="text-emerald-400 flex-shrink-0" />
@@ -431,29 +429,29 @@ export function TradingAgentCopilot() {
 
                       {/* Simulation Stats */}
                       {msg.simulation && (
-                        <div className="grid grid-cols-2 gap-2 font-mono text-[11px] pt-1">
-                          <div className="p-2 rounded bg-white/[0.02] border border-border text-center">
-                            <span className="text-[10px] text-text-dim block">Simulated Win Rate</span>
-                            <span className="font-semibold text-emerald-400">{msg.simulation.winRatePct}%</span>
+                        <div className="grid grid-cols-2 gap-2 font-mono text-xs pt-1">
+                          <div className="p-2.5 rounded-xl bg-[#101010] border border-white/[0.03] text-center">
+                            <span className="text-[10px] text-neutral-500 block font-sans">Simulated Win Rate</span>
+                            <span className="font-semibold text-emerald-400 font-mono">{msg.simulation.winRatePct}%</span>
                           </div>
-                          <div className="p-2 rounded bg-white/[0.02] border border-border text-center">
-                            <span className="text-[10px] text-text-dim block">Expected PnL</span>
-                            <span className="font-semibold text-text-primary">+{msg.simulation.expectedPnlPct}%</span>
+                          <div className="p-2.5 rounded-xl bg-[#101010] border border-white/[0.03] text-center">
+                            <span className="text-[10px] text-neutral-500 block font-sans">Expected PnL</span>
+                            <span className="font-semibold text-white font-mono">+{msg.simulation.expectedPnlPct}%</span>
                           </div>
                         </div>
                       )}
 
                       {/* Action Buttons */}
-                      <div className="flex items-center gap-2 pt-1 font-mono text-xs">
+                      <div className="flex items-center gap-2 pt-1 font-sans text-xs">
                         <button
                           onClick={() => handleDeploy(msg.strategy!, "paper")}
-                          className="flex-1 py-2 rounded bg-white/[0.04] hover:bg-white/[0.08] border border-border text-text-primary transition-colors cursor-pointer text-center"
+                          className="flex-1 py-2 rounded-full bg-white/[0.05] hover:bg-white/[0.1] text-white font-medium transition-colors cursor-pointer text-center"
                         >
                           Paper Trade
                         </button>
                         <button
                           onClick={() => handleDeploy(msg.strategy!, "live")}
-                          className="flex-1 py-2 rounded bg-accent hover:bg-accent/90 text-white font-medium transition-colors cursor-pointer text-center"
+                          className="flex-1 py-2 rounded-full bg-white hover:bg-neutral-200 text-black font-semibold transition-colors cursor-pointer text-center"
                         >
                           Deploy Live
                         </button>
@@ -463,8 +461,8 @@ export function TradingAgentCopilot() {
 
                   {/* Telemetry Stream Log Box */}
                   {msg.telemetryLogs && msg.telemetryLogs.length > 0 && (
-                    <div className="rounded-lg border border-border bg-black p-3 space-y-1.5 font-mono text-[11px] max-h-48 overflow-y-auto">
-                      <div className="text-[10px] text-text-dim uppercase tracking-wider pb-1 border-b border-border/40">
+                    <div className="rounded-xl border border-white/[0.04] bg-[#101010] p-3.5 space-y-1.5 font-mono text-[11px] max-h-48 overflow-y-auto">
+                      <div className="text-[10px] text-neutral-500 uppercase tracking-wider pb-1.5 border-b border-white/[0.04]">
                         Live Execution Logs
                       </div>
                       {msg.telemetryLogs.map((log, idx) => (
@@ -474,11 +472,11 @@ export function TradingAgentCopilot() {
                             "leading-relaxed",
                             log.type === "buy" && "text-emerald-300",
                             log.type === "sell" && "text-emerald-400",
-                            log.type === "signal" && "text-accent",
-                            log.type === "info" && "text-text-dim"
+                            log.type === "signal" && "text-white",
+                            log.type === "info" && "text-neutral-500"
                           )}
                         >
-                          <span className="text-text-dim mr-1.5">[{log.time}]</span>
+                          <span className="text-neutral-500 mr-1.5">[{log.time}]</span>
                           <span>{log.text}</span>
                         </div>
                       ))}
@@ -487,10 +485,10 @@ export function TradingAgentCopilot() {
                 </div>
               ))}
 
-              {/* Loading Indicator (screenshot 3 style) */}
+              {/* Loading Indicator */}
               {isLoading && (
-                <div className="flex items-center gap-2 text-xs text-text-muted font-mono py-2">
-                  <IconRefresh size={13} className="animate-spin text-accent" />
+                <div className="flex items-center gap-2 text-xs text-neutral-400 font-mono py-2">
+                  <IconRefresh size={14} className="animate-spin text-white" />
                   <span>{loadingStatus}</span>
                 </div>
               )}
@@ -498,29 +496,29 @@ export function TradingAgentCopilot() {
               <div ref={messagesEndRef} />
             </div>
 
-            {/* Bottom Input Area (screenshot 3 style) */}
-            <div className="p-3 border-t border-border bg-[#101117]">
+            {/* Bottom Input Area */}
+            <div className="p-4 border-t border-white/[0.04] bg-[#141414]">
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
                   handleSubmit();
                 }}
-                className="flex items-center gap-2 p-1.5 rounded-lg bg-black border border-border focus-within:border-accent/80 transition-colors"
+                className="flex items-center gap-2 p-1.5 pl-4 rounded-full bg-[#101010] border border-white/[0.08] focus-within:border-white/30 transition-colors"
               >
                 <input
                   type="text"
                   value={inputPrompt}
                   onChange={(e) => setInputPrompt(e.target.value)}
-                  placeholder="Describe your trading strategy..."
+                  placeholder="Describe your strategy..."
                   disabled={isLoading}
-                  className="flex-1 bg-transparent px-2.5 py-1 text-xs text-text-primary placeholder:text-text-dim focus:outline-none font-sans"
+                  className="flex-1 bg-transparent py-1 text-xs text-white placeholder:text-neutral-500 focus:outline-none font-sans"
                 />
                 <button
                   type="submit"
                   disabled={isLoading || !inputPrompt.trim()}
-                  className="w-7 h-7 rounded-full bg-accent hover:bg-accent/90 disabled:opacity-30 text-white flex items-center justify-center transition-colors cursor-pointer flex-shrink-0"
+                  className="w-8 h-8 rounded-full bg-white hover:bg-neutral-200 disabled:opacity-30 text-black flex items-center justify-center transition-colors cursor-pointer flex-shrink-0 font-semibold"
                 >
-                  <IconArrowUp size={14} />
+                  <IconArrowUp size={15} />
                 </button>
               </form>
             </div>

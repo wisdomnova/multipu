@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { IconX, IconRefresh, IconCheck } from "@tabler/icons-react";
+import { IconX, IconRefresh, IconCheck, IconBell } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 import type { NotificationItem, NotificationCategory } from "@/app/api/notifications/route";
 
@@ -67,96 +67,109 @@ export function NotificationsSidebar({ isOpen, onClose }: NotificationsSidebarPr
     <AnimatePresence>
       {isOpen && (
         <div className="fixed inset-0 z-[60] overflow-hidden">
-          {/* Backdrop (no shadow, no border) */}
+          {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.15 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/70 backdrop-blur-xs"
+            className="fixed inset-0 bg-black/75 backdrop-blur-sm"
             aria-hidden="true"
           />
 
-          {/* Sidebar Drawer (no border, no shadow, clean dark flat background) */}
+          {/* Sidebar Drawer */}
           <motion.div
             initial={{ x: "100%" }}
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
-            transition={{ type: "spring", damping: 28, stiffness: 320 }}
-            className="fixed top-0 right-0 bottom-0 w-full sm:w-[420px] max-w-[100vw] bg-[#07080b] z-[60] flex flex-col select-none"
+            transition={{ type: "spring", damping: 30, stiffness: 320 }}
+            className="fixed top-0 right-0 bottom-0 w-full sm:w-[440px] max-w-[100vw] bg-[#121212] border-l border-white/[0.06] z-[60] flex flex-col select-none shadow-2xl"
           >
             {/* Top Bar Header */}
-            <div className="p-6 pb-4 flex items-center justify-between">
+            <div className="p-6 border-b border-white/[0.04] flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <span className="font-mono text-xs uppercase tracking-widest text-text-primary font-bold">
-                  Activity Feed
-                </span>
+                <div className="w-8 h-8 rounded-lg bg-white/[0.05] border border-white/[0.06] flex items-center justify-center text-white">
+                  <IconBell size={16} />
+                </div>
+                <div>
+                  <h3 className="text-sm font-semibold text-white font-sans">
+                    Notifications &amp; Activity
+                  </h3>
+                  <p className="text-[11px] text-neutral-400 font-mono mt-0.5">
+                    Real-time transaction and agent events
+                  </p>
+                </div>
                 {unreadCount > 0 && (
-                  <span className="font-mono text-[10px] uppercase tracking-wider text-accent bg-accent/10 px-2 py-0.5 rounded-full">
+                  <span className="font-mono text-[11px] text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full font-medium">
                     {unreadCount} new
                   </span>
                 )}
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
                 <button
                   onClick={fetchNotifications}
                   disabled={loading}
-                  className="p-1.5 text-text-dim hover:text-text-primary transition-colors disabled:opacity-40"
+                  className="p-2 text-neutral-400 hover:text-white hover:bg-white/[0.06] rounded-lg transition-colors disabled:opacity-40 cursor-pointer"
                   title="Refresh activity"
                   aria-label="Refresh activity"
                 >
-                  <IconRefresh size={14} className={cn(loading && "animate-spin text-accent")} />
+                  <IconRefresh size={15} className={cn(loading && "animate-spin text-white")} />
                 </button>
                 <button
                   onClick={onClose}
-                  className="p-1.5 text-text-dim hover:text-text-primary transition-colors"
+                  className="p-2 text-neutral-400 hover:text-white hover:bg-white/[0.06] rounded-lg transition-colors cursor-pointer"
                   aria-label="Close panel"
                 >
-                  <IconX size={16} />
+                  <IconX size={17} />
                 </button>
               </div>
             </div>
 
-            {/* Filter Tabs (minimalist text buttons, no borders, no shadows) */}
-            <div className="px-6 py-2 flex items-center gap-1.5 overflow-x-auto scrollbar-none">
-              {(["ALL", "LAUNCH", "TRADE", "FEE", "SIGNAL"] as const).map((filter) => (
-                <button
-                  key={filter}
-                  onClick={() => setActiveFilter(filter)}
-                  className={cn(
-                    "px-2.5 py-1 font-mono text-[11px] uppercase tracking-wider transition-colors rounded-sm",
-                    activeFilter === filter
-                      ? "text-white bg-white/[0.08] font-semibold"
-                      : "text-text-dim hover:text-text-secondary hover:bg-white/[0.03]"
-                  )}
-                >
-                  {filter}
-                </button>
-              ))}
+            {/* Filter Tabs */}
+            <div className="px-6 py-3 border-b border-white/[0.04] flex items-center justify-between gap-2 overflow-x-auto">
+              <div className="flex items-center gap-1.5">
+                {(["ALL", "LAUNCH", "TRADE", "FEE", "SIGNAL"] as const).map((filter) => (
+                  <button
+                    key={filter}
+                    onClick={() => setActiveFilter(filter)}
+                    className={cn(
+                      "px-3 py-1 font-mono text-xs rounded-full transition-colors cursor-pointer",
+                      activeFilter === filter
+                        ? "text-black bg-white font-semibold"
+                        : "text-neutral-400 hover:text-white bg-white/[0.03] hover:bg-white/[0.06]"
+                    )}
+                  >
+                    {filter}
+                  </button>
+                ))}
+              </div>
+
               {unreadCount > 0 && (
                 <button
                   onClick={markAllAsRead}
-                  className="ml-auto font-mono text-[10px] uppercase tracking-wider text-text-muted hover:text-text-primary transition-colors whitespace-nowrap pl-2"
+                  className="font-mono text-[11px] text-neutral-400 hover:text-white transition-colors whitespace-nowrap cursor-pointer pl-2"
                 >
-                  Mark read
+                  Mark all read
                 </button>
               )}
             </div>
 
             {/* Notification Stream List */}
-            <div className="flex-1 overflow-y-auto px-6 py-4 space-y-2 divide-none">
+            <div className="flex-1 overflow-y-auto p-6 space-y-3">
               {loading && notifications.length === 0 ? (
-                <div className="py-16 text-center space-y-2">
-                  <div className="font-mono text-xs text-text-dim">Loading session updates...</div>
+                <div className="py-20 text-center text-xs text-neutral-500 font-mono">
+                  Loading activity stream...
                 </div>
               ) : filtered.length === 0 ? (
-                <div className="py-16 text-center space-y-2">
-                  <div className="font-mono text-xs text-text-dim">No updates in this stream</div>
-                  <div className="font-mono text-[10px] text-text-muted">
-                    Activity will appear here as trades and deployments occur.
-                  </div>
+                <div className="py-20 text-center bg-[#181818] rounded-2xl p-8 border border-dashed border-white/[0.04]">
+                  <p className="text-xs text-neutral-300 font-sans font-medium">
+                    No updates in this stream
+                  </p>
+                  <p className="text-[11px] text-neutral-500 font-sans mt-1">
+                    Activity will appear here as trades, creator fees, and deployments occur.
+                  </p>
                 </div>
               ) : (
                 filtered.map((item) => {
@@ -166,17 +179,19 @@ export function NotificationsSidebar({ isOpen, onClose }: NotificationsSidebarPr
                     <div
                       onClick={() => setReadIds((prev) => new Set(prev).add(item.id))}
                       className={cn(
-                        "p-3.5 rounded-sm transition-colors text-left w-full block",
-                        isRead ? "bg-white/[0.015] hover:bg-white/[0.03]" : "bg-white/[0.04] hover:bg-white/[0.06]"
+                        "p-4 rounded-xl border transition-all text-left w-full block cursor-pointer",
+                        isRead
+                          ? "bg-[#141414] border-white/[0.03] hover:border-white/[0.08]"
+                          : "bg-[#181818] border-white/[0.08] hover:border-white/[0.14]"
                       )}
                     >
-                      <div className="flex items-center justify-between mb-1.5">
+                      <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-2">
-                          <span className="font-mono text-[10px] uppercase tracking-wider text-text-dim font-medium">
+                          <span className="font-mono text-[10px] uppercase tracking-wider text-neutral-400 font-medium">
                             {item.category}
                           </span>
                           {!isRead && (
-                            <span className="w-1.5 h-1.5 rounded-full bg-accent" />
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
                           )}
                         </div>
 
@@ -184,30 +199,30 @@ export function NotificationsSidebar({ isOpen, onClose }: NotificationsSidebarPr
                           {item.metric && (
                             <span
                               className={cn(
-                                "font-mono text-[10px] font-semibold uppercase tracking-wider",
+                                "font-mono text-[10px] font-semibold px-2 py-0.5 rounded-full",
                                 item.status === "ALERT"
-                                  ? "text-accent"
+                                  ? "text-red-400 bg-red-500/10"
                                   : item.status === "SUCCESS"
-                                  ? "text-success"
+                                  ? "text-emerald-400 bg-emerald-500/10"
                                   : item.status === "PENDING"
-                                  ? "text-warning"
-                                  : "text-text-secondary"
+                                  ? "text-amber-400 bg-amber-500/10"
+                                  : "text-neutral-400 bg-white/[0.05]"
                               )}
                             >
                               {item.metric}
                             </span>
                           )}
-                          <span className="font-mono text-[10px] text-text-dim">
+                          <span className="font-mono text-[10px] text-neutral-500">
                             {item.timeAgo}
                           </span>
                         </div>
                       </div>
 
-                      <div className="text-xs font-medium text-text-primary tracking-tight mb-1">
+                      <div className="text-xs font-semibold text-white font-sans tracking-tight mb-1">
                         {item.title}
                       </div>
 
-                      <div className="text-[11px] text-text-muted leading-relaxed font-normal">
+                      <div className="text-xs text-neutral-400 font-sans leading-relaxed">
                         {item.detail}
                       </div>
                     </div>
@@ -231,10 +246,13 @@ export function NotificationsSidebar({ isOpen, onClose }: NotificationsSidebarPr
               )}
             </div>
 
-            {/* Bottom Status Footer (pure minimalist text, no border) */}
-            <div className="p-6 pt-3 pb-6 flex items-center justify-between font-mono text-[10px] text-text-dim">
-              <span>Telemetry: Active</span>
-              <span>Updated in real-time</span>
+            {/* Bottom Status Footer */}
+            <div className="p-4 px-6 border-t border-white/[0.04] flex items-center justify-between font-mono text-[11px] text-neutral-500">
+              <span className="flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                Live Telemetry
+              </span>
+              <span>Updated automatically</span>
             </div>
           </motion.div>
         </div>

@@ -38,10 +38,18 @@ interface DashboardToken {
 interface DashboardData {
   stats: {
     totalTokens: number;
+    tokensChange?: string;
+    tokensChangeColor?: string;
     activeLaunches: number;
+    launchesChange?: string;
+    launchesChangeColor?: string;
     totalEarnings: number;
+    earningsChange?: string;
+    earningsChangeColor?: string;
     earningsToday: number;
     launchpadsUsed: string[];
+    launchpadsChange?: string;
+    launchpadsChangeColor?: string;
   };
   exposure?: {
     total: string;
@@ -127,27 +135,27 @@ export default function DashboardPage() {
   const statItems = [
     {
       label: "Total Tokens",
-      value: stats?.totalTokens !== undefined ? stats.totalTokens.toString() : (tokens.length ? tokens.length.toString() : "1"),
-      change: "12.5% ↑",
-      changeColor: "text-emerald-400",
+      value: stats?.totalTokens !== undefined ? stats.totalTokens.toString() : tokens.length.toString(),
+      change: stats?.tokensChange || (tokens.length ? `+${tokens.length} new` : "none"),
+      changeColor: stats?.tokensChangeColor || "text-neutral-400",
     },
     {
       label: "Active Launches",
       value: stats?.activeLaunches !== undefined ? stats.activeLaunches.toString() : "0",
-      change: "no launches",
-      changeColor: "text-neutral-400",
+      change: stats?.launchesChange || "no launches",
+      changeColor: stats?.launchesChangeColor || "text-neutral-400",
     },
     {
       label: "Total Earnings",
-      value: `${stats?.totalEarnings !== undefined ? stats.totalEarnings.toFixed(2) : "0.00"}SOL`,
-      change: "21.6% ↑",
-      changeColor: "text-emerald-400",
+      value: `${(stats?.totalEarnings !== undefined ? stats.totalEarnings : 0).toFixed(2)} SOL`,
+      change: stats?.earningsChange || "0.00 SOL",
+      changeColor: stats?.earningsChangeColor || "text-neutral-400",
     },
     {
       label: "Launchpads Used",
       value: stats?.launchpadsUsed !== undefined ? stats.launchpadsUsed.length.toString() : "0",
-      change: "none",
-      changeColor: "text-neutral-400",
+      change: stats?.launchpadsChange || "none",
+      changeColor: stats?.launchpadsChangeColor || "text-neutral-400",
     },
   ];
 

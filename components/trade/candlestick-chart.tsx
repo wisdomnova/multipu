@@ -38,7 +38,7 @@ export function CandlestickChart({ currentPrice, priceDirection, gasSymbol }: Ca
       timeFilter === "4h" ? 240 : 
       1440; // 1d
 
-    for (let i = 24; i >= 0; i--) {
+    for (let i = 28; i >= 0; i--) {
       const isUp = Math.random() > 0.46; // upward trend bias
       const change = prevClose * (Math.random() * 0.025);
       
@@ -104,7 +104,7 @@ export function CandlestickChart({ currentPrice, priceDirection, gasSymbol }: Ca
           time: timeStr,
         };
 
-        // Keep a rolling window of 25 candles
+        // Keep a rolling window of 29 candles
         return [...prevCandles.slice(1), newCandle];
       });
     }, 45000); // 45 seconds per candle cycle
@@ -113,7 +113,7 @@ export function CandlestickChart({ currentPrice, priceDirection, gasSymbol }: Ca
   }, [timeFilter]);
 
   if (candles.length === 0) {
-    return <div className="h-[300px] flex items-center justify-center text-xs text-neutral-500 font-mono">Loading chart...</div>;
+    return <div className="h-[320px] flex items-center justify-center text-xs text-neutral-500 font-mono">Loading chart...</div>;
   }
 
   // Calculate pricing bounds for scaling
@@ -122,12 +122,12 @@ export function CandlestickChart({ currentPrice, priceDirection, gasSymbol }: Ca
   const minPrice = Math.min(...prices) * 0.998;
   const priceRange = maxPrice - minPrice;
 
-  // Render variables
-  const width = 680;
-  const height = 280;
-  const rightAxisWidth = 80;
+  // Render variables - wider dimensions filling available space
+  const width = 880;
+  const height = 310;
+  const rightAxisWidth = 70;
   const chartWidth = width - rightAxisWidth;
-  const paddingBottom = 20;
+  const paddingBottom = 22;
   const chartHeight = height - paddingBottom;
 
   const scaleY = (val: number) => {
@@ -136,7 +136,7 @@ export function CandlestickChart({ currentPrice, priceDirection, gasSymbol }: Ca
 
   const candleCount = candles.length;
   const slotWidth = chartWidth / candleCount;
-  const bodyWidth = slotWidth * 0.65;
+  const bodyWidth = slotWidth * 0.7;
 
   // Grid lines
   const gridLinesCount = 5;
@@ -161,7 +161,7 @@ export function CandlestickChart({ currentPrice, priceDirection, gasSymbol }: Ca
   const isOverallUp = candles.length > 0 && candles[candles.length - 1].close >= candles[0].open;
 
   return (
-    <div className="bg-[#181818] border border-white/[0.04] p-6 rounded-2xl flex flex-col gap-4" ref={containerRef}>
+    <div className="bg-[#181818] border border-white/[0.04] p-6 rounded-2xl flex flex-col gap-4 w-full" ref={containerRef}>
       {/* Chart Top Info Bar */}
       <div className="flex items-center justify-between text-xs font-mono border-b border-white/[0.04] pb-3.5 flex-wrap gap-3">
         <div className="flex flex-wrap items-center gap-3">
@@ -184,49 +184,14 @@ export function CandlestickChart({ currentPrice, priceDirection, gasSymbol }: Ca
           </div>
         </div>
 
-        {/* Filters and Chart Type Toggles */}
-        <div className="flex items-center gap-2.5 flex-wrap">
-          {/* Timeframe Filters */}
-          <div className="flex items-center bg-[#141414] p-1 rounded-full border border-white/[0.04]">
-            {(["15m", "1h", "4h", "1d"] as const).map((filter) => (
-              <button
-                key={filter}
-                onClick={() => setTimeFilter(filter)}
-                className={cn(
-                  "px-2.5 py-0.5 text-[10px] font-mono rounded-full transition-all cursor-pointer",
-                  timeFilter === filter
-                    ? "bg-white text-black font-semibold"
-                    : "text-neutral-400 hover:text-white"
-                )}
-              >
-                {filter}
-              </button>
-            ))}
-          </div>
-
-          {/* Chart View Toggle Switch */}
-          <div className="flex items-center bg-[#141414] p-1 rounded-full border border-white/[0.04]">
-            {(["candles", "line"] as const).map((type) => (
-              <button
-                key={type}
-                onClick={() => setChartType(type)}
-                className={cn(
-                  "px-3 py-0.5 text-[10px] font-mono rounded-full capitalize transition-all cursor-pointer",
-                  chartType === type
-                    ? "bg-white text-black font-semibold"
-                    : "text-neutral-400 hover:text-white"
-                )}
-              >
-                {type}
-              </button>
-            ))}
-          </div>
+        <div className="text-[11px] font-mono text-neutral-400">
+          Pair: {gasSymbol}
         </div>
       </div>
 
-      {/* SVG Canvas Area */}
-      <div className="relative select-none overflow-hidden h-[280px]">
-        <svg viewBox={`0 0 ${width} ${height}`} width="100%" height="100%" className="overflow-visible">
+      {/* SVG Canvas Area - Expanded width */}
+      <div className="relative select-none overflow-hidden h-[310px] w-full">
+        <svg viewBox={`0 0 ${width} ${height}`} width="100%" height="100%" className="w-full h-full">
           {/* Horizontal Grid lines */}
           {gridLines.map((line, idx) => (
             <g key={idx}>
@@ -240,7 +205,7 @@ export function CandlestickChart({ currentPrice, priceDirection, gasSymbol }: Ca
                 strokeWidth={1}
               />
               <text
-                x={chartWidth + 8}
+                x={chartWidth + 6}
                 y={line.y + 3}
                 fill="#737373"
                 fontSize={9}
@@ -254,7 +219,7 @@ export function CandlestickChart({ currentPrice, priceDirection, gasSymbol }: Ca
 
           {/* Time coordinates labels */}
           {candles.map((candle, idx) => {
-            if (idx % 6 !== 0) return null; // Show label every 6 candles to avoid clutter
+            if (idx % 5 !== 0) return null; // Show label every 5 candles
             const x = idx * slotWidth + slotWidth / 2;
             return (
               <text
@@ -394,13 +359,13 @@ export function CandlestickChart({ currentPrice, priceDirection, gasSymbol }: Ca
             <rect
               x={chartWidth}
               y={scaleY(currentPrice) - 8}
-              width={75}
+              width={66}
               height={16}
               fill={priceDirection === "up" ? "rgba(52, 211, 153, 0.95)" : priceDirection === "down" ? "rgba(248, 113, 113, 0.95)" : "rgba(30, 41, 59, 0.95)"}
               rx={4}
             />
             <text
-              x={chartWidth + 37}
+              x={chartWidth + 33}
               y={scaleY(currentPrice) + 4}
               fill={priceDirection === "up" || priceDirection === "down" ? "#000000" : "#ffffff"}
               fontSize={8.5}
@@ -412,6 +377,45 @@ export function CandlestickChart({ currentPrice, priceDirection, gasSymbol }: Ca
             </text>
           </g>
         </svg>
+      </div>
+
+      {/* Bottom Controls Bar: Timeframe Filters & Chart Type Toggle */}
+      <div className="flex items-center justify-between pt-3 border-t border-white/[0.04] flex-wrap gap-3">
+        {/* Timeframe Filters */}
+        <div className="flex items-center bg-[#141414] p-1 rounded-full border border-white/[0.04]">
+          {(["15m", "1h", "4h", "1d"] as const).map((filter) => (
+            <button
+              key={filter}
+              onClick={() => setTimeFilter(filter)}
+              className={cn(
+                "px-3 py-1 text-xs font-mono rounded-full transition-all cursor-pointer",
+                timeFilter === filter
+                  ? "bg-white text-black font-semibold"
+                  : "text-neutral-400 hover:text-white"
+              )}
+            >
+              {filter}
+            </button>
+          ))}
+        </div>
+
+        {/* Chart View Toggle Switch */}
+        <div className="flex items-center bg-[#141414] p-1 rounded-full border border-white/[0.04]">
+          {(["candles", "line"] as const).map((type) => (
+            <button
+              key={type}
+              onClick={() => setChartType(type)}
+              className={cn(
+                "px-3.5 py-1 text-xs font-mono rounded-full capitalize transition-all cursor-pointer",
+                chartType === type
+                  ? "bg-white text-black font-semibold"
+                  : "text-neutral-400 hover:text-white"
+              )}
+            >
+              {type}
+            </button>
+          ))}
+        </div>
       </div>
     </div>
   );

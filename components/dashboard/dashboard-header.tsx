@@ -79,7 +79,7 @@ export function DashboardHeader({
 
   return (
     <>
-      <header className="sticky top-0 z-30 w-full h-16 border-b border-white/[0.06] bg-[#121212]/95 backdrop-blur-md flex items-center">
+      <header className="sticky top-0 z-30 w-full h-16 flex-shrink-0 shrink-0 border-b border-white/[0.06] bg-[#121212]/95 backdrop-blur-md flex items-center">
         <div className="flex items-center justify-between w-full px-4 sm:px-8 gap-3">
           {/* Left section: Mobile hamburger & logo + Supported Chain Balances */}
           <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">

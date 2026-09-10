@@ -226,6 +226,15 @@ export function KeyboardTerminal() {
 
         {/* Action buttons */}
         <div className="flex flex-wrap items-center justify-center gap-4 mt-8">
+          <a
+            href="https://docs.multipu.fun"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-8 py-3 rounded-full bg-white text-[#1a2d24] font-mono text-xs font-semibold hover:bg-[#fbc5b3] transition-colors cursor-pointer inline-flex items-center gap-1.5"
+          >
+            <span>API Documentation</span>
+            <span className="text-[10px]">↗</span>
+          </a>
           <Link
             href="/dashboard/api"
             className="px-8 py-3 rounded-full bg-[#fbc5b3] text-[#1a2d24] font-mono text-xs font-semibold hover:bg-white transition-colors cursor-pointer"

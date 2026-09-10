@@ -243,12 +243,12 @@ export default function ApiKeysPage() {
                 placeholder="e.g. Trading Bot / Agent Worker"
                 value={newKeyName}
                 onChange={(e) => setNewKeyName(e.target.value)}
-                className="flex-1 bg-[#141414] border border-white/[0.08] focus:border-white/30 rounded-xl px-4 py-2.5 text-xs text-white placeholder:text-neutral-500 font-mono transition-colors focus:outline-none"
+                className="flex-1 h-12 bg-[#141414] border border-white/[0.08] focus:border-white/30 rounded-xl px-4 text-sm text-white placeholder:text-neutral-500 font-mono transition-colors focus:outline-none"
               />
               <button
                 type="submit"
                 disabled={isGenerating}
-                className="bg-white text-black hover:bg-neutral-200 font-semibold text-xs px-5 py-2.5 rounded-full transition-colors cursor-pointer font-sans inline-flex items-center justify-center gap-1.5 flex-shrink-0 disabled:opacity-50"
+                className="h-12 bg-white text-black hover:bg-neutral-200 font-semibold text-xs sm:text-sm px-6 rounded-full transition-colors cursor-pointer font-sans inline-flex items-center justify-center gap-2 flex-shrink-0 disabled:opacity-50"
               >
                 {isGenerating ? (
                   "Generating..."

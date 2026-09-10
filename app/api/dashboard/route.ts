@@ -39,7 +39,7 @@ export async function GET(request: Request) {
 
         supabase
           .from("launches")
-          .select("id, status")
+          .select("id, status, launchpad, created_at")
           .eq("wallet_address", wallet)
           .eq("app_phase", scope.appPhase),
 
@@ -66,8 +66,10 @@ export async function GET(request: Request) {
       ]);
 
     const tokens = tokensRes.data ?? [];
-    const launches: { id: string; status: string; launchpad?: string }[] = (launchesRes.data ?? []) as { id: string; status: string; launchpad?: string }[];
-    const earnings: { amount_sol: number; recorded_at: string; launchpad: string }[] = (earningsRes.data ?? []) as { amount_sol: number; recorded_at: string; launchpad: string }[];
+    const launches: { id: string; status: string; launchpad?: string; created_at?: string }[] =
+      (launchesRes.data ?? []) as { id: string; status: string; launchpad?: string; created_at?: string }[];
+    const earnings: { amount_sol: number; recorded_at: string; launchpad: string }[] =
+      (earningsRes.data ?? []) as { amount_sol: number; recorded_at: string; launchpad: string }[];
     const recentEarnings = recentEarningsRes.data ?? [];
     const exposureRows = exposureRes.data ?? [];
 
@@ -77,14 +79,32 @@ export async function GET(request: Request) {
     );
 
     const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+
     const earningsToday = earnings
       .filter((e) => e.recorded_at > oneDayAgo)
       .reduce((sum, e) => sum + Number(e.amount_sol), 0);
+
+    const earningsLast30d = earnings
+      .filter((e) => e.recorded_at >= thirtyDaysAgo)
+      .reduce((sum, e) => sum + Number(e.amount_sol), 0);
+    const earningsChange = earningsLast30d > 0 ? `+${earningsLast30d.toFixed(2)} SOL` : "0.00 SOL";
+    const earningsChangeColor = earningsLast30d > 0 ? "text-emerald-400" : "text-neutral-400";
+
+    const tokensLast30d = tokens.filter((t: any) => t.created_at && t.created_at >= thirtyDaysAgo).length;
+    const tokensChange = tokensLast30d > 0 ? `+${tokensLast30d} new` : "none";
+    const tokensChangeColor = tokensLast30d > 0 ? "text-emerald-400" : "text-neutral-400";
+
+    const launchesLast30d = launches.filter((l) => l.created_at && l.created_at >= thirtyDaysAgo).length;
+    const launchesChange = launchesLast30d > 0 ? `${launchesLast30d} launched` : "no launches";
+    const launchesChangeColor = launchesLast30d > 0 ? "text-emerald-400" : "text-neutral-400";
 
     // Launchpads used (distinct)
     const launchpadsUsed = [
       ...new Set(launches.map((l) => l.launchpad).filter(Boolean)),
     ];
+    const launchpadsChange = launchpadsUsed.length > 0 ? `${launchpadsUsed.length} venues` : "none";
+    const launchpadsChangeColor = launchpadsUsed.length > 0 ? "text-emerald-400" : "text-neutral-400";
 
     const exposurePoints = ((exposureRows as any[]) ?? []).map((r) => ({
       date: r.label,
@@ -99,10 +119,18 @@ export async function GET(request: Request) {
     return Response.json({
       stats: {
         totalTokens: tokens.length,
+        tokensChange,
+        tokensChangeColor,
         activeLaunches: launches.filter((l) => l.status === "live").length,
+        launchesChange,
+        launchesChangeColor,
         totalEarnings: Math.round(totalEarnings * 1e9) / 1e9,
+        earningsChange,
+        earningsChangeColor,
         earningsToday: Math.round(earningsToday * 1e9) / 1e9,
         launchpadsUsed,
+        launchpadsChange,
+        launchpadsChangeColor,
       },
       exposure: {
         total: currentVal.toLocaleString(),
