@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { motion, fadeUp, stagger, scaleIn } from "@/components/motion";
 
 const launchpads = [
   {
@@ -35,9 +36,15 @@ const launchpads = [
 
 export function ProductList() {
   return (
-    <section className="py-24 md:py-36 px-6 md:px-12 max-w-[1360px] mx-auto">
-      {/* Lilac product list container matching Screenshot 1 */}
-      <div className="rounded-[40px] bg-[#aba6d8] text-[#140e28] p-8 sm:p-14 lg:p-20 overflow-hidden">
+    <motion.section
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, margin: "-80px" }}
+      variants={stagger}
+      className="py-24 md:py-36 px-6 md:px-12 max-w-[1360px] mx-auto"
+    >
+      {/* Lilac product list container */}
+      <motion.div variants={fadeUp} className="rounded-[40px] bg-[#aba6d8] text-[#140e28] p-8 sm:p-14 lg:p-20 overflow-hidden">
         {/* Top Eyebrow */}
         <div className="text-xs font-mono uppercase tracking-widest text-[#140e28]/70 mb-3">
           Multipu Protocols
@@ -49,11 +56,12 @@ export function ProductList() {
         </h2>
 
         {/* List Rows */}
-        <div className="flex flex-col">
+        <motion.div variants={stagger} className="flex flex-col">
           {launchpads.map((pad) => (
-            <div
+            <motion.div
               key={pad.symbol}
-              className="py-8 flex flex-col md:flex-row md:items-center justify-between gap-6 border-t border-black/10 first:border-t-0"
+              variants={fadeUp}
+              className="py-8 flex flex-col md:flex-row md:items-center justify-between gap-6 border-t border-black/10 first:border-t-0 hover:bg-black/5 px-4 rounded-2xl transition-colors"
             >
               {/* Left Column: Symbol and Full Name */}
               <div className="flex items-start md:items-center gap-4">
@@ -88,13 +96,13 @@ export function ProductList() {
                   View Details
                 </Link>
               </div>
-            </div>
+            </motion.div>
           ))}
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
 
-      {/* Bottom Dark Banner with Angular Geometric Shapes matching Screenshot 1 */}
-      <div className="mt-8 rounded-[40px] bg-[#140e28] text-white p-8 sm:p-14 lg:p-16 flex flex-col md:flex-row items-center justify-between gap-8 relative overflow-hidden">
+      {/* Bottom Dark Banner */}
+      <motion.div variants={scaleIn} className="mt-8 rounded-[40px] bg-[#140e28] text-white p-8 sm:p-14 lg:p-16 flex flex-col md:flex-row items-center justify-between gap-8 relative overflow-hidden">
         <div>
           <h3 className="text-3xl sm:text-4xl lg:text-5xl font-normal tracking-tight text-white mb-3">
             Ready to launch?
@@ -107,7 +115,7 @@ export function ProductList() {
         <div className="flex items-center gap-4 relative z-10">
           <Link
             href="/launch"
-            className="px-8 py-3.5 rounded-full bg-white text-[#140e28] font-semibold text-xs font-mono uppercase tracking-wider hover:bg-neutral-200 transition-colors cursor-pointer"
+            className="px-8 py-3.5 rounded-full bg-white text-[#140e28] font-semibold text-xs font-mono uppercase tracking-wider hover:bg-neutral-200 transition-colors cursor-pointer hover:scale-105 active:scale-95 duration-200"
           >
             Launch Token
           </Link>
@@ -121,7 +129,7 @@ export function ProductList() {
             <polygon points="150,200 300,200 250,100" />
           </svg>
         </div>
-      </div>
-    </section>
+      </motion.div>
+    </motion.section>
   );
 }

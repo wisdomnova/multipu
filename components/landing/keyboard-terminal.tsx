@@ -1,14 +1,21 @@
 "use client";
 
 import Link from "next/link";
+import { motion, fadeUp, stagger, scaleIn } from "@/components/motion";
 
 export function KeyboardTerminal() {
   return (
-    <section className="py-24 md:py-36 px-6 md:px-12 max-w-[1360px] mx-auto">
+    <motion.section
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, margin: "-80px" }}
+      variants={stagger}
+      className="py-24 md:py-36 px-6 md:px-12 max-w-[1360px] mx-auto"
+    >
       {/* Outer Forest Green Container matching Screenshot 3 */}
-      <div className="rounded-[40px] bg-[#1a2d24] text-white p-8 sm:p-14 lg:p-20 overflow-hidden flex flex-col items-center">
+      <motion.div variants={fadeUp} className="rounded-[40px] bg-[#1a2d24] text-white p-8 sm:p-14 lg:p-20 overflow-hidden flex flex-col items-center">
         {/* Header Text */}
-        <div className="text-center max-w-2xl mb-12">
+        <motion.div variants={fadeUp} className="text-center max-w-2xl mb-12">
           <div className="text-xs font-mono uppercase tracking-widest text-[#fbc5b3] mb-3">
             Developer Controls &amp; Terminal Hotkeys
           </div>
@@ -18,10 +25,10 @@ export function KeyboardTerminal() {
           <p className="text-sm text-neutral-300 leading-relaxed">
             Use high-performance SDK commands or keyboard-driven terminal hotkeys to swap, launch, and rebalance liquidity in milliseconds.
           </p>
-        </div>
+        </motion.div>
 
         {/* Technical Mechanical Keyboard Wireframe SVG matching Screenshot 3 */}
-        <div className="w-full max-w-4xl overflow-x-auto py-6 flex justify-center">
+        <motion.div variants={scaleIn} className="w-full max-w-4xl overflow-x-auto py-6 flex justify-center">
           <svg
             viewBox="0 0 960 440"
             className="w-full max-w-[900px] h-auto text-[#fbc5b3] stroke-current fill-none"
@@ -222,33 +229,38 @@ export function KeyboardTerminal() {
               <text x="785" y="363" className="fill-[#fbc5b3] stroke-none text-xs font-mono">▶</text>
             </g>
           </svg>
-        </div>
+        </motion.div>
 
         {/* Action buttons */}
-        <div className="flex flex-wrap items-center justify-center gap-4 mt-8">
-          <a
+        <motion.div variants={stagger} className="flex flex-wrap items-center justify-center gap-4 mt-8">
+          <motion.a
+            variants={fadeUp}
             href="https://docs.multipu.fun"
             target="_blank"
             rel="noopener noreferrer"
-            className="px-8 py-3 rounded-full bg-white text-[#1a2d24] font-mono text-xs font-semibold hover:bg-[#fbc5b3] transition-colors cursor-pointer inline-flex items-center gap-1.5"
+            className="px-8 py-3 rounded-full bg-white text-[#1a2d24] font-mono text-xs font-semibold hover:bg-[#fbc5b3] transition-colors cursor-pointer inline-flex items-center gap-1.5 hover:scale-105 active:scale-95 duration-200"
           >
             <span>API Documentation</span>
             <span className="text-[10px]">↗</span>
-          </a>
-          <Link
-            href="/dashboard/api"
-            className="px-8 py-3 rounded-full bg-[#fbc5b3] text-[#1a2d24] font-mono text-xs font-semibold hover:bg-white transition-colors cursor-pointer"
-          >
-            Developer API Keys
-          </Link>
-          <Link
-            href="/dashboard"
-            className="px-8 py-3 rounded-full bg-black/40 text-white font-mono text-xs hover:bg-black/60 transition-colors cursor-pointer"
-          >
-            Open Trading Terminal
-          </Link>
-        </div>
-      </div>
-    </section>
+          </motion.a>
+          <motion.div variants={fadeUp}>
+            <Link
+              href="/dashboard/api"
+              className="px-8 py-3 rounded-full bg-[#fbc5b3] text-[#1a2d24] font-mono text-xs font-semibold hover:bg-white transition-colors cursor-pointer inline-block hover:scale-105 active:scale-95 duration-200"
+            >
+              Developer API Keys
+            </Link>
+          </motion.div>
+          <motion.div variants={fadeUp}>
+            <Link
+              href="/dashboard"
+              className="px-8 py-3 rounded-full bg-black/40 text-white font-mono text-xs hover:bg-black/60 transition-colors cursor-pointer inline-block hover:scale-105 active:scale-95 duration-200"
+            >
+              Open Trading Terminal
+            </Link>
+          </motion.div>
+        </motion.div>
+      </motion.div>
+    </motion.section>
   );
 }

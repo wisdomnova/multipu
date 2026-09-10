@@ -1,21 +1,33 @@
 "use client";
 
 import Link from "next/link";
+import { motion, fadeUp, stagger, scaleIn } from "@/components/motion";
 
 export function HeroStatus() {
   return (
-    <section className="relative pt-36 md:pt-48 pb-20 md:pb-32 px-6 md:px-12 max-w-[1360px] mx-auto overflow-hidden">
+    <motion.section
+      initial="hidden"
+      animate="visible"
+      variants={stagger}
+      className="relative pt-36 md:pt-48 pb-20 md:pb-32 px-6 md:px-12 max-w-[1360px] mx-auto overflow-hidden"
+    >
       {/* Top Hero Typography & Graphic Mark */}
       <div className="mb-16 md:mb-24">
         {/* Powered by X-Agent & OlaXBT Badge */}
-        <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-white/[0.04] border border-white/[0.08] text-xs font-mono text-neutral-300 mb-8 backdrop-blur-md">
+        <motion.div
+          variants={fadeUp}
+          className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-white/[0.04] border border-white/[0.08] text-xs font-mono text-neutral-300 mb-8 backdrop-blur-md"
+        >
           <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
           <span className="text-white font-semibold tracking-tight">Powered by X-Agent</span>
           <span className="text-neutral-500">|</span>
           <span className="text-neutral-400">OlaXBT Strategy Intelligence</span>
-        </div>
+        </motion.div>
 
-        <h1 className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-bold tracking-tight text-white leading-[1.05] md:leading-[0.98]">
+        <motion.h1
+          variants={fadeUp}
+          className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-bold tracking-tight text-white leading-[1.05] md:leading-[0.98]"
+        >
           <span className="inline-flex items-center gap-4 md:gap-6 flex-wrap">
             <span className="relative inline-flex items-center justify-center w-14 h-14 sm:w-20 sm:h-20 md:w-28 md:h-28 align-middle">
               {/* Organic purple highlight blob */}
@@ -47,22 +59,25 @@ export function HeroStatus() {
           </span>
           <br />
           <span className="text-neutral-300">on your terms</span>
-        </h1>
+        </motion.h1>
       </div>
 
       {/* Sub-hero Row: CTAs, Description, Scroll Prompt */}
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-end mb-24 md:mb-32">
+      <motion.div
+        variants={fadeUp}
+        className="grid grid-cols-1 md:grid-cols-12 gap-8 items-end mb-24 md:mb-32"
+      >
         {/* CTAs */}
         <div className="md:col-span-4 flex flex-wrap items-center gap-3">
           <Link
             href="/launch"
-            className="px-8 py-3.5 rounded-full bg-accent hover:bg-accent-hover text-white text-sm font-semibold transition-colors cursor-pointer"
+            className="px-8 py-3.5 rounded-full bg-accent hover:bg-accent-hover text-white text-sm font-semibold transition-colors cursor-pointer shadow-lg hover:scale-105 active:scale-95 duration-200"
           >
             Launch Token
           </Link>
           <Link
             href="/dashboard/explore"
-            className="px-8 py-3.5 rounded-full bg-neutral-900 hover:bg-neutral-800 text-neutral-200 text-sm font-semibold transition-colors cursor-pointer"
+            className="px-8 py-3.5 rounded-full bg-neutral-900 hover:bg-neutral-800 text-neutral-200 text-sm font-semibold transition-colors cursor-pointer hover:scale-105 active:scale-95 duration-200"
           >
             Explore Memes
           </Link>
@@ -82,41 +97,44 @@ export function HeroStatus() {
             className="inline-flex items-center gap-2 text-xs font-mono text-neutral-500 hover:text-neutral-300 transition-colors cursor-pointer"
           >
             <span>Scroll to learn more</span>
-            <span className="text-sm">↓</span>
+            <span className="text-sm animate-bounce">↓</span>
           </a>
         </div>
-      </div>
+      </motion.div>
 
       {/* Proof Stats Row matching Screenshot 1 */}
-      <div className="pt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-8 items-center">
-        <div className="lg:col-span-3">
+      <motion.div
+        variants={stagger}
+        className="pt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-8 items-center border-t border-white/[0.08]"
+      >
+        <motion.div variants={fadeUp} className="lg:col-span-3">
           <div className="text-sm font-medium text-neutral-400">
             Built for decentralized liquidity
           </div>
           <div className="text-xs text-neutral-600 mt-0.5">
             Verified on-chain infrastructure
           </div>
-        </div>
+        </motion.div>
 
-        <div className="lg:col-span-3">
+        <motion.div variants={scaleIn} className="lg:col-span-3">
           <div className="text-3xl md:text-4xl font-bold font-mono text-white tracking-tight">
             6+ Launchpads
           </div>
           <div className="text-xs text-neutral-500 mt-1">
             Solana, BNB, and Robinhood
           </div>
-        </div>
+        </motion.div>
 
-        <div className="lg:col-span-3">
+        <motion.div variants={scaleIn} className="lg:col-span-3">
           <div className="text-3xl md:text-4xl font-bold font-mono text-white tracking-tight">
             &lt; 1s Routing
           </div>
           <div className="text-xs text-neutral-500 mt-1">
             Simultaneous multi-pool seeding
           </div>
-        </div>
+        </motion.div>
 
-        <div className="lg:col-span-3 flex items-center justify-between">
+        <motion.div variants={scaleIn} className="lg:col-span-3 flex items-center justify-between">
           <div>
             <div className="text-3xl md:text-4xl font-bold font-mono text-white tracking-tight">
               100% Direct
@@ -138,8 +156,8 @@ export function HeroStatus() {
               <line x1="85" y1="25" x2="88" y2="40" strokeWidth="3" />
             </svg>
           </div>
-        </div>
-      </div>
-    </section>
+        </motion.div>
+      </motion.div>
+    </motion.section>
   );
 }

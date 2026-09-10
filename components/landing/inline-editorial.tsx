@@ -1,22 +1,30 @@
 "use client";
 
 import Link from "next/link";
+import { motion, fadeUp, stagger, scaleIn } from "@/components/motion";
 
 export function InlineEditorial() {
   return (
-    <section id="editorial" className="py-24 md:py-36 px-6 md:px-12 max-w-[1360px] mx-auto">
+    <motion.section
+      id="editorial"
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, margin: "-80px" }}
+      variants={stagger}
+      className="py-24 md:py-36 px-6 md:px-12 max-w-[1360px] mx-auto"
+    >
       {/* Top Tag */}
-      <div className="flex items-center gap-3 mb-10">
+      <motion.div variants={fadeUp} className="flex items-center gap-3 mb-10">
         <span className="font-mono text-xs text-neutral-500">01</span>
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-neutral-900 text-neutral-300 text-xs font-mono">
           <span>About</span>
           <span className="text-orange-500 font-bold">✱</span>
           <span>Multipu</span>
         </div>
-      </div>
+      </motion.div>
 
-      {/* Running Headline with Inline Editorial Pills & SVGs matching Screenshot 2 */}
-      <div className="mb-20 md:mb-28 max-w-5xl">
+      {/* Running Headline with Inline Editorial Pills & SVGs */}
+      <motion.div variants={fadeUp} className="mb-20 md:mb-28 max-w-5xl">
         <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-normal tracking-tight text-white leading-[1.3] md:leading-[1.25]">
           Our protocol{" "}
           <span className="inline-flex items-center justify-center align-middle w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-orange-600 text-white font-bold text-lg mx-1.5 flex-shrink-0">
@@ -40,19 +48,19 @@ export function InlineEditorial() {
           </span>{" "}
           creators.
         </h2>
-      </div>
+      </motion.div>
 
-      {/* 3-Card Showcase matching Screenshot 2 */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-10">
+      {/* 3-Card Showcase */}
+      <motion.div variants={stagger} className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-10">
         {/* Card 1: Constant monitoring */}
-        <div className="flex flex-col">
-          <div className="w-full h-80 rounded-3xl bg-[#14201c] p-8 flex flex-col items-center justify-between relative overflow-hidden">
+        <motion.div variants={scaleIn} className="flex flex-col">
+          <div className="w-full h-80 rounded-3xl bg-[#14201c] p-8 flex flex-col items-center justify-between relative overflow-hidden group hover:bg-[#182823] transition-colors">
             {/* Concentric radar circles & Asterisk Star */}
             <div className="relative w-40 h-40 flex items-center justify-center mt-2">
               <div className="absolute w-36 h-36 rounded-full bg-white/[0.03]" />
               <div className="absolute w-24 h-24 rounded-full bg-white/[0.05]" />
               {/* 8-spoke Asterisk Star */}
-              <div className="text-4xl font-bold text-orange-500 select-none">
+              <div className="text-4xl font-bold text-orange-500 select-none group-hover:scale-110 transition-transform">
                 ✱
               </div>
             </div>
@@ -76,22 +84,22 @@ export function InlineEditorial() {
               Track bonding curves, DEX liquidity pools, and creator earnings across all venues in real time.
             </p>
           </div>
-        </div>
+        </motion.div>
 
         {/* Card 2: AI-based execution */}
-        <div className="flex flex-col">
+        <motion.div variants={scaleIn} className="flex flex-col">
           {/* Top Pill Action */}
           <Link
             href="/dashboard"
-            className="w-full py-4 px-6 rounded-2xl bg-orange-600 hover:bg-orange-700 text-white flex items-center justify-between font-mono text-xs font-bold tracking-wider uppercase mb-3 transition-colors cursor-pointer"
+            className="w-full py-4 px-6 rounded-2xl bg-orange-600 hover:bg-orange-700 text-white flex items-center justify-between font-mono text-xs font-bold tracking-wider uppercase mb-3 transition-colors cursor-pointer group"
           >
             <span>LAUNCH ENGINE</span>
-            <span className="w-6 h-6 rounded-full bg-black flex items-center justify-center text-white text-xs">
+            <span className="w-6 h-6 rounded-full bg-black flex items-center justify-center text-white text-xs group-hover:translate-x-1 transition-transform">
               →
             </span>
           </Link>
 
-          <div className="w-full h-[260px] rounded-3xl bg-[#14201c] p-6 flex flex-col items-center justify-center relative overflow-hidden">
+          <div className="w-full h-[260px] rounded-3xl bg-[#14201c] p-6 flex flex-col items-center justify-center relative overflow-hidden group hover:bg-[#182823] transition-colors">
             {/* Avatar with Detective Hat illustration & Asterisk */}
             <div className="relative flex flex-col items-center justify-center mb-4">
               {/* Minimalist Hat SVG */}
@@ -100,7 +108,7 @@ export function InlineEditorial() {
               </svg>
               {/* Avatar circle with Asterisk */}
               <div className="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center">
-                <span className="text-2xl font-bold text-orange-500">✱</span>
+                <span className="text-2xl font-bold text-orange-500 group-hover:rotate-45 transition-transform duration-300">✱</span>
               </div>
             </div>
 
@@ -118,11 +126,11 @@ export function InlineEditorial() {
               Powered by the X-Agent autonomous framework and OlaXBT market momentum signals to detect volume surges and execute optimal bonding curve arbitrage.
             </p>
           </div>
-        </div>
+        </motion.div>
 
         {/* Card 3: Automatic triage */}
-        <div className="flex flex-col">
-          <div className="w-full h-80 rounded-3xl bg-[#14201c] p-8 flex flex-col items-center justify-between relative overflow-hidden">
+        <motion.div variants={scaleIn} className="flex flex-col">
+          <div className="w-full h-80 rounded-3xl bg-[#14201c] p-8 flex flex-col items-center justify-between relative overflow-hidden group hover:bg-[#182823] transition-colors">
             {/* Rotating circular SVG text surrounding the Asterisk Star */}
             <div className="relative w-36 h-36 flex items-center justify-center mt-2">
               <svg viewBox="0 0 100 100" className="w-full h-full animate-spin-slow">
@@ -164,8 +172,8 @@ export function InlineEditorial() {
               Neutralize launch friction and seed pool liquidity without human intervention.
             </p>
           </div>
-        </div>
-      </div>
-    </section>
+        </motion.div>
+      </motion.div>
+    </motion.section>
   );
 }

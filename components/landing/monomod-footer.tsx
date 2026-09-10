@@ -2,20 +2,27 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { motion, fadeUp, stagger } from "@/components/motion";
 
 export function MonomodFooter() {
   return (
-    <footer className="pt-24 pb-16 px-6 md:px-12 max-w-[1360px] mx-auto">
+    <motion.footer
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, margin: "-60px" }}
+      variants={stagger}
+      className="pt-24 pb-16 px-6 md:px-12 max-w-[1360px] mx-auto"
+    >
       {/* Top Banner / Prompt */}
-      <div className="mb-6">
+      <motion.div variants={fadeUp} className="mb-6">
         <p className="text-xs font-mono text-neutral-400 uppercase tracking-widest mb-4">
           Deploy instantly with zero lockup. Pay only network gas when you launch.
         </p>
 
-        {/* Wide Action Bar matching Screenshot 4 */}
+        {/* Wide Action Bar */}
         <Link
           href="/launch"
-          className="w-full rounded-2xl bg-neutral-900/90 hover:bg-neutral-800 text-white p-6 sm:p-8 flex items-center justify-between group transition-colors cursor-pointer"
+          className="w-full rounded-2xl bg-neutral-900/90 hover:bg-neutral-800 text-white p-6 sm:p-8 flex items-center justify-between group transition-colors cursor-pointer border border-white/[0.04]"
         >
           <span className="text-2xl sm:text-3xl md:text-4xl font-normal tracking-tight text-white">
             Get started today
@@ -24,10 +31,10 @@ export function MonomodFooter() {
             →
           </span>
         </Link>
-      </div>
+      </motion.div>
 
-      {/* Large Rounded Container matching Screenshot 4 */}
-      <div className="rounded-3xl bg-neutral-950 p-8 sm:p-14 lg:p-16 mb-8">
+      {/* Large Rounded Container */}
+      <motion.div variants={fadeUp} className="rounded-3xl bg-neutral-950 p-8 sm:p-14 lg:p-16 mb-8 border border-white/[0.04]">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8">
           {/* Left: Multipu Logo & Wordmark */}
           <div className="lg:col-span-5 flex flex-col justify-between">
@@ -52,7 +59,7 @@ export function MonomodFooter() {
             </div>
 
             <div className="mt-8 flex items-center gap-2 text-xs font-mono text-neutral-500">
-              <span className="w-2 h-2 rounded-full bg-emerald-500" />
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
               <span>Solana, BNB, Robinhood live</span>
             </div>
           </div>
@@ -156,15 +163,15 @@ export function MonomodFooter() {
             </div>
           </div>
         </div>
-      </div>
+      </motion.div>
 
-      {/* Bottom Copyright & Disclaimer matching Screenshot 4 */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-mono text-neutral-600">
+      {/* Bottom Copyright & Disclaimer */}
+      <motion.div variants={fadeUp} className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-mono text-neutral-600">
         <div>(c) 2026 Multipu Protocol. Powered by X-Agent &amp; OlaXBT.</div>
         <div className="text-neutral-500">
           Crafted for decentralized traders and creators.
         </div>
-      </div>
-    </footer>
+      </motion.div>
+    </motion.footer>
   );
 }

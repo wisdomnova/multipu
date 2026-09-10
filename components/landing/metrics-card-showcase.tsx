@@ -1,13 +1,20 @@
 "use client";
 
 import Link from "next/link";
+import { motion, fadeUp, stagger, scaleIn } from "@/components/motion";
 
 export function MetricsCardShowcase() {
   return (
-    <section className="py-24 md:py-36 px-6 md:px-12 max-w-[1360px] mx-auto">
-      {/* Top Floating Pill Navigation matching Screenshot 2 */}
-      <div className="flex justify-center mb-12">
-        <div className="inline-flex items-center gap-6 px-6 py-2 rounded-full bg-neutral-900 text-neutral-300 text-xs font-mono">
+    <motion.section
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, margin: "-80px" }}
+      variants={stagger}
+      className="py-24 md:py-36 px-6 md:px-12 max-w-[1360px] mx-auto"
+    >
+      {/* Top Floating Pill Navigation */}
+      <motion.div variants={fadeUp} className="flex justify-center mb-12">
+        <div className="inline-flex items-center gap-6 px-6 py-2 rounded-full bg-neutral-900 text-neutral-300 text-xs font-mono border border-white/[0.06]">
           <span className="text-neutral-500 font-bold">≡</span>
           <span className="font-semibold text-white tracking-wider uppercase">MULTIPU</span>
           <Link
@@ -18,12 +25,12 @@ export function MetricsCardShowcase() {
             <span>Signals</span>
           </Link>
         </div>
-      </div>
+      </motion.div>
 
-      {/* Two Side-by-Side Cards with Large Rounded Corners */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8">
+      {/* Two Side-by-Side Cards */}
+      <motion.div variants={stagger} className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8">
         {/* Left Card: Deep Dark Plum Metrics Card */}
-        <div className="lg:col-span-7 rounded-[36px] bg-[#120b18] p-8 sm:p-12 lg:p-14 flex flex-col justify-between min-h-[400px]">
+        <motion.div variants={scaleIn} className="lg:col-span-7 rounded-[36px] bg-[#120b18] p-8 sm:p-12 lg:p-14 flex flex-col justify-between min-h-[400px] border border-white/[0.04]">
           <div>
             {/* Top platform tag */}
             <div className="flex items-center gap-2 mb-12">
@@ -58,10 +65,10 @@ export function MetricsCardShowcase() {
           <div className="text-[11px] font-mono text-neutral-600 mt-10">
             *Simultaneous cross-chain routing on Solana, BNB Chain, and Robinhood Chain.
           </div>
-        </div>
+        </motion.div>
 
         {/* Right Card: Soft Lavender Card */}
-        <div className="lg:col-span-5 rounded-[36px] bg-[#b6b3e8] text-[#120b18] p-8 sm:p-12 lg:p-14 flex flex-col justify-between min-h-[400px]">
+        <motion.div variants={scaleIn} className="lg:col-span-5 rounded-[36px] bg-[#b6b3e8] text-[#120b18] p-8 sm:p-12 lg:p-14 flex flex-col justify-between min-h-[400px]">
           <div>
             <h3 className="text-3xl sm:text-4xl font-normal tracking-tight text-[#120b18] leading-[1.15] mb-4">
               Accelerating Liquidity in Decentralized Finance
@@ -75,7 +82,7 @@ export function MetricsCardShowcase() {
           <div className="pt-8">
             <Link
               href="/dashboard"
-              className="inline-flex items-center gap-3 px-5 py-3 rounded-xl bg-[#120b18] text-white hover:bg-[#20152a] text-xs font-mono transition-colors cursor-pointer"
+              className="inline-flex items-center gap-3 px-5 py-3 rounded-xl bg-[#120b18] text-white hover:bg-[#20152a] text-xs font-mono transition-colors cursor-pointer hover:scale-105 active:scale-95 duration-200"
             >
               <span className="w-5 h-5 rounded-sm bg-white/10 flex items-center justify-center text-xs">
                 ↗
@@ -83,8 +90,8 @@ export function MetricsCardShowcase() {
               <span>View Strategies</span>
             </Link>
           </div>
-        </div>
-      </div>
-    </section>
+        </motion.div>
+      </motion.div>
+    </motion.section>
   );
 }
