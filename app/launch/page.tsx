@@ -98,24 +98,76 @@ export default function LaunchPage() {
           setTokenData({
             name: found.name || "",
             symbol: found.symbol || "",
-            supply: found.supply || "",
+            supply: found.supply ? String(found.supply) : "",
             decimals: String(found.decimals ?? "9"),
             description: found.description || "",
           });
+          if (found.mint_address) {
+            setMintAddress(found.mint_address);
+          }
           if (found.image_url) {
             setImagePreview(found.image_url);
           }
-          if (session.isLoggedIn) {
-            setCurrentStep("create");
-          }
-          toast.info(`Loaded draft token: ${found.name}`);
+          setCurrentStep("launchpads");
+          toast.info("Resuming launch configuration for " + found.name);
         }
       })
       .catch(() => {});
-  }, [session.isLoggedIn]);
+  }, []);
+
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Image size must be less than 5MB");
+      return;
+    }
+
+    setImageFile(file);
+    const reader = new FileReader();
+    reader.onload = () => setImagePreview(reader.result as string);
+    reader.readAsDataURL(file);
+  };
+
+  const togglePad = (padId: string) => {
+    if (isEvmPad(padId) && !evmLaunchesEnabled) {
+      toast.error("Robinhood and BSC multi-chain launches are currently in testnet configuration.");
+      return;
+    }
+
+    if (isEvmPad(padId) && !evmAddress) {
+      toast.error("Use an EVM wallet to launch on Four.meme and Pons.");
+    }
+
+    setSelectedPads((prev) =>
+      prev.includes(padId)
+        ? prev.filter((id) => id !== padId)
+        : [...prev, padId]
+    );
+  };
+
+  const canProceed = () => {
+    switch (currentStep) {
+      case "connect":
+        return session.isLoggedIn;
+      case "create":
+        return Boolean(
+          tokenData.name.trim() &&
+            tokenData.symbol.trim() &&
+            tokenData.supply &&
+            Number(tokenData.supply) > 0
+        );
+      case "launchpads":
+        return selectedPads.length > 0;
+      case "confirm":
+        return true;
+      default:
+        return false;
+    }
+  };
 
   const goNext = () => {
-    setError(null);
     if (currentStep === "connect") setCurrentStep("create");
     else if (currentStep === "create") setCurrentStep("launchpads");
     else if (currentStep === "launchpads") setCurrentStep("confirm");
@@ -123,301 +175,121 @@ export default function LaunchPage() {
   };
 
   const goBack = () => {
-    setError(null);
     if (currentStep === "create") setCurrentStep("connect");
     else if (currentStep === "launchpads") setCurrentStep("create");
     else if (currentStep === "confirm") setCurrentStep("launchpads");
   };
 
-  const togglePad = (pad: string) => {
-    const launchpadMeta = LAUNCHPAD_META.find((m) => m.id === pad);
-    if (!launchpadMeta?.ready) {
-      toast.error(`${launchpadMeta?.name ?? pad} integration is not live yet`);
-      return;
-    }
-    if (!isDemo) {
-      if (isEvmPad(pad) && !evmLaunchesEnabled) {
-        toast.error("EVM launch adapters are disabled for this deployment.");
-        return;
-      }
-      if (session.walletKind === "solana" && isEvmPad(pad)) {
-        toast.error("Use SIWB (EVM wallet) for Four.meme and Pons.");
-        return;
-      }
-      if (session.walletKind === "evm" && !isEvmPad(pad)) {
-        toast.error("Use SIWS (Solana wallet) for Solana launchpads.");
-        return;
-      }
-    }
-    setSelectedPads((prev) =>
-      prev.includes(pad) ? prev.filter((p) => p !== pad) : [...prev, pad]
-    );
-  };
-
-  const canProceed = () => {
-    if (currentStep === "connect") {
-      if (!session.isLoggedIn) return false;
-      if (isDemo) return true;
-      if (session.walletKind === "evm") return Boolean(evmAddress);
-      return connected;
-    }
-    if (currentStep === "create")
-      return Boolean(tokenData.name && tokenData.symbol && tokenData.supply);
-    if (currentStep === "launchpads") return selectedPads.length > 0;
-    if (currentStep === "confirm") return isDemo || !launchRestricted;
-    return false;
-  };
-
-  // ─── Image Upload Handler ──────────────────────────
-  const handleImageSelect = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const file = e.target.files?.[0];
-      if (!file) return;
-
-      if (file.size > 5 * 1024 * 1024) {
-        toast.error("Image must be under 5MB");
-        return;
-      }
-
-      setImageFile(file);
-      const reader = new FileReader();
-      reader.onload = () => setImagePreview(reader.result as string);
-      reader.readAsDataURL(file);
-    },
-    []
-  );
-
-  // ─── Deploy Flow ───────────────────────────────────
   const handleDeploy = useCallback(async () => {
-    if (isDemo) {
-      setIsDeploying(true);
-      setError(null);
-      try {
-        setDeployProgress("Uploading token icon...");
-        let imageUrl: string | null = null;
-        if (imageFile) {
-          try {
-            const formData = new FormData();
-            formData.append("file", imageFile);
-            const uploadRes = await fetch("/api/upload", {
-              method: "POST",
-              body: formData,
-            });
-            if (uploadRes.ok) {
-              const { url } = await uploadRes.json();
-              imageUrl = url;
-            }
-          } catch {
-            console.warn("Image upload skipped for demo mode");
-          }
-        }
-
-        setDeployProgress("Preparing simulated token on testnet...");
-        await new Promise((r) => setTimeout(r, 600));
-
-        const demoMint =
-          "Demo" +
-          Math.random().toString(36).substring(2, 8).toUpperCase() +
-          "MintToken77";
-        const demoSig =
-          "5Demo" +
-          Math.random().toString(36).substring(2, 12) +
-          "TxSig";
-
-        setMintAddress(demoMint);
-        setMintTx(demoSig);
-
-        try {
-          const tokenRes = await fetch("/api/tokens", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              name: tokenData.name,
-              symbol: tokenData.symbol,
-              supply: tokenData.supply,
-              decimals: parseInt(tokenData.decimals) || 9,
-              description: tokenData.description,
-              imageUrl,
-            }),
-          });
-          if (tokenRes.ok) {
-            const { token } = await tokenRes.json();
-            if (token?.id) {
-              await fetch("/api/tokens", {
-                method: "PATCH",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  tokenId: token.id,
-                  mintAddress: demoMint,
-                  mintTx: demoSig,
-                }),
-              });
-              for (const padId of selectedPads) {
-                await fetch("/api/launches", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({
-                    tokenId: token.id,
-                    launchpad: padId,
-                    initialLiquidity: 1,
-                  }),
-                });
-              }
-            }
-          }
-        } catch {
-          // Demo DB persistence fallback
-        }
-
-        for (const padId of selectedPads) {
-          const padMeta = LAUNCHPAD_META.find((m) => m.id === padId);
-          setDeployProgress(`Dispatching to ${padMeta?.name || padId}...`);
-          await new Promise((r) => setTimeout(r, 600));
-        }
-
-        const simResults = selectedPads.map((padId) => ({
-          launchpad: padId,
-          poolAddress:
-            "DemoPool" +
-            Math.random().toString(36).substring(2, 8).toUpperCase(),
-          status: "live" as const,
-        }));
-
-        setLaunchResults(simResults);
-        setDeployProgress("");
-        setIsDeploying(false);
-        setCurrentStep("success");
-        toast.success("Demo token created & launched successfully!");
-        return;
-      } catch (err) {
-        setIsDeploying(false);
-        setError(err instanceof Error ? err.message : "Demo deployment failed");
-        return;
-      }
-    }
-
-    const isSolanaAuth = session.walletKind === "solana";
-    const isEvmAuth = session.walletKind === "evm";
-
-    if (isSolanaAuth && (!publicKey || !signTransaction || !connection)) {
-      setError("Solana wallet not connected");
-      return;
-    }
-    if (isEvmAuth && !evmAddress) {
-      setError("EVM wallet not connected");
-      return;
-    }
-
-    if (launchRestricted) {
-      setError(
-        "Mainnet launches are currently disabled while Multipu runs in a testnet security phase."
-      );
-      return;
-    }
-
     setIsDeploying(true);
     setError(null);
 
     try {
-      // Step 1: Upload image (if any)
-      let imageUrl: string | null = null;
-      if (imageFile) {
-        setDeployProgress("Uploading image...");
-        try {
-          const formData = new FormData();
-          formData.append("file", imageFile);
-          const uploadRes = await fetch("/api/upload", {
-            method: "POST",
-            body: formData,
-          });
-          if (uploadRes.ok) {
-            const { url } = await uploadRes.json();
-            imageUrl = url;
-          }
-        } catch {
-          console.warn("Image upload failed, continuing without image");
-        }
-      }
-
-      // Step 2: Create token record in DB
-      setDeployProgress("Preparing token...");
-      const tokenRes = await fetch("/api/tokens", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: tokenData.name,
-          symbol: tokenData.symbol,
-          supply: tokenData.supply,
-          decimals: parseInt(tokenData.decimals),
-          description: tokenData.description,
-          imageUrl,
-        }),
-      });
-
-      let tokenId: string | null = null;
-      if (tokenRes.ok) {
-        const { token } = await tokenRes.json();
-        tokenId = token.id;
-      }
-
-      let mintedTokenAddress: string | null = null;
-      if (isSolanaAuth && publicKey && signTransaction && connection) {
-        setDeployProgress("Creating token on Solana...");
-        const mintResult = await createMintTransaction(connection, publicKey, {
-          name: tokenData.name,
-          symbol: tokenData.symbol,
-          decimals: parseInt(tokenData.decimals),
-          supply: tokenData.supply,
-          description: tokenData.description,
-          imageUrl: imageUrl || undefined,
-        });
-
-        const signed = await signTransaction(mintResult.transaction);
-        const rawTx = signed.serialize();
-
-        setDeployProgress("Confirming mint transaction...");
-        const sig = await connection.sendRawTransaction(rawTx, {
-          skipPreflight: false,
-          preflightCommitment: "confirmed",
-        });
-
-        const { blockhash, lastValidBlockHeight } =
-          await connection.getLatestBlockhash("confirmed");
-        await connection.confirmTransaction(
-          { signature: sig, blockhash, lastValidBlockHeight },
-          "confirmed"
+      if (launchRestricted && !isDemo) {
+        throw new Error(
+          "Mainnet launches are locked until explicitly enabled."
         );
+      }
 
-        const mintAddr = mintResult.mintKeypair.publicKey.toBase58();
-        mintedTokenAddress = mintAddr;
-        setMintAddress(mintAddr);
-        setMintTx(sig);
-
-        if (tokenId) {
-          await fetch("/api/tokens", {
-            method: "PATCH",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              tokenId,
-              mintAddress: mintAddr,
-              mintTx: sig,
-            }),
-          });
+      let imageUrl: string | undefined;
+      if (imageFile) {
+        setDeployProgress("Uploading token asset...");
+        const formData = new FormData();
+        formData.append("file", imageFile);
+        const uploadRes = await fetch("/api/upload", {
+          method: "POST",
+          body: formData,
+        });
+        if (uploadRes.ok) {
+          const { url } = await uploadRes.json();
+          imageUrl = url;
         }
       }
 
-      // Step 5: Launch on selected launchpads
-      const results: typeof launchResults = [];
+      let mintedTokenAddress = mintAddress;
+      const requiresSolanaMint = selectedPads.some((p) => !isEvmPad(p));
+
+      if (requiresSolanaMint && !mintedTokenAddress) {
+        if (isDemo) {
+          setDeployProgress("Minting sandbox preview token...");
+          mintedTokenAddress = "mock-mint-" + Math.random().toString(36).substring(2, 9);
+          setMintAddress(mintedTokenAddress);
+          setMintTx("mock-tx-" + Math.random().toString(36).substring(2, 9));
+        } else {
+          if (!publicKey || !signTransaction || !connection) {
+            throw new Error("Solana wallet required for deployment");
+          }
+          setDeployProgress("Compiling SPL token transaction...");
+          const mintResult = await createMintTransaction(connection, publicKey, {
+            name: tokenData.name,
+            symbol: tokenData.symbol,
+            decimals: parseInt(tokenData.decimals) || 9,
+            supply: tokenData.supply,
+            description: tokenData.description,
+            imageUrl: imageUrl || undefined,
+          });
+
+          setDeployProgress("Sign token mint transaction...");
+          const signed = await signTransaction(mintResult.transaction);
+          const rawTx = signed.serialize();
+
+          setDeployProgress("Confirming on-chain...");
+          const txid = await connection.sendRawTransaction(rawTx);
+          await connection.confirmTransaction(txid, "confirmed");
+
+          mintedTokenAddress = mintResult.mintKeypair.publicKey.toBase58();
+          setMintAddress(mintedTokenAddress);
+          setMintTx(txid);
+        }
+      }
+
+      // Record token in database
+      setDeployProgress("Persisting token registry record...");
+      let tokenId: string | null = null;
+      try {
+        const tokenRes = await fetch("/api/tokens", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: tokenData.name,
+            symbol: tokenData.symbol,
+            description: tokenData.description || null,
+            imageUrl: imageUrl || null,
+            supply: tokenData.supply,
+            decimals: parseInt(tokenData.decimals),
+            mintAddress: mintedTokenAddress,
+          }),
+        });
+        if (tokenRes.ok) {
+          const { token } = await tokenRes.json();
+          tokenId = token.id;
+        }
+      } catch (err) {
+        console.warn("[TOKEN] Registration non-fatal error:", err);
+      }
+
+      // Execute multi-pad launch
+      const results: {
+        launchpad: string;
+        poolAddress: string;
+        status: "live" | "failed";
+      }[] = [];
 
       for (const padId of selectedPads) {
         const padMeta = LAUNCHPAD_META.find((m) => m.id === padId);
-        setDeployProgress(`Launching on ${padMeta?.name || padId}...`);
+        setDeployProgress(`Dispatching to ${padMeta?.name || padId}...`);
 
         try {
-          const launchpad = getLaunchpad(padId);
-          if (!launchpad) throw new Error(`Unknown launchpad: ${padId}`);
+          if (isDemo) {
+            await new Promise((r) => setTimeout(r, 600));
+            results.push({
+              launchpad: padId,
+              poolAddress: "mock-pool-" + Math.random().toString(36).substring(2, 8),
+              status: "live",
+            });
+            continue;
+          }
 
-          // Create launch record
           let launchId: string | null = null;
           if (tokenId) {
             const launchRes = await fetch("/api/launches", {
@@ -441,13 +313,13 @@ export default function LaunchPage() {
           if (isEvmPad(padId)) {
             if (!evmAddress) throw new Error("EVM wallet not connected");
             const evmResult = await executeEvmLaunch({
-              launchpad: padId as "fourmeme" | "pons" | "sherwood",
+              launchpad: padId as "fourmeme" | "pons",
               walletAddress: evmAddress,
               token: {
                 name: tokenData.name,
                 symbol: tokenData.symbol,
                 description: tokenData.description,
-                imageUrl,
+                imageUrl: imageUrl || null,
                 supply: tokenData.supply,
                 decimals: parseInt(tokenData.decimals),
               },
@@ -458,45 +330,39 @@ export default function LaunchPage() {
             if (!connection || !publicKey || !signTransaction || !mintedTokenAddress) {
               throw new Error("Missing Solana launch prerequisites");
             }
-            const launchResult = await launchpad.createLaunchTransaction(
+            const service = getLaunchpad(padId);
+            if (!service) {
+              throw new Error(`Unsupported launchpad: ${padId}`);
+            }
+            const launchResult = await service.createLaunchTransaction(
               connection,
               {
                 mintAddress: new PublicKey(mintedTokenAddress),
                 walletPublicKey: publicKey,
                 initialLiquiditySol: 1,
                 tokenAmount:
-                  (BigInt(tokenData.supply) *
-                    BigInt(10 ** parseInt(tokenData.decimals))) /
+                  (BigInt(tokenData.supply || "1000000000") *
+                    BigInt(10 ** (parseInt(tokenData.decimals) || 9))) /
                   10n,
               }
             );
 
+            setDeployProgress(`Sign ${padMeta?.name || padId} launch transaction...`);
             const signedLaunch = await signTransaction(launchResult.transaction);
-            launchSig = await connection.sendRawTransaction(
-              signedLaunch.serialize(),
-              { skipPreflight: false, preflightCommitment: "confirmed" }
-            );
-
-            const launchBlock = await connection.getLatestBlockhash("confirmed");
-            await connection.confirmTransaction(
-              {
-                signature: launchSig,
-                blockhash: launchBlock.blockhash,
-                lastValidBlockHeight: launchBlock.lastValidBlockHeight,
-              },
-              "confirmed"
-            );
-            poolAddr = launchResult.poolAddress.toBase58();
+            launchSig = await connection.sendRawTransaction(signedLaunch.serialize());
+            await connection.confirmTransaction(launchSig, "confirmed");
+            poolAddr = launchResult.poolAddress ? launchResult.poolAddress.toBase58() : launchSig.slice(0, 12);
           }
 
           if (launchId) {
             await fetch("/api/launches", {
-              method: "PATCH",
+              method: "PUT",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
-                launchId,
+                id: launchId,
+                status: "live",
                 poolAddress: poolAddr,
-                launchTx: launchSig,
+                txSignature: launchSig,
               }),
             });
           }
@@ -529,16 +395,15 @@ export default function LaunchPage() {
     publicKey,
     signTransaction,
     connection,
-    session.walletKind,
     evmAddress,
     tokenData,
     selectedPads,
     imageFile,
-    launchResults,
+    mintAddress,
     launchRestricted,
+    isDemo,
   ]);
 
-  // ─── Cost Estimate ─────────────────────────────────
   const estimatedCost = selectedPads.reduce((total, pad) => {
     const meta = LAUNCHPAD_META.find((m) => m.id === pad);
     const feeStr = meta?.estimatedFee || "0";
@@ -546,73 +411,77 @@ export default function LaunchPage() {
   }, 0.01);
 
   return (
-    <div className="min-h-screen bg-background dot-grid">
-      {/* Nav bar */}
-      <nav className="border-b border-border bg-[rgba(5,5,5,0.8)] backdrop-blur-xl sticky top-0 z-50">
-        <div className="mx-auto max-w-[1000px] px-6 md:px-10 flex items-center justify-between h-16">
+    <div className="min-h-screen bg-[#121212] text-white">
+      {/* Top navigation bar */}
+      <nav className="border-b border-white/[0.06] bg-[#121212]/95 backdrop-blur-md sticky top-0 z-50 flex items-center h-16 flex-shrink-0 shrink-0">
+        <div className="mx-auto max-w-[1200px] w-full px-6 md:px-10 flex items-center justify-between">
           <button
             onClick={() => {
               if (typeof window !== "undefined" && window.history.length > 1) {
                 router.back();
               } else {
-                router.push("/");
+                router.push("/dashboard");
               }
             }}
-            className="flex items-center gap-2 text-text-secondary hover:text-text-primary transition-colors text-sm cursor-pointer"
+            className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.05] hover:bg-white/[0.1] text-neutral-300 hover:text-white transition-colors text-xs font-sans font-medium cursor-pointer"
           >
-            <IconArrowLeft size={16} />
+            <IconArrowLeft size={14} />
             <span>Back</span>
           </button>
-          <div className="flex items-center gap-2.5">
-            <div className="relative w-6 h-6 flex-shrink-0">
+          
+          <Link href="/" className="flex items-center gap-2.5">
+            <div className="relative w-7 h-7 flex-shrink-0">
               <Image
-                src="/1.jpg"
-                alt=""
+                src="/logo.png"
+                alt="Multipu"
                 fill
-                sizes="24px"
-                className="object-cover rounded-md"
+                sizes="28px"
+                className="object-contain"
               />
             </div>
-            <span className="text-sm font-semibold text-text-primary">
+            <span className="text-sm font-semibold text-white font-sans tracking-tight">
               Multipu
             </span>
-          </div>
+          </Link>
+          
           <div className="w-20" />
         </div>
       </nav>
 
-      <div className="mx-auto max-w-[1000px] px-6 md:px-10 py-12">
-        {/* Step indicator */}
+      <div className="mx-auto max-w-[900px] px-6 md:px-10 py-10 md:py-14">
+        {/* Step Indicator */}
         {currentStep !== "success" && (
           <motion.div
             initial="hidden"
             animate="visible"
             variants={stagger}
-            className="mb-12"
+            className="mb-10"
           >
-            <div className="flex items-center gap-2 md:gap-4 overflow-x-auto pb-2">
+            <div className="flex items-center justify-center gap-2 md:gap-3 overflow-x-auto pb-2">
               {stepsMeta.map((step, i) => (
                 <motion.div
                   key={step.id}
                   variants={fadeUp}
-                  className="flex items-center gap-2 md:gap-4"
+                  className="flex items-center gap-2 md:gap-3"
                 >
                   <div
                     className={cn(
-                      "flex items-center gap-2 px-3 py-1.5 rounded-sm font-mono text-xs transition-colors whitespace-nowrap",
-                      i <= currentIndex
-                        ? "text-accent bg-accent/10 border border-accent/20"
-                        : "text-text-dim border border-border"
+                      "flex items-center gap-2 px-4 py-2 rounded-full font-mono text-xs transition-colors whitespace-nowrap",
+                      i === currentIndex
+                        ? "bg-white text-black font-semibold"
+                        : i < currentIndex
+                        ? "bg-white/[0.08] text-white"
+                        : "bg-[#181818] text-neutral-500 border border-white/[0.04]"
                     )}
                   >
                     <span>{step.number}</span>
-                    <span className="hidden sm:inline">{step.label}</span>
+                    <span className="hidden sm:inline font-sans">{step.label}</span>
                   </div>
                   {i < stepsMeta.length - 1 && (
                     <div
                       className={cn(
                         "w-6 md:w-10 h-px transition-colors",
-                        i < currentIndex ? "bg-accent/40" : "bg-border"
+                        i < currentIndex ? "bg-white/40" : "bg-white/[0.08]"
                       )}
                     />
                   )}
@@ -629,19 +498,19 @@ export default function LaunchPage() {
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="mb-6 p-4 border border-error/30 bg-error/5 flex items-start gap-3"
+              className="mb-6 p-4 rounded-xl border border-red-500/20 bg-red-500/10 flex items-start gap-3"
             >
               <IconAlertCircle
                 size={16}
-                className="text-error mt-0.5 flex-shrink-0"
+                className="text-red-400 mt-0.5 flex-shrink-0"
               />
               <div>
-                <p className="text-sm text-error font-medium">Error</p>
-                <p className="text-xs text-text-secondary mt-1">{error}</p>
+                <p className="text-xs text-red-400 font-sans font-semibold">Error</p>
+                <p className="text-xs text-neutral-300 font-sans mt-0.5">{error}</p>
               </div>
               <button
                 onClick={() => setError(null)}
-                className="ml-auto text-text-muted hover:text-text-primary text-xs"
+                className="ml-auto text-neutral-400 hover:text-white text-xs font-sans cursor-pointer"
               >
                 Dismiss
               </button>
@@ -651,7 +520,7 @@ export default function LaunchPage() {
 
         {/* Step content */}
         <AnimatePresence mode="wait">
-          {/* ─── Step 1: Connect Wallet ─────────────── */}
+          {/* Step 1: Connect Wallet */}
           {currentStep === "connect" && (
             <motion.div
               key="connect"
@@ -659,56 +528,56 @@ export default function LaunchPage() {
               animate="visible"
               exit={{ opacity: 0, y: -20 }}
               variants={stagger}
-              className="max-w-lg mx-auto"
+              className="max-w-xl mx-auto bg-[#181818] p-8 md:p-10 rounded-2xl border border-white/[0.04]"
             >
               <motion.h1
                 variants={fadeUp}
-                className="text-2xl md:text-3xl font-bold tracking-tight"
+                className="text-2xl md:text-3xl font-bold tracking-tight text-white font-sans"
               >
                 Connect your wallet
               </motion.h1>
               <motion.p
                 variants={fadeUp}
-                className="mt-3 text-text-secondary"
+                className="mt-2 text-sm text-neutral-400 font-sans"
               >
-                Link your Solana or EVM wallet to deploy tokens and manage launches.
+                Link your Solana or EVM wallet to deploy tokens and dispatch multi-venue pools.
               </motion.p>
               <motion.div
                 variants={fadeUp}
-                className="mt-3 inline-flex items-center gap-2 border border-accent/30 bg-accent/5 px-3 py-1.5"
+                className="mt-4 inline-flex items-center gap-2 rounded-full border border-white/[0.06] bg-[#141414] px-3.5 py-1"
               >
-                <span className="font-mono text-[10px] uppercase tracking-wider text-accent">
+                <span className="font-mono text-[10px] uppercase tracking-wider text-neutral-400">
                   Network
                 </span>
-                <span className="font-mono text-xs text-text-primary">
+                <span className="font-mono text-xs text-white">
                   {SOLANA_NETWORK}
                 </span>
-                <span className="text-text-dim">/</span>
-                <span className="font-mono text-xs text-text-primary">
+                <span className="text-neutral-600">/</span>
+                <span className="font-mono text-xs text-white">
                   {APP_PHASE}
                 </span>
               </motion.div>
 
-              <motion.div variants={fadeUp} className="mt-10 space-y-4">
+              <motion.div variants={fadeUp} className="mt-8 space-y-4">
                 {!session.isLoggedIn ? (
-                  <div className="p-8 border border-border bg-elevated text-center space-y-4">
-                    <p className="text-sm text-text-secondary">
-                      Connect and sign in with your Solana wallet to continue.
+                  <div className="p-8 rounded-xl border border-white/[0.04] bg-[#141414] text-center space-y-4">
+                    <p className="text-xs text-neutral-400 font-sans">
+                      Connect and authenticate your wallet to continue.
                     </p>
                     <WalletButton />
                   </div>
                 ) : (
-                  <div className="p-6 border border-accent/30 bg-accent/5">
+                  <div className="p-5 rounded-xl border border-emerald-500/30 bg-emerald-500/5">
                     <div className="flex items-center gap-3">
-                      <div className="w-2 h-2 rounded-full bg-success" />
-                      <span className="font-mono text-sm text-text-primary">
+                      <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
+                      <span className="font-mono text-xs text-white">
                         {session.walletAddress.slice(0, 6)}...
                         {session.walletAddress.slice(-4)}
                       </span>
-                      <span className="font-mono text-xs text-success ml-auto">
-                        {isDemo ? "Demo Session Ready" : "Connected & Signed In"}
+                      <span className="font-mono text-xs text-emerald-400 ml-auto">
+                        {isDemo ? "Demo Session Ready" : "Connected & Authenticated"}
                       </span>
-                      <IconCheck size={14} className="text-success" />
+                      <IconCheck size={16} className="text-emerald-400" />
                     </div>
                   </div>
                 )}
@@ -716,7 +585,7 @@ export default function LaunchPage() {
             </motion.div>
           )}
 
-          {/* ─── Step 2: Create Token ───────────────── */}
+          {/* Step 2: Create Token */}
           {currentStep === "create" && (
             <motion.div
               key="create"
@@ -724,25 +593,25 @@ export default function LaunchPage() {
               animate="visible"
               exit={{ opacity: 0, y: -20 }}
               variants={stagger}
-              className="max-w-lg mx-auto"
+              className="max-w-xl mx-auto bg-[#181818] p-8 md:p-10 rounded-2xl border border-white/[0.04]"
             >
               <motion.h1
                 variants={fadeUp}
-                className="text-2xl md:text-3xl font-bold tracking-tight"
+                className="text-2xl md:text-3xl font-bold tracking-tight text-white font-sans"
               >
                 Create your token
               </motion.h1>
               <motion.p
                 variants={fadeUp}
-                className="mt-3 text-text-secondary"
+                className="mt-2 text-sm text-neutral-400 font-sans"
               >
                 Define your token&apos;s identity and supply parameters.
               </motion.p>
 
-              <motion.div variants={fadeUp} className="mt-10 space-y-6">
+              <motion.div variants={fadeUp} className="mt-8 space-y-5">
                 {/* Token image upload */}
-                <div className="flex items-center gap-6">
-                  <label className="relative w-20 h-20 border border-dashed border-border hover:border-border-hover bg-elevated rounded-xl flex flex-col items-center justify-center gap-1 transition-colors cursor-pointer overflow-hidden">
+                <div className="flex items-center gap-5">
+                  <label className="relative w-20 h-20 border border-dashed border-white/[0.1] hover:border-white/30 bg-[#141414] rounded-2xl flex flex-col items-center justify-center gap-1 transition-colors cursor-pointer overflow-hidden flex-shrink-0">
                     {imagePreview ? (
                       <Image
                         src={imagePreview}
@@ -752,8 +621,8 @@ export default function LaunchPage() {
                       />
                     ) : (
                       <>
-                        <IconUpload size={18} className="text-text-muted" />
-                        <span className="text-[10px] font-mono text-text-dim">
+                        <IconUpload size={18} className="text-neutral-400" />
+                        <span className="text-[10px] font-mono text-neutral-500">
                           Logo
                         </span>
                       </>
@@ -766,7 +635,7 @@ export default function LaunchPage() {
                     />
                   </label>
                   <div className="flex-1">
-                    <label className="font-mono text-xs text-text-dim uppercase tracking-wider block mb-2">
+                    <label className="font-sans text-xs font-medium text-neutral-300 block mb-2">
                       Token Name
                     </label>
                     <input
@@ -777,7 +646,7 @@ export default function LaunchPage() {
                       onChange={(e) =>
                         setTokenData({ ...tokenData, name: e.target.value })
                       }
-                      className="w-full bg-transparent border border-border hover:border-border-hover focus:border-accent/50 focus:outline-none px-4 py-3 text-sm text-text-primary placeholder:text-text-dim transition-colors"
+                      className="w-full bg-[#141414] border border-white/[0.08] focus:border-white/30 rounded-xl px-4 py-3 text-sm text-white placeholder:text-neutral-500 font-mono transition-colors focus:outline-none"
                     />
                   </div>
                 </div>
@@ -785,7 +654,7 @@ export default function LaunchPage() {
                 {/* Symbol + Supply */}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="font-mono text-xs text-text-dim uppercase tracking-wider block mb-2">
+                    <label className="font-sans text-xs font-medium text-neutral-300 block mb-2">
                       Symbol
                     </label>
                     <input
@@ -799,11 +668,11 @@ export default function LaunchPage() {
                           symbol: e.target.value.toUpperCase(),
                         })
                       }
-                      className="w-full bg-transparent border border-border hover:border-border-hover focus:border-accent/50 focus:outline-none px-4 py-3 text-sm text-text-primary placeholder:text-text-dim transition-colors font-mono"
+                      className="w-full bg-[#141414] border border-white/[0.08] focus:border-white/30 rounded-xl px-4 py-3 text-sm text-white placeholder:text-neutral-500 font-mono transition-colors focus:outline-none uppercase"
                     />
                   </div>
                   <div>
-                    <label className="font-mono text-xs text-text-dim uppercase tracking-wider block mb-2">
+                    <label className="font-sans text-xs font-medium text-neutral-300 block mb-2">
                       Total Supply
                     </label>
                     <input
@@ -815,14 +684,14 @@ export default function LaunchPage() {
                         const val = e.target.value.replace(/[^0-9]/g, "");
                         setTokenData({ ...tokenData, supply: val });
                       }}
-                      className="w-full bg-transparent border border-border hover:border-border-hover focus:border-accent/50 focus:outline-none px-4 py-3 text-sm text-text-primary placeholder:text-text-dim transition-colors font-mono"
+                      className="w-full bg-[#141414] border border-white/[0.08] focus:border-white/30 rounded-xl px-4 py-3 text-sm text-white placeholder:text-neutral-500 font-mono transition-colors focus:outline-none"
                     />
                   </div>
                 </div>
 
                 {/* Decimals */}
                 <div>
-                  <label className="font-mono text-xs text-text-dim uppercase tracking-wider block mb-2">
+                  <label className="font-sans text-xs font-medium text-neutral-300 block mb-2">
                     Decimals
                   </label>
                   <select
@@ -830,10 +699,10 @@ export default function LaunchPage() {
                     onChange={(e) =>
                       setTokenData({ ...tokenData, decimals: e.target.value })
                     }
-                    className="w-full bg-transparent border border-border hover:border-border-hover focus:border-accent/50 focus:outline-none px-4 py-3 text-sm text-text-primary transition-colors appearance-none cursor-pointer"
+                    className="w-full bg-[#141414] border border-white/[0.08] focus:border-white/30 rounded-xl px-4 py-3 text-sm text-white transition-colors appearance-none cursor-pointer focus:outline-none font-mono"
                   >
                     {[6, 8, 9].map((d) => (
-                      <option key={d} value={d} className="bg-background">
+                      <option key={d} value={d} className="bg-[#181818] text-white">
                         {d} decimals
                       </option>
                     ))}
@@ -842,7 +711,7 @@ export default function LaunchPage() {
 
                 {/* Description */}
                 <div>
-                  <label className="font-mono text-xs text-text-dim uppercase tracking-wider block mb-2">
+                  <label className="font-sans text-xs font-medium text-neutral-300 block mb-2">
                     Description
                   </label>
                   <textarea
@@ -856,10 +725,10 @@ export default function LaunchPage() {
                       })
                     }
                     rows={3}
-                    className="w-full bg-transparent border border-border hover:border-border-hover focus:border-accent/50 focus:outline-none px-4 py-3 text-sm text-text-primary placeholder:text-text-dim transition-colors resize-none"
+                    className="w-full bg-[#141414] border border-white/[0.08] focus:border-white/30 rounded-xl px-4 py-3 text-sm text-white placeholder:text-neutral-500 font-sans transition-colors resize-none focus:outline-none"
                   />
                   <div className="text-right mt-1">
-                    <span className="font-mono text-[10px] text-text-dim">
+                    <span className="font-mono text-[10px] text-neutral-500">
                       {tokenData.description.length}/500
                     </span>
                   </div>
@@ -868,7 +737,7 @@ export default function LaunchPage() {
             </motion.div>
           )}
 
-          {/* ─── Step 3: Select Launchpads ──────────── */}
+          {/* Step 3: Select Launchpads */}
           {currentStep === "launchpads" && (
             <motion.div
               key="launchpads"
@@ -876,73 +745,75 @@ export default function LaunchPage() {
               animate="visible"
               exit={{ opacity: 0, y: -20 }}
               variants={stagger}
-              className="max-w-2xl mx-auto"
+              className="max-w-3xl mx-auto bg-[#181818] p-8 md:p-10 rounded-2xl border border-white/[0.04]"
             >
               <motion.h1
                 variants={fadeUp}
-                className="text-2xl md:text-3xl font-bold tracking-tight"
+                className="text-2xl md:text-3xl font-bold tracking-tight text-white font-sans"
               >
                 Select launchpads
               </motion.h1>
               <motion.p
                 variants={fadeUp}
-                className="mt-3 text-text-secondary"
+                className="mt-2 text-sm text-neutral-400 font-sans"
               >
-                Choose one or more. Your token details will auto-fill on each
-                platform.
+                Choose one or more platforms. Multipu automatically orchestrates simultaneous deployment.
               </motion.p>
 
               <motion.div
                 variants={fadeUp}
-                className="mt-10 grid grid-cols-1 md:grid-cols-3 gap-4"
+                className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4"
               >
                 {LAUNCHPAD_META.map((pad) => (
                   <button
                     key={pad.id}
                     onClick={() => togglePad(pad.id)}
                     className={cn(
-                      "relative text-left p-6 border transition-all duration-200 group",
+                      "relative text-left p-5 rounded-2xl border transition-all group cursor-pointer flex flex-col justify-between min-h-[180px]",
                       selectedPads.includes(pad.id)
-                        ? "border-accent/40 bg-accent/5"
+                        ? "border-white/40 bg-[#161616]"
                         : pad.ready
-                        ? "border-border hover:border-border-hover hover:bg-elevated"
-                        : "border-border opacity-60 cursor-not-allowed"
+                        ? "border-white/[0.04] bg-[#141414] hover:bg-[#161616] hover:border-white/[0.08]"
+                        : "border-white/[0.02] bg-[#141414] opacity-50 cursor-not-allowed"
                     )}
                   >
                     {selectedPads.includes(pad.id) && (
-                      <div className="absolute top-4 right-4 w-5 h-5 rounded-sm bg-accent flex items-center justify-center">
-                        <IconCheck size={12} className="text-white" />
+                      <div className="absolute top-4 right-4 w-5 h-5 rounded-full bg-white text-black flex items-center justify-center">
+                        <IconCheck size={12} strokeWidth={3} />
                       </div>
                     )}
 
-                    <div className="flex items-center gap-3 mb-4">
-                      <div className="relative w-10 h-10 rounded-lg overflow-hidden border border-border">
-                        <Image
-                          src={pad.image}
-                          alt={pad.name}
-                          fill
-                          className="object-cover"
-                        />
-                      </div>
-                      <div>
-                        <h3 className="text-base font-semibold text-text-primary">
-                          {pad.name}
-                        </h3>
-                        <span className="font-mono text-[10px] text-text-dim">
-                          Est. fee: {pad.estimatedFee}
-                        </span>
-                        <div className="font-mono text-[10px] text-text-dim mt-0.5">
-                          {pad.network}
+                    <div>
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="relative w-10 h-10 rounded-xl overflow-hidden bg-black/40 border border-white/[0.06] flex-shrink-0">
+                          <Image
+                            src={pad.image}
+                            alt={pad.name}
+                            fill
+                            className="object-cover"
+                          />
+                        </div>
+                        <div>
+                          <h3 className="text-sm font-semibold text-white font-sans">
+                            {pad.name}
+                          </h3>
+                          <span className="font-mono text-[10px] text-neutral-400 block">
+                            Est. fee: {pad.estimatedFee}
+                          </span>
+                          <span className="font-mono text-[10px] text-neutral-500 block">
+                            {pad.network}
+                          </span>
                         </div>
                       </div>
-                    </div>
-                    <p className="text-sm text-text-secondary leading-relaxed">
-                      {pad.description}
-                    </p>
-                    {!pad.ready && (
-                      <p className="text-[10px] font-mono text-text-dim mt-2 uppercase tracking-wider">
-                        Coming soon
+                      <p className="text-xs text-neutral-400 font-sans leading-relaxed">
+                        {pad.description}
                       </p>
+                    </div>
+
+                    {!pad.ready && (
+                      <span className="text-[10px] font-mono text-neutral-500 uppercase tracking-wider block mt-3">
+                        Coming soon
+                      </span>
                     )}
                   </button>
                 ))}
@@ -952,10 +823,10 @@ export default function LaunchPage() {
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className="mt-6 p-4 border border-border bg-elevated"
+                  className="mt-6 p-4 rounded-xl border border-white/[0.04] bg-[#141414]"
                 >
-                  <div className="flex items-center justify-between">
-                    <span className="font-mono text-xs text-text-muted">
+                  <div className="flex items-center justify-between text-xs font-mono">
+                    <span className="text-neutral-400">
                       Selected:{" "}
                       {selectedPads
                         .map(
@@ -964,12 +835,12 @@ export default function LaunchPage() {
                         )
                         .join(", ")}
                     </span>
-                    <span className="font-mono text-xs text-accent">
+                    <span className="text-white font-semibold">
                       {selectedPads.length === 1
                         ? "Single launch"
                         : selectedPads.length === 2
                         ? "Dual launch"
-                        : "Triple launch"}
+                        : `${selectedPads.length}-venue launch`}
                     </span>
                   </div>
                 </motion.div>
@@ -977,7 +848,7 @@ export default function LaunchPage() {
             </motion.div>
           )}
 
-          {/* ─── Step 4: Confirm ────────────────────── */}
+          {/* Step 4: Confirm */}
           {currentStep === "confirm" && (
             <motion.div
               key="confirm"
@@ -985,53 +856,50 @@ export default function LaunchPage() {
               animate="visible"
               exit={{ opacity: 0, y: -20 }}
               variants={stagger}
-              className="max-w-lg mx-auto"
+              className="max-w-xl mx-auto bg-[#181818] p-8 md:p-10 rounded-2xl border border-white/[0.04]"
             >
               <motion.h1
                 variants={fadeUp}
-                className="text-2xl md:text-3xl font-bold tracking-tight"
+                className="text-2xl md:text-3xl font-bold tracking-tight text-white font-sans"
               >
-                Confirm & launch
+                Confirm &amp; launch
               </motion.h1>
               <motion.p
                 variants={fadeUp}
-                className="mt-3 text-text-secondary"
+                className="mt-2 text-sm text-neutral-400 font-sans"
               >
-                Review your token details before deploying.
+                Review parameters and initiate simultaneous protocol deployment.
               </motion.p>
 
               <motion.div
                 variants={fadeUp}
-                className="mt-10 border border-border divide-y divide-border"
+                className="mt-8 rounded-2xl border border-white/[0.04] bg-[#141414] divide-y divide-white/[0.04] overflow-hidden"
               >
                 {launchRestricted && !isDemo && (
-                  <div className="p-6 bg-error/5 border-b border-error/20">
-                    <p className="text-sm text-error font-medium">
+                  <div className="p-5 bg-red-500/10 border-b border-red-500/20">
+                    <p className="text-xs text-red-400 font-semibold font-sans">
                       Mainnet safety lock is enabled
                     </p>
-                    <p className="text-xs text-text-secondary mt-1">
-                      This deployment only allows testnet-phase usage until
-                      `NEXT_PUBLIC_APP_PHASE=mainnet` and
-                      `NEXT_PUBLIC_ENABLE_MAINNET_LAUNCHES=true` are explicitly
-                      enabled.
+                    <p className="text-xs text-neutral-300 font-sans mt-1">
+                      This deployment only allows testnet-phase usage until mainnet is explicitly configured.
                     </p>
                   </div>
                 )}
                 {isDemo && (
-                  <div className="p-4 bg-accent/5 border-b border-accent/20 flex items-center justify-between">
-                    <span className="font-mono text-xs text-accent font-medium">
+                  <div className="p-4 bg-emerald-500/10 border-b border-emerald-500/20 flex items-center justify-between">
+                    <span className="font-mono text-xs text-emerald-400 font-medium">
                       Demo Simulation Mode
                     </span>
-                    <span className="text-xs text-text-muted">
+                    <span className="text-xs text-neutral-400 font-sans">
                       Sandbox testnet launch preview
                     </span>
                   </div>
                 )}
                 <div className="p-6">
-                  <span className="font-mono text-[0.65rem] text-text-dim uppercase tracking-[0.15em]">
-                    // Token Details
+                  <span className="font-mono text-[10px] text-neutral-500 uppercase tracking-widest block mb-4">
+                    Token Details
                   </span>
-                  <div className="mt-4 space-y-3">
+                  <div className="space-y-3">
                     {[
                       { label: "Name", value: tokenData.name || "-" },
                       { label: "Symbol", value: tokenData.symbol || "-" },
@@ -1049,12 +917,12 @@ export default function LaunchPage() {
                     ].map((row) => (
                       <div
                         key={row.label}
-                        className="flex items-center justify-between"
+                        className="flex items-center justify-between text-xs"
                       >
-                        <span className="text-sm text-text-muted">
+                        <span className="text-neutral-400 font-sans">
                           {row.label}
                         </span>
-                        <span className="text-sm font-mono text-text-primary">
+                        <span className="font-mono text-white font-medium">
                           {row.value}
                         </span>
                       </div>
@@ -1063,18 +931,18 @@ export default function LaunchPage() {
                 </div>
 
                 <div className="p-6">
-                  <span className="font-mono text-[0.65rem] text-text-dim uppercase tracking-[0.15em]">
-                    // Launchpads
+                  <span className="font-mono text-[10px] text-neutral-500 uppercase tracking-widest block mb-3">
+                    Selected Venues
                   </span>
-                  <div className="mt-4 flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-2">
                     {selectedPads.map((padId) => {
                       const meta = LAUNCHPAD_META.find((m) => m.id === padId);
                       return (
                         <span
                           key={padId}
-                          className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-mono border border-accent/20 bg-accent/5 text-accent"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono rounded-full bg-white/[0.05] border border-white/[0.06] text-white"
                         >
-                          <IconRocket size={12} />
+                          <IconRocket size={12} className="text-neutral-400" />
                           {meta?.name || padId}
                         </span>
                       );
@@ -1083,14 +951,11 @@ export default function LaunchPage() {
                 </div>
 
                 <div className="p-6">
-                  <span className="font-mono text-[0.65rem] text-text-dim uppercase tracking-[0.15em]">
-                    // Estimated Cost
-                  </span>
-                  <div className="mt-4 flex items-center justify-between">
-                    <span className="text-sm text-text-muted">
-                      Token mint + launchpad fees
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-neutral-400 font-sans">
+                      Estimated Cost (Mint + Gas)
                     </span>
-                    <span className="text-lg font-mono font-bold text-text-primary">
+                    <span className="text-base font-mono font-bold text-white">
                       ~{estimatedCost.toFixed(2)} SOL
                     </span>
                   </div>
@@ -1101,11 +966,11 @@ export default function LaunchPage() {
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className="mt-6 p-4 border border-accent/20 bg-accent/5"
+                  className="mt-6 p-4 rounded-xl border border-white/[0.08] bg-[#141414]"
                 >
                   <div className="flex items-center gap-3">
-                    <IconLoader2 size={16} className="text-accent animate-spin" />
-                    <span className="text-sm text-accent font-mono">
+                    <IconLoader2 size={16} className="text-white animate-spin" />
+                    <span className="text-xs text-white font-mono">
                       {deployProgress}
                     </span>
                   </div>
@@ -1114,32 +979,32 @@ export default function LaunchPage() {
             </motion.div>
           )}
 
-          {/* ─── Step 5: Success ────────────────────── */}
+          {/* Step 5: Success */}
           {currentStep === "success" && (
             <motion.div
               key="success"
               initial="hidden"
               animate="visible"
               variants={stagger}
-              className="max-w-lg mx-auto text-center py-12"
+              className="max-w-xl mx-auto bg-[#181818] p-8 md:p-10 rounded-2xl border border-white/[0.04] text-center"
             >
-              <motion.div variants={scaleIn} className="mb-8">
-                <div className="inline-flex w-16 h-16 rounded-full bg-success/10 border border-success/20 items-center justify-center">
-                  <IconCheck size={28} className="text-success" />
+              <motion.div variants={scaleIn} className="mb-6">
+                <div className="inline-flex w-16 h-16 rounded-full bg-emerald-500/10 border border-emerald-500/20 items-center justify-center text-emerald-400">
+                  <IconCheck size={30} />
                 </div>
               </motion.div>
 
               <motion.h1
                 variants={fadeUp}
-                className="text-2xl md:text-3xl font-bold tracking-tight"
+                className="text-2xl md:text-3xl font-bold tracking-tight text-white font-sans"
               >
                 Token launched!
               </motion.h1>
               <motion.p
                 variants={fadeUp}
-                className="mt-3 text-text-secondary"
+                className="mt-2 text-sm text-neutral-400 font-sans"
               >
-                Your token has been deployed and pushed to{" "}
+                Your token has been deployed and dispatched to{" "}
                 {launchResults.filter((r) => r.status === "live").length}{" "}
                 launchpad
                 {launchResults.filter((r) => r.status === "live").length !== 1
@@ -1151,21 +1016,21 @@ export default function LaunchPage() {
               {mintAddress && (
                 <motion.div
                   variants={fadeUp}
-                  className="mt-8 border border-border p-4 text-left"
+                  className="mt-6 p-4 rounded-xl border border-white/[0.04] bg-[#141414] text-left"
                 >
-                  <span className="font-mono text-[0.65rem] text-text-dim uppercase tracking-[0.15em]">
-                    // Token Address
+                  <span className="font-mono text-[10px] text-neutral-500 uppercase tracking-widest block mb-2">
+                    Token Address
                   </span>
-                  <div className="mt-3 flex items-center gap-3">
-                    <span className="font-mono text-sm text-text-primary truncate">
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="font-mono text-xs text-white truncate select-all">
                       {mintAddress}
                     </span>
                     <button
                       onClick={() => {
                         navigator.clipboard.writeText(mintAddress);
-                        toast.success("Copied!");
+                        toast.success("Copied to clipboard!");
                       }}
-                      className="text-text-muted hover:text-text-primary transition-colors flex-shrink-0"
+                      className="text-neutral-400 hover:text-white transition-colors p-1"
                     >
                       <IconCopy size={14} />
                     </button>
@@ -1175,9 +1040,10 @@ export default function LaunchPage() {
                       href={`https://explorer.solana.com/tx/${mintTx}?cluster=${process.env.NEXT_PUBLIC_SOLANA_NETWORK || "devnet"}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="mt-2 inline-flex items-center gap-1 text-xs font-mono text-accent hover:text-accent-hover transition-colors"
+                      className="mt-2 inline-flex items-center gap-1 text-xs font-mono text-neutral-400 hover:text-white transition-colors"
                     >
-                      View transaction <IconExternalLink size={10} />
+                      <span>View transaction</span>
+                      <IconExternalLink size={12} />
                     </a>
                   )}
                 </motion.div>
@@ -1191,27 +1057,27 @@ export default function LaunchPage() {
                   return (
                     <div
                       key={result.launchpad}
-                      className="flex items-center justify-between p-4 border border-border"
+                      className="flex items-center justify-between p-3.5 rounded-xl border border-white/[0.04] bg-[#141414]"
                     >
                       <div className="flex items-center gap-3">
                         <span
                           className={cn(
                             "w-2 h-2 rounded-full",
                             result.status === "live"
-                              ? "bg-success"
-                              : "bg-error"
+                              ? "bg-emerald-400"
+                              : "bg-red-400"
                           )}
                         />
-                        <span className="text-sm font-medium text-text-primary">
+                        <span className="text-xs font-semibold text-white font-sans">
                           {meta?.name || result.launchpad}
                         </span>
                       </div>
                       <span
                         className={cn(
-                          "font-mono text-xs",
+                          "font-mono text-xs font-semibold",
                           result.status === "live"
-                            ? "text-success"
-                            : "text-error"
+                            ? "text-emerald-400"
+                            : "text-red-400"
                         )}
                       >
                         {result.status === "live" ? "Live" : "Failed"}
@@ -1223,14 +1089,14 @@ export default function LaunchPage() {
 
               <motion.div
                 variants={fadeUp}
-                className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4"
+                className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3"
               >
                 <Link
                   href="/dashboard"
-                  className="inline-flex items-center gap-2 px-6 py-3 text-sm font-semibold bg-accent hover:bg-accent-hover text-white rounded-full transition-all duration-300"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 text-xs sm:text-sm font-semibold bg-white text-black hover:bg-neutral-200 rounded-full transition-colors font-sans"
                 >
-                  View Dashboard
-                  <IconArrowRight size={16} />
+                  <span>View Dashboard</span>
+                  <IconArrowRight size={15} />
                 </Link>
                 <button
                   onClick={() => {
@@ -1250,7 +1116,7 @@ export default function LaunchPage() {
                     setLaunchResults([]);
                     setError(null);
                   }}
-                  className="inline-flex items-center gap-2 px-6 py-3 text-sm font-medium text-text-primary border border-border hover:border-border-hover rounded-full transition-all"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 text-xs sm:text-sm font-medium text-white bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.06] rounded-full transition-colors font-sans cursor-pointer"
                 >
                   Launch Another
                 </button>
@@ -1264,45 +1130,45 @@ export default function LaunchPage() {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="max-w-lg mx-auto mt-12 flex items-center justify-between"
+            className="max-w-xl mx-auto mt-8 flex items-center justify-between"
           >
             <button
               onClick={goBack}
               disabled={currentStep === "connect"}
               className={cn(
-                "inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium border rounded-full transition-all",
+                "inline-flex items-center gap-2 px-5 py-2.5 text-xs font-sans font-medium rounded-full transition-colors cursor-pointer",
                 currentStep === "connect"
-                  ? "border-border text-text-dim cursor-not-allowed"
-                  : "border-border text-text-primary hover:border-border-hover hover:bg-elevated"
+                  ? "opacity-30 cursor-not-allowed bg-white/[0.02] text-neutral-500"
+                  : "bg-white/[0.05] hover:bg-white/[0.1] text-white border border-white/[0.06]"
               )}
             >
-              <IconArrowLeft size={16} />
-              Back
+              <IconArrowLeft size={14} />
+              <span>Back</span>
             </button>
             <button
               onClick={goNext}
               disabled={!canProceed() || isDeploying}
               className={cn(
-                "inline-flex items-center gap-2 px-6 py-2.5 text-sm font-semibold rounded-full transition-all duration-300",
+                "inline-flex items-center gap-2 px-6 py-2.5 text-xs font-sans font-semibold rounded-full transition-colors cursor-pointer",
                 canProceed() && !isDeploying
-                  ? "bg-accent hover:bg-accent-hover text-white hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(139,92,246,0.3)]"
-                  : "bg-accent/20 text-accent/40 cursor-not-allowed"
+                  ? "bg-white text-black hover:bg-neutral-200"
+                  : "bg-white/[0.1] text-neutral-500 cursor-not-allowed"
               )}
             >
               {isDeploying ? (
                 <>
-                  <IconLoader2 size={16} className="animate-spin" />
-                  Deploying...
+                  <IconLoader2 size={14} className="animate-spin" />
+                  <span>Deploying...</span>
                 </>
               ) : currentStep === "confirm" ? (
                 <>
-                  <IconRocket size={16} />
-                  Deploy & Launch
+                  <IconRocket size={14} />
+                  <span>Deploy &amp; Launch</span>
                 </>
               ) : (
                 <>
-                  Next
-                  <IconArrowRight size={16} />
+                  <span>Next</span>
+                  <IconArrowRight size={14} />
                 </>
               )}
             </button>
