@@ -15,6 +15,7 @@ import {
   IconX,
   IconBell,
   IconLogout,
+  IconArrowsExchange,
 } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
@@ -31,7 +32,7 @@ const navItems = [
   { label: "Launches", icon: IconRocket, href: "/dashboard/launches" },
   { label: "Earnings", icon: IconTrendingUp, href: "/dashboard/earnings" },
   { label: "API Keys", icon: IconKey, href: "/dashboard/api" },
-  { label: "Explore", icon: IconSearch, href: "/dashboard/explore" },
+  { label: "Trade", icon: IconArrowsExchange, href: "/dashboard/explore" },
 ];
 
 export default function DashboardLayout({
@@ -107,19 +108,20 @@ export default function DashboardLayout({
     <div className="h-screen overflow-hidden bg-background">
       <div className="flex h-full">
         {/* Desktop Sidebar */}
-        <aside className="hidden lg:flex flex-col w-64 border-r border-border h-full flex-shrink-0 bg-background">
-          <div className="p-6 border-b border-border">
-            <Link href="/" className="flex items-center gap-2.5">
+        <aside className="hidden lg:flex flex-col w-64 border-r border-white/[0.06] h-full flex-shrink-0 bg-[#121212]">
+          {/* Clean Logo Header aligned with header */}
+          <div className="h-16 px-6 border-b border-white/[0.06] flex items-center">
+            <Link href="/" className="flex items-center gap-2.5 group">
               <div className="relative w-7 h-7 flex-shrink-0">
                 <Image src="/logo.png" alt="Multipu" fill sizes="28px" className="object-contain" />
               </div>
-              <span className="text-base font-semibold text-text-primary">
+              <span className="text-base font-semibold text-white tracking-tight">
                 Multipu
               </span>
             </Link>
           </div>
 
-          <nav className="flex-1 p-4 space-y-1">
+          <nav className="flex-1 px-3 py-3 space-y-1 overflow-y-auto">
             {navItems.map((item) => {
               const isActive = isItemActive(item.href);
               return (
@@ -127,30 +129,30 @@ export default function DashboardLayout({
                   key={item.label}
                   href={item.href}
                   className={cn(
-                    "w-full flex items-center gap-3 px-3 py-2.5 text-sm rounded-sm transition-colors",
+                    "w-full flex items-center gap-3 px-3.5 py-2.5 text-sm rounded-xl transition-colors font-medium",
                     isActive
-                      ? "bg-accent/10 text-accent border border-accent/20"
-                      : "text-text-secondary hover:text-text-primary hover:bg-elevated"
+                      ? "bg-white/[0.09] text-white"
+                      : "text-neutral-400 hover:text-white hover:bg-white/[0.04]"
                   )}
                 >
-                  <item.icon size={16} />
-                  {item.label}
+                  <item.icon size={18} className={cn(isActive ? "text-white" : "text-neutral-400")} />
+                  <span>{item.label}</span>
                 </Link>
               );
             })}
           </nav>
 
           {/* Wallet info with Disconnect */}
-          <div className="p-4 border-t border-border">
+          <div className="p-3 border-t border-white/[0.06]">
             {session.isLoggedIn ? (
-              <div className="flex items-center justify-between p-3 bg-elevated rounded-sm border border-border">
+              <div className="flex items-center justify-between p-2.5 bg-white/[0.04] rounded-xl">
                 <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                  <div className="w-2 h-2 rounded-full bg-success flex-shrink-0" />
+                  <div className="w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0" />
                   <div className="min-w-0">
-                    <div className="font-mono text-xs text-text-primary truncate">
+                    <div className="font-mono text-xs text-white truncate font-medium">
                       {walletShort}
                     </div>
-                    <div className="font-mono text-[10px] text-text-dim capitalize">
+                    <div className="font-mono text-[10px] text-neutral-400 capitalize">
                       {session.walletKind || "Connected"}
                     </div>
                   </div>
@@ -158,7 +160,7 @@ export default function DashboardLayout({
                 <button
                   type="button"
                   onClick={() => setDisconnectModalOpen(true)}
-                  className="p-1.5 text-text-dim hover:text-red-400 hover:bg-red-500/10 rounded-sm transition-colors cursor-pointer flex-shrink-0 ml-2"
+                  className="p-1.5 text-neutral-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors cursor-pointer flex-shrink-0 ml-2"
                   title="Disconnect session"
                   aria-label="Disconnect session"
                 >
@@ -166,7 +168,7 @@ export default function DashboardLayout({
                 </button>
               </div>
             ) : (
-              <WalletButton className="w-full justify-center" />
+              <WalletButton className="w-full justify-center text-xs" />
             )}
           </div>
         </aside>
@@ -192,10 +194,10 @@ export default function DashboardLayout({
                 animate={{ x: 0 }}
                 exit={{ x: "-100%" }}
                 transition={{ type: "spring", damping: 25, stiffness: 300 }}
-                className="fixed top-0 left-0 bottom-0 w-72 max-w-[85vw] bg-background border-r border-border z-50 flex flex-col lg:hidden"
+                className="fixed top-0 left-0 bottom-0 w-72 max-w-[85vw] bg-[#121212] border-r border-white/[0.06] z-50 flex flex-col lg:hidden"
               >
                 {/* Header */}
-                <div className="flex items-center justify-between p-5 border-b border-border">
+                <div className="h-16 px-5 border-b border-white/[0.06] flex items-center justify-between">
                   <Link
                     href="/"
                     onClick={() => setMobileOpen(false)}
@@ -204,14 +206,14 @@ export default function DashboardLayout({
                     <div className="relative w-7 h-7 flex-shrink-0">
                       <Image src="/logo.png" alt="Multipu" fill sizes="28px" className="object-contain" />
                     </div>
-                    <span className="text-base font-semibold text-text-primary">
+                    <span className="text-base font-semibold text-white tracking-tight">
                       Multipu
                     </span>
                   </Link>
 
                   <button
                     onClick={() => setMobileOpen(false)}
-                    className="p-1.5 text-text-muted hover:text-text-primary rounded-sm transition-colors"
+                    className="p-1.5 text-neutral-400 hover:text-white rounded-lg transition-colors"
                     aria-label="Close menu"
                   >
                     <IconX size={20} />
@@ -219,7 +221,7 @@ export default function DashboardLayout({
                 </div>
 
                 {/* Navigation Items */}
-                <nav className="flex-1 p-4 space-y-1.5 overflow-y-auto">
+                <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
                   {navItems.map((item) => {
                     const isActive = isItemActive(item.href);
                     return (
@@ -228,14 +230,14 @@ export default function DashboardLayout({
                         href={item.href}
                         onClick={() => setMobileOpen(false)}
                         className={cn(
-                          "w-full flex items-center gap-3 px-3.5 py-3 text-sm rounded-sm transition-colors font-medium",
+                          "w-full flex items-center gap-3 px-3.5 py-2.5 text-sm rounded-xl transition-colors font-medium",
                           isActive
-                            ? "bg-accent/10 text-accent border border-accent/20"
-                            : "text-text-secondary hover:text-text-primary hover:bg-elevated"
+                            ? "bg-white/[0.09] text-white"
+                            : "text-neutral-400 hover:text-white hover:bg-white/[0.04]"
                         )}
                       >
-                        <item.icon size={18} />
-                        {item.label}
+                        <item.icon size={18} className={cn(isActive ? "text-white" : "text-neutral-400")} />
+                        <span>{item.label}</span>
                       </Link>
                     );
                   })}
@@ -248,7 +250,7 @@ export default function DashboardLayout({
                       setNotificationsOpen(true);
                       setHasUnread(false);
                     }}
-                    className="w-full flex items-center justify-between px-3.5 py-3 text-sm rounded-sm transition-colors font-medium text-text-secondary hover:text-text-primary hover:bg-elevated cursor-pointer"
+                    className="w-full flex items-center justify-between px-3.5 py-2.5 text-sm rounded-xl transition-colors font-medium text-neutral-400 hover:text-white hover:bg-white/[0.04] cursor-pointer"
                   >
                     <div className="flex items-center gap-3">
                       <IconBell size={18} />
@@ -260,11 +262,11 @@ export default function DashboardLayout({
                   </button>
 
                   {/* Launch Token Action */}
-                  <div className="pt-4 mt-4 border-t border-border">
+                  <div className="pt-3 mt-3 border-t border-white/[0.06]">
                     <Link
                       href="/launch"
                       onClick={() => setMobileOpen(false)}
-                      className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-sm bg-accent text-white font-medium text-sm hover:bg-accent-hover transition-colors font-mono"
+                      className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-accent text-white font-medium text-sm hover:bg-accent-hover transition-colors font-sans"
                     >
                       <IconRocket size={16} />
                       Launch Token
@@ -273,16 +275,16 @@ export default function DashboardLayout({
                 </nav>
 
                 {/* Single Connected Account Widget at Base */}
-                <div className="p-4 border-t border-border bg-elevated/40">
+                <div className="p-3 border-t border-white/[0.06]">
                   {session.isLoggedIn ? (
-                    <div className="flex items-center justify-between p-3 bg-elevated rounded-sm border border-border">
+                    <div className="flex items-center justify-between p-2.5 bg-white/[0.04] rounded-xl">
                       <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                        <div className="w-2 h-2 rounded-full bg-success flex-shrink-0" />
+                        <div className="w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0" />
                         <div className="min-w-0">
-                          <div className="font-mono text-xs text-text-primary truncate">
+                          <div className="font-mono text-xs text-white truncate font-medium">
                             {walletShort}
                           </div>
-                          <div className="font-mono text-[10px] text-text-dim capitalize">
+                          <div className="font-mono text-[10px] text-neutral-400 capitalize">
                             {session.walletKind || "Connected"}
                           </div>
                         </div>
@@ -293,7 +295,7 @@ export default function DashboardLayout({
                           setMobileOpen(false);
                           setDisconnectModalOpen(true);
                         }}
-                        className="p-1.5 text-text-dim hover:text-red-400 hover:bg-red-500/10 rounded-sm transition-colors cursor-pointer flex-shrink-0 ml-2"
+                        className="p-1.5 text-neutral-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors cursor-pointer flex-shrink-0 ml-2"
                         title="Disconnect session"
                         aria-label="Disconnect session"
                       >
@@ -301,7 +303,7 @@ export default function DashboardLayout({
                       </button>
                     </div>
                   ) : (
-                    <WalletButton className="w-full justify-center" />
+                    <WalletButton className="w-full justify-center text-xs" />
                   )}
                 </div>
               </motion.aside>

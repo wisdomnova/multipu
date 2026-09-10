@@ -338,7 +338,7 @@ export default function TokensPage() {
                       <div className="flex items-center gap-4 text-[11px] text-text-dim font-mono flex-wrap">
                         <span className="flex items-center gap-1">
                           {isPending ? (
-                            <span className="text-text-muted italic">Un-minted</span>
+                            <span className="text-text-muted">Un-minted</span>
                           ) : (
                             <>
                               {formatAddress(token.mint_address)}

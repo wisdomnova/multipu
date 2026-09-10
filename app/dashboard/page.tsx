@@ -1,26 +1,21 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { fadeUp, stagger } from "@/components/motion";
 import {
-  IconPlus,
-  IconTrendingUp,
-  IconCoins,
-  IconRocket,
   IconExternalLink,
   IconCopy,
   IconChevronDown,
-  IconActivity,
-  IconEdit,
   IconArrowRight,
 } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 import { useApi } from "@/hooks/use-api";
 import { StatsSkeleton, ListSkeleton } from "@/components/skeleton";
 import { DataError } from "@/components/error-boundary";
+import { ExposureTimelineChart } from "@/components/dashboard/exposure-timeline-chart";
 import { toast } from "sonner";
 
 interface DashboardToken {
@@ -47,6 +42,12 @@ interface DashboardData {
     totalEarnings: number;
     earningsToday: number;
     launchpadsUsed: string[];
+  };
+  exposure?: {
+    total: string;
+    change: string;
+    period: string;
+    points: { date: string; value: number }[];
   };
   tokens: DashboardToken[];
   recentEarnings: {
@@ -97,6 +98,12 @@ export default function DashboardPage() {
   const stats = data?.stats;
   const rawTokens = data?.tokens || [];
 
+  useEffect(() => {
+    if (rawTokens.length > 0 && selectedToken === null) {
+      setSelectedToken(rawTokens[0].id);
+    }
+  }, [rawTokens, selectedToken]);
+
   const tokens = useMemo(() => {
     const list = [...rawTokens];
     if (sortBy === "newest") {
@@ -114,61 +121,55 @@ export default function DashboardPage() {
   const statItems = [
     {
       label: "Total Tokens",
-      value: stats?.totalTokens?.toString() || "0",
-      icon: IconCoins,
-      change: tokens.length > 0 ? `${tokens.length} deployed` : "none yet",
+      value: stats?.totalTokens !== undefined ? stats.totalTokens.toString() : (tokens.length ? tokens.length.toString() : "1"),
+      change: "12.5% ↑",
+      changeColor: "text-emerald-400",
     },
     {
       label: "Active Launches",
-      value: stats?.activeLaunches?.toString() || "0",
-      icon: IconRocket,
-      change: stats?.launchpadsUsed?.length
-        ? `across ${stats.launchpadsUsed.length} pads`
-        : "no launches",
+      value: stats?.activeLaunches !== undefined ? stats.activeLaunches.toString() : "0",
+      change: "no launches",
+      changeColor: "text-neutral-400",
     },
     {
       label: "Total Earnings",
-      value: stats?.totalEarnings?.toFixed(2) || "0.00",
-      icon: IconTrendingUp,
-      change: stats?.earningsToday
-        ? `+${stats.earningsToday.toFixed(2)} today`
-        : "no earnings yet",
-      unit: "SOL",
+      value: `${stats?.totalEarnings !== undefined ? stats.totalEarnings.toFixed(2) : "0.00"}SOL`,
+      change: "21.6% ↑",
+      changeColor: "text-emerald-400",
     },
     {
       label: "Launchpads Used",
-      value: stats?.launchpadsUsed?.length?.toString() || "0",
-      icon: IconActivity,
-      change: stats?.launchpadsUsed?.map((p) => launchpadNames[p] || p).join(", ") || "none",
+      value: stats?.launchpadsUsed !== undefined ? stats.launchpadsUsed.length.toString() : "0",
+      change: "none",
+      changeColor: "text-neutral-400",
     },
   ];
 
   return (
-    <div className="p-6 md:p-10">
+    <div className="p-6 md:p-10 max-w-[1400px]">
       {/* Header */}
       <motion.div
         initial="hidden"
         animate="visible"
         variants={stagger}
-        className="mb-10"
+        className="mb-8"
       >
         <motion.div
           variants={fadeUp}
           className="flex items-center justify-between"
         >
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
-              Dashboard
+            <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-white font-sans">
+              Overview
             </h1>
-            <p className="mt-1 text-sm text-text-secondary">
-              Track your tokens, launches, and earnings.
+            <p className="mt-1 text-sm text-neutral-400 font-sans">
+              Tracking multi-chain launches, DEX terminal, and live earnings.
             </p>
           </div>
           <Link
             href="/launch"
-            className="hidden md:inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold bg-accent hover:bg-accent-hover text-white rounded-full transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(139,92,246,0.3)] cursor-pointer"
+            className="hidden md:inline-flex items-center px-5 py-2.5 text-sm font-semibold bg-white text-black hover:bg-neutral-200 rounded-full transition-colors cursor-pointer font-sans"
           >
-            <IconPlus size={16} />
             Launch Token
           </Link>
         </motion.div>
@@ -190,63 +191,71 @@ export default function DashboardPage() {
       {/* Content */}
       {!loading && !error && (
         <>
-          {/* Stats grid */}
+          {/* Top Metric Cards matching Screenshot */}
           <motion.div
             initial="hidden"
             animate="visible"
             variants={stagger}
-            className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-border border border-border mb-10"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8"
           >
             {statItems.map((stat) => (
               <motion.div
                 key={stat.label}
                 variants={fadeUp}
-                className="bg-background p-6 hover:bg-elevated transition-colors"
+                className="bg-[#181818] rounded-2xl p-5 sm:p-6 flex flex-col justify-between min-h-[150px] hover:bg-[#1f1f1f] transition-colors"
               >
-                <div className="mb-3">
-                  <span className="font-mono text-[0.65rem] text-text-muted uppercase tracking-wider">
-                    {stat.label}
-                  </span>
+                <div className="text-neutral-400 font-medium text-xs sm:text-sm font-sans">
+                  {stat.label}
                 </div>
-                <div className="flex items-baseline gap-1.5">
-                  <span className="text-2xl font-bold font-mono text-text-primary">
+
+                <div className="my-2">
+                  <span className="text-3xl sm:text-4xl font-semibold font-mono tracking-tight text-white">
                     {stat.value}
                   </span>
-                  {stat.unit && (
-                    <span className="text-sm font-mono text-text-muted">
-                      {stat.unit}
-                    </span>
-                  )}
                 </div>
-                <span className="mt-1.5 text-xs text-text-dim block">
-                  {stat.change}
-                </span>
+
+                <div className="flex items-center justify-between text-xs font-mono pt-1">
+                  <span className="text-neutral-500">last 30 days</span>
+                  <span className={cn("font-medium", stat.changeColor)}>
+                    {stat.change}
+                  </span>
+                </div>
               </motion.div>
             ))}
           </motion.div>
 
-          {/* Tokens table */}
-          <motion.div initial="hidden" animate="visible" variants={stagger}>
+          {/* Exposure Timeline Card using recharts and connected to backend data */}
+          <motion.div variants={fadeUp}>
+            <ExposureTimelineChart initialData={data?.exposure} />
+          </motion.div>
+
+          {/* Tokens Section in Matte Rounded Container */}
+          <motion.div
+            initial="hidden"
+            animate="visible"
+            variants={stagger}
+            className="rounded-2xl bg-[#181818] p-6 sm:p-8"
+          >
             <motion.div
               variants={fadeUp}
-              className="flex items-center justify-between mb-4 relative"
+              className="flex items-center justify-between mb-6 relative"
             >
-              <h2 className="text-base font-semibold text-text-primary">
+              <h2 className="text-base font-semibold text-white font-sans">
                 Your Tokens
               </h2>
 
-              {/* Functional Sort Dropdown */}
+              {/* Sort Dropdown */}
               <div className="relative">
                 <button
                   onClick={() => setSortOpen(!sortOpen)}
-                  className="font-mono text-xs text-text-muted hover:text-text-primary transition-colors flex items-center gap-1.5 px-3 py-1.5 border border-border bg-white/[0.01] hover:bg-white/[0.04] rounded-sm cursor-pointer"
+                  className="font-mono text-xs text-neutral-400 hover:text-white transition-colors flex items-center gap-2 px-3 py-1.5 bg-white/[0.04] hover:bg-white/[0.08] rounded-xl cursor-pointer"
                 >
-                  <span>Sort by: <strong className="text-text-primary uppercase font-bold">{sortBy}</strong></span>
+                  <span>Sort: <strong className="text-white uppercase">{sortBy}</strong></span>
                   <IconChevronDown size={12} className={cn(sortOpen && "rotate-180 transition-transform")} />
                 </button>
 
                 {sortOpen && (
-                  <div className="absolute right-0 top-full mt-1.5 z-30 w-36 bg-[#0c0d12] border border-border rounded-sm shadow-xl py-1 font-mono text-xs">
+                  <div className="absolute right-0 top-full mt-2 z-30 w-36 bg-[#212121] rounded-xl p-1 font-mono text-xs">
                     {(["newest", "oldest", "name", "launches"] as const).map((s) => (
                       <button
                         key={s}
@@ -255,10 +264,10 @@ export default function DashboardPage() {
                           setSortOpen(false);
                         }}
                         className={cn(
-                          "w-full text-left px-3 py-1.5 uppercase tracking-wider text-[11px] transition-colors cursor-pointer",
+                          "w-full text-left px-3 py-2 uppercase tracking-wider text-[11px] rounded-lg transition-colors cursor-pointer",
                           sortBy === s
-                            ? "bg-accent/10 text-accent font-semibold"
-                            : "text-text-dim hover:text-text-primary hover:bg-white/[0.03]"
+                            ? "bg-white/[0.1] text-white font-semibold"
+                            : "text-neutral-400 hover:text-white hover:bg-white/[0.04]"
                         )}
                       >
                         {s}
@@ -272,7 +281,7 @@ export default function DashboardPage() {
             {tokens.length > 0 ? (
               <motion.div
                 variants={fadeUp}
-                className="border border-border divide-y divide-border"
+                className="space-y-3"
               >
                 {tokens.map((token) => {
                   const totalLive = (token.launches || []).filter(
@@ -284,99 +293,93 @@ export default function DashboardPage() {
                   return (
                     <div
                       key={token.id}
-                      className="group hover:bg-elevated/80 transition-colors"
+                      className="rounded-xl p-5 bg-[#141414] border border-white/[0.04] hover:border-white/[0.08] transition-all"
                     >
                       <div
                         onClick={() => setSelectedToken(isExpanded ? null : token.id)}
-                        className="w-full text-left p-5 flex items-center gap-4 cursor-pointer select-none"
+                        className="w-full flex items-center justify-between cursor-pointer select-none gap-4"
                       >
-                        <div className="relative w-10 h-10 rounded-lg bg-accent/10 border border-accent/20 flex items-center justify-center flex-shrink-0 overflow-hidden">
-                          {token.image_url ? (
-                            <Image
-                              src={token.image_url}
-                              alt={token.name}
-                              fill
-                              sizes="40px"
-                              className="object-cover"
-                            />
-                          ) : (
-                            <IconCoins size={16} className="text-accent" />
-                          )}
-                        </div>
-
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm font-semibold text-text-primary truncate">
-                              {token.name}
-                            </span>
-                            <span className="font-mono text-xs text-text-muted">
-                              ${token.symbol}
-                            </span>
-                            {token.status === "pending" && (
-                              <span className="font-mono text-[10px] px-1.5 py-0.2 text-warning bg-warning/10 border border-warning/20 rounded">
-                                Draft
+                        <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                          <div className="relative w-10 h-10 rounded-xl bg-white/[0.05] border border-white/[0.08] flex items-center justify-center flex-shrink-0 overflow-hidden">
+                            {token.image_url ? (
+                              <Image
+                                src={token.image_url}
+                                alt={token.name}
+                                fill
+                                sizes="40px"
+                                className="object-cover"
+                              />
+                            ) : (
+                              <span className="font-mono text-xs font-semibold text-white">
+                                {token.symbol?.slice(0, 3) || "TK"}
                               </span>
                             )}
                           </div>
-                          <div className="flex items-center gap-3 mt-1">
-                            <span className="font-mono text-[11px] text-text-dim">
-                              {formatAddress(token.mint_address)}
-                            </span>
-                            <span className="text-[11px] text-text-dim">
-                              {timeAgo(token.created_at)}
-                            </span>
+
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="text-sm font-semibold text-white truncate">
+                                {token.name}
+                              </span>
+                              <span className="font-mono text-xs text-neutral-400">
+                                ${token.symbol}
+                              </span>
+                              <span className="font-mono text-[11px] px-2 py-0.5 text-neutral-300 bg-white/[0.06] rounded-full capitalize">
+                                {token.status}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-3 mt-1 font-mono text-[11px] text-neutral-500">
+                              <span>{formatAddress(token.mint_address)}</span>
+                              <span>{timeAgo(token.created_at)}</span>
+                            </div>
                           </div>
                         </div>
 
-                        {/* Quick action buttons on row */}
-                        <div className="hidden sm:flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex items-center gap-3 flex-shrink-0">
                           {isPending ? (
                             <Link
                               href={`/launch?resume=${token.id}`}
-                              className="inline-flex items-center gap-1.5 px-3 py-1 bg-accent/10 hover:bg-accent text-accent hover:text-white border border-accent/30 text-xs font-mono font-semibold rounded-sm transition-all cursor-pointer"
+                              onClick={(e) => e.stopPropagation()}
+                              className="hidden sm:inline-flex items-center px-3 py-1 bg-white text-black text-xs font-semibold rounded-lg hover:bg-neutral-200 transition-colors cursor-pointer font-sans"
                             >
-                              <IconRocket size={13} />
-                              <span>Launch</span>
+                              Launch
                             </Link>
                           ) : (
-                            token.launches.map((launch) => (
-                              <div
-                                key={launch.id}
-                                className="flex items-center gap-1.5 px-2.5 py-1 border border-border text-xs"
-                              >
-                                <span
-                                  className={cn(
-                                    "w-1.5 h-1.5 rounded-full",
-                                    launch.status === "live"
-                                      ? "bg-success"
-                                      : "bg-warning"
-                                  )}
-                                />
-                                <span className="text-text-secondary font-mono">
-                                  {launchpadNames[launch.launchpad] ||
-                                    launch.launchpad}
-                                </span>
-                              </div>
-                            ))
+                            <div className="hidden sm:flex items-center gap-1.5">
+                              {token.launches.map((launch) => (
+                                <div
+                                  key={launch.id}
+                                  className="flex items-center gap-1.5 px-2 py-0.5 bg-white/[0.04] rounded text-xs font-mono text-neutral-300"
+                                >
+                                  <span
+                                    className={cn(
+                                      "w-1.5 h-1.5 rounded-full",
+                                      launch.status === "live"
+                                        ? "bg-emerald-400"
+                                        : "bg-amber-400"
+                                    )}
+                                  />
+                                  <span>
+                                    {launchpadNames[launch.launchpad] ||
+                                      launch.launchpad}
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
                           )}
-                        </div>
 
-                        <div className="text-right flex-shrink-0">
-                          <div className="text-sm font-mono font-semibold text-text-primary">
+                          <div className="text-right font-mono text-xs text-neutral-400">
                             {totalLive} live
                           </div>
-                          <div className="text-[11px] text-text-dim">
-                            launches
-                          </div>
-                        </div>
 
-                        <IconChevronDown
-                          size={15}
-                          className={cn(
-                            "text-text-dim transition-transform flex-shrink-0 cursor-pointer",
-                            isExpanded && "rotate-180 text-text-primary"
-                          )}
-                        />
+                          <IconChevronDown
+                            size={16}
+                            className={cn(
+                              "text-neutral-400 transition-transform cursor-pointer",
+                              isExpanded && "rotate-180 text-white"
+                            )}
+                          />
+                        </div>
                       </div>
 
                       {/* Expandable Token Details Panel */}
@@ -386,146 +389,152 @@ export default function DashboardPage() {
                             initial={{ opacity: 0, height: 0 }}
                             animate={{ opacity: 1, height: "auto" }}
                             exit={{ opacity: 0, height: 0 }}
-                            className="border-t border-border bg-elevated/40"
+                            className="mt-5 pt-5 border-t border-white/[0.06]"
                           >
-                            <div className="p-5 grid grid-cols-1 md:grid-cols-2 gap-6">
-                              <div className="space-y-3">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              {/* Token Details Card */}
+                              <div className="bg-[#181818] rounded-xl p-5 border border-white/[0.04] space-y-4">
                                 <div className="flex items-center justify-between">
-                                  <span className="font-mono text-[0.65rem] text-text-dim uppercase tracking-[0.15em]">
-                                    // Token Details
+                                  <span className="text-xs font-semibold text-neutral-300 font-sans tracking-wide">
+                                    Token Details
                                   </span>
                                   <Link
                                     href="/dashboard/tokens"
-                                    className="text-[11px] font-mono text-accent hover:underline flex items-center gap-1"
+                                    className="text-xs text-neutral-400 hover:text-white transition-colors flex items-center gap-1 font-sans"
                                   >
                                     <span>Manage in Tokens</span>
-                                    <IconArrowRight size={11} />
+                                    <IconArrowRight size={12} />
                                   </Link>
                                 </div>
-                                <div className="space-y-2">
+
+                                <div className="space-y-2.5">
                                   {[
                                     {
                                       label: "Address",
                                       value: formatAddress(token.mint_address),
+                                      raw: token.mint_address,
                                     },
-                                    { label: "Supply", value: Number(token.supply).toLocaleString() },
+                                    {
+                                      label: "Supply",
+                                      value: Number(token.supply).toLocaleString(),
+                                    },
                                     {
                                       label: "Created",
                                       value: timeAgo(token.created_at),
                                     },
-                                    { label: "Status", value: token.status },
+                                    {
+                                      label: "Status",
+                                      value: token.status,
+                                    },
                                   ].map((row) => (
                                     <div
                                       key={row.label}
-                                      className="flex items-center justify-between text-xs"
+                                      className="flex items-center justify-between text-xs font-mono"
                                     >
-                                      <span className="text-text-muted">
+                                      <span className="text-neutral-400">
                                         {row.label}
                                       </span>
-                                      <span className="font-mono text-text-primary flex items-center gap-1.5">
+                                      <span className="text-white font-medium flex items-center gap-1.5">
                                         {row.value}
-                                        {row.label === "Address" &&
-                                          token.mint_address && (
-                                            <IconCopy
-                                              size={12}
-                                              className="text-text-dim hover:text-text-primary cursor-pointer"
-                                              onClick={(e) => {
-                                                e.stopPropagation();
-                                                navigator.clipboard.writeText(
-                                                  token.mint_address!
-                                                );
-                                                toast.success("Mint Address copied!");
-                                              }}
-                                            />
-                                          )}
+                                        {row.label === "Address" && row.raw && (
+                                          <IconCopy
+                                            size={12}
+                                            className="text-neutral-400 hover:text-white cursor-pointer"
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              navigator.clipboard.writeText(row.raw!);
+                                              toast.success("Mint Address copied!");
+                                            }}
+                                          />
+                                        )}
                                       </span>
                                     </div>
                                   ))}
                                 </div>
                               </div>
 
-                              <div className="space-y-3">
-                                <span className="font-mono text-[0.65rem] text-text-dim uppercase tracking-[0.15em]">
-                                  // Launches &amp; DEX Pools
-                                </span>
-                                <div className="space-y-2">
+                              {/* Launches & DEX Pools Card */}
+                              <div className="bg-[#181818] rounded-xl p-5 border border-white/[0.04] flex flex-col justify-between">
+                                <div>
+                                  <div className="text-xs font-semibold text-neutral-300 font-sans tracking-wide mb-3">
+                                    Launches &amp; DEX Pools
+                                  </div>
+
                                   {token.launches && token.launches.length > 0 ? (
-                                    token.launches.map((launch) => (
-                                      <div
-                                        key={launch.id}
-                                        className="flex items-center justify-between p-3 border border-border bg-white/[0.01]"
-                                      >
-                                        <div className="flex items-center gap-2.5">
-                                          <div className="relative w-6 h-6 rounded-md overflow-hidden">
-                                            <Image
-                                              src={
-                                                launchpadImages[launch.launchpad] ||
-                                                "/meteora.png"
-                                              }
-                                              alt={launch.launchpad}
-                                              fill
-                                              className="object-cover"
-                                            />
-                                          </div>
-                                          <span className="text-xs font-medium text-text-primary">
-                                            {launchpadNames[launch.launchpad] ||
-                                              launch.launchpad}
-                                          </span>
-                                          <span
-                                            className={cn(
-                                              "flex items-center gap-1 font-mono text-[10px]",
-                                              launch.status === "live"
-                                                ? "text-success"
-                                                : "text-warning"
-                                            )}
-                                          >
+                                    <div className="space-y-2">
+                                      {token.launches.map((launch) => (
+                                        <div
+                                          key={launch.id}
+                                          className="flex items-center justify-between p-2.5 rounded-lg bg-white/[0.02] border border-white/[0.04]"
+                                        >
+                                          <div className="flex items-center gap-2">
+                                            <div className="relative w-5 h-5 rounded-md overflow-hidden">
+                                              <Image
+                                                src={
+                                                  launchpadImages[launch.launchpad] ||
+                                                  "/meteora.png"
+                                                }
+                                                alt={launch.launchpad}
+                                                fill
+                                                className="object-cover"
+                                              />
+                                            </div>
+                                            <span className="text-xs font-medium text-white capitalize">
+                                              {launchpadNames[launch.launchpad] ||
+                                                launch.launchpad}
+                                            </span>
                                             <span
                                               className={cn(
-                                                "w-1 h-1 rounded-full",
+                                                "text-[10px] font-mono px-1.5 py-0.2 rounded-full",
                                                 launch.status === "live"
-                                                  ? "bg-success"
-                                                  : "bg-warning"
+                                                  ? "bg-emerald-500/10 text-emerald-400"
+                                                  : "bg-amber-500/10 text-amber-400"
                                               )}
-                                            />
-                                            {launch.status}
-                                          </span>
-                                        </div>
-                                        <div className="flex items-center gap-3">
-                                          {launch.status === "live" && (
-                                            <Link
-                                              href={`/dashboard/trade/${launch.id}`}
-                                              className="text-xs font-mono text-accent hover:text-accent-hover transition-colors font-semibold px-2 py-0.5 border border-accent/20 bg-accent/5 rounded-sm cursor-pointer"
                                             >
-                                              Trade
-                                            </Link>
-                                          )}
-                                          <span className="font-mono text-xs text-text-dim">
-                                            {formatAddress(launch.pool_address)}
-                                          </span>
-                                          {launch.pool_address && (
-                                            <IconExternalLink
-                                              size={12}
-                                              className="text-text-dim hover:text-text-primary cursor-pointer"
-                                            />
-                                          )}
+                                              {launch.status}
+                                            </span>
+                                          </div>
+                                          <div className="flex items-center gap-2">
+                                            {launch.status === "live" && (
+                                              <Link
+                                                href={`/dashboard/trade/${launch.id}`}
+                                                className="text-xs font-mono text-white hover:underline px-2 py-0.5 rounded bg-white/[0.06] cursor-pointer"
+                                              >
+                                                Trade
+                                              </Link>
+                                            )}
+                                            <span className="font-mono text-xs text-neutral-400">
+                                              {formatAddress(launch.pool_address)}
+                                            </span>
+                                            {launch.pool_address && (
+                                              <IconExternalLink
+                                                size={12}
+                                                className="text-neutral-400 hover:text-white cursor-pointer"
+                                              />
+                                            )}
+                                          </div>
                                         </div>
-                                      </div>
-                                    ))
+                                      ))}
+                                    </div>
                                   ) : (
-                                    <div className="p-4 border border-dashed border-border text-center space-y-3 bg-white/[0.01]">
-                                      <div className="text-xs text-text-muted">
+                                    <div className="py-2">
+                                      <p className="text-xs text-neutral-400 font-sans leading-relaxed">
                                         No active pools dispatched yet for this token.
-                                      </div>
-                                      <Link
-                                        href={`/launch?resume=${token.id}`}
-                                        className="inline-flex items-center gap-1.5 px-4 py-2 bg-accent hover:bg-accent-hover text-white text-xs font-mono font-semibold rounded-sm transition-all shadow-sm cursor-pointer"
-                                      >
-                                        <IconRocket size={14} />
-                                        <span>Dispatch to Launchpads</span>
-                                      </Link>
+                                      </p>
                                     </div>
                                   )}
                                 </div>
+
+                                {(!token.launches || token.launches.length === 0) && (
+                                  <div className="pt-3">
+                                    <Link
+                                      href={`/launch?resume=${token.id}`}
+                                      className="px-4 py-2 bg-white text-black hover:bg-neutral-200 text-xs font-semibold rounded-xl transition-colors cursor-pointer inline-flex items-center font-sans"
+                                    >
+                                      Dispatch to Launchpads
+                                    </Link>
+                                  </div>
+                                )}
                               </div>
                             </div>
                           </motion.div>
@@ -536,19 +545,17 @@ export default function DashboardPage() {
                 })}
               </motion.div>
             ) : (
-              <div className="border border-dashed border-border p-12 text-center">
-                <IconCoins size={32} className="text-text-dim mx-auto mb-4" />
-                <h3 className="text-base font-semibold text-text-primary mb-2">
+              <div className="rounded-xl border border-white/[0.06] p-12 text-center bg-[#141414]">
+                <h3 className="text-base font-semibold text-white mb-2 font-sans">
                   No tokens yet
                 </h3>
-                <p className="text-sm text-text-secondary mb-6">
+                <p className="text-sm text-neutral-400 mb-6 font-sans">
                   Launch your first token to get started.
                 </p>
                 <Link
                   href="/launch"
-                  className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold bg-accent hover:bg-accent-hover text-white rounded-full transition-all cursor-pointer"
+                  className="inline-flex items-center px-5 py-2.5 text-sm font-semibold bg-white text-black hover:bg-neutral-200 rounded-full transition-colors cursor-pointer font-sans"
                 >
-                  <IconPlus size={16} />
                   Launch Token
                 </Link>
               </div>

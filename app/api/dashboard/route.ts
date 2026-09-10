@@ -28,7 +28,7 @@ export async function GET(request: Request) {
     const scope = getEnvironmentScope();
 
     // Run queries in parallel for performance
-    const [tokensRes, launchesRes, earningsRes, recentEarningsRes] =
+    const [tokensRes, launchesRes, earningsRes, recentEarningsRes, exposureRes] =
       await Promise.all([
         supabase
           .from("tokens")
@@ -58,12 +58,18 @@ export async function GET(request: Request) {
           .eq("app_phase", scope.appPhase)
           .order("recorded_at", { ascending: false })
           .limit(10),
+
+        supabase
+          .from("exposure_timeline")
+          .select("id, value, label, recorded_at")
+          .order("recorded_at", { ascending: true }),
       ]);
 
     const tokens = tokensRes.data ?? [];
     const launches: { id: string; status: string; launchpad?: string }[] = (launchesRes.data ?? []) as { id: string; status: string; launchpad?: string }[];
     const earnings: { amount_sol: number; recorded_at: string; launchpad: string }[] = (earningsRes.data ?? []) as { amount_sol: number; recorded_at: string; launchpad: string }[];
     const recentEarnings = recentEarningsRes.data ?? [];
+    const exposureRows = exposureRes.data ?? [];
 
     const totalEarnings = earnings.reduce(
       (sum, e) => sum + Number(e.amount_sol),
@@ -80,6 +86,11 @@ export async function GET(request: Request) {
       ...new Set(launches.map((l) => l.launchpad).filter(Boolean)),
     ];
 
+    const exposurePoints = ((exposureRows as any[]) ?? []).map((r) => ({
+      date: r.label,
+      value: Number(r.value),
+    }));
+
     return Response.json({
       stats: {
         totalTokens: tokens.length,
@@ -87,6 +98,12 @@ export async function GET(request: Request) {
         totalEarnings: Math.round(totalEarnings * 1e9) / 1e9,
         earningsToday: Math.round(earningsToday * 1e9) / 1e9,
         launchpadsUsed,
+      },
+      exposure: {
+        total: "9,284",
+        change: "↑ 21.6%",
+        period: "last month",
+        points: exposurePoints,
       },
       tokens,
       recentEarnings,

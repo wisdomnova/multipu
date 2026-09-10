@@ -9,7 +9,7 @@ import { SignInModal } from "@/components/signin-modal";
 
 const navLinks = [
   { href: "/launch", label: "Launch" },
-  { href: "/dashboard/explore", label: "Explore" },
+  { href: "/dashboard/explore", label: "Trade" },
   { href: "/dashboard/launches", label: "Launchpads" },
   { href: "/dashboard/api", label: "Docs" },
 ];
@@ -125,7 +125,7 @@ export function MinimalNav() {
               ) : (
                 <button
                   onClick={() => setShowSignInModal(true)}
-                  className="px-5 py-2.5 text-xs font-mono font-semibold rounded-full bg-accent hover:bg-accent-hover text-white transition-colors cursor-pointer select-none"
+                  className="px-5 py-2 text-sm font-semibold tracking-tight rounded-full bg-accent hover:bg-accent-hover text-white transition-colors cursor-pointer select-none font-sans"
                 >
                   Sign In
                 </button>
@@ -133,7 +133,7 @@ export function MinimalNav() {
 
               <Link
                 href="/launch"
-                className="px-5 py-2.5 text-xs font-mono font-semibold rounded-full bg-white text-black hover:bg-neutral-200 transition-colors cursor-pointer select-none"
+                className="px-5 py-2 text-sm font-semibold tracking-tight rounded-full bg-white text-black hover:bg-neutral-200 transition-colors cursor-pointer select-none font-sans"
               >
                 Launch App
               </Link>
@@ -168,7 +168,7 @@ export function MinimalNav() {
                 key={link.label}
                 href={link.href}
                 onClick={() => setMobileOpen(false)}
-                className="text-base font-medium text-neutral-300 hover:text-white py-2"
+                className="text-base font-medium text-neutral-300 hover:text-white py-2 font-sans"
               >
                 {link.label}
               </Link>
@@ -196,7 +196,7 @@ export function MinimalNav() {
                     setMobileOpen(false);
                     setShowSignInModal(true);
                   }}
-                  className="w-full py-2.5 text-xs font-mono font-semibold text-white bg-accent rounded-full text-center cursor-pointer"
+                  className="w-full py-2.5 text-sm font-semibold tracking-tight text-white bg-accent rounded-full text-center cursor-pointer font-sans"
                 >
                   Sign In
                 </button>
@@ -204,14 +204,14 @@ export function MinimalNav() {
               <Link
                 href="/dashboard"
                 onClick={() => setMobileOpen(false)}
-                className="text-center py-2.5 text-xs font-mono font-medium text-neutral-300 hover:text-white bg-neutral-900 rounded-full"
+                className="text-center py-2.5 text-sm font-medium tracking-tight text-neutral-300 hover:text-white bg-neutral-900 rounded-full font-sans"
               >
                 Dashboard
               </Link>
               <Link
                 href="/launch"
                 onClick={() => setMobileOpen(false)}
-                className="text-center py-2.5 text-xs font-mono font-semibold text-black bg-white rounded-full"
+                className="text-center py-2.5 text-sm font-semibold tracking-tight text-black bg-white rounded-full font-sans"
               >
                 Launch App
               </Link>
