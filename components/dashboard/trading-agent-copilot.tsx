@@ -239,21 +239,22 @@ export function TradingAgentCopilot() {
 
   return (
     <>
-      {/* Floating Trigger Button - Matte Dark Rounded Pill */}
+      {/* Floating Trigger Button - Bright Vibrant Eye-Catching Pill */}
       <div className="fixed bottom-6 right-6 z-40">
         <button
           onClick={() => setIsOpen(!isOpen)}
           className={cn(
-            "flex items-center gap-2.5 px-4 py-3 rounded-full text-xs font-sans font-semibold transition-all shadow-2xl border border-white/[0.08] hover:border-white/20 cursor-pointer text-white bg-[#181818] hover:bg-[#202020] active:scale-95 backdrop-blur-md"
+            "flex items-center gap-2.5 px-5 py-3 rounded-full text-xs sm:text-sm font-sans font-semibold transition-all shadow-[0_0_30px_rgba(139,92,246,0.6)] border border-violet-400/60 cursor-pointer text-white bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 hover:scale-105 active:scale-95"
           )}
         >
+          <IconSparkles size={16} className="text-purple-200 animate-pulse" />
           <span
             className={cn(
               "w-2 h-2 rounded-full",
-              isAgentRunning ? "bg-emerald-400 animate-pulse" : "bg-emerald-400"
+              isAgentRunning ? "bg-emerald-300 shadow-[0_0_8px_#6ee7b7] animate-pulse" : "bg-emerald-400 shadow-[0_0_6px_#34d399]"
             )}
           />
-          <span className="text-white">
+          <span className="text-white font-bold tracking-tight">
             {isAgentRunning
               ? `Agent Active (${totalPnl >= 0 ? "+" : ""}${totalPnl}%)`
               : "Multipu AI"}

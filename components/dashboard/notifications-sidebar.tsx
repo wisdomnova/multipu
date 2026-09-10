@@ -84,7 +84,7 @@ export function NotificationsSidebar({ isOpen, onClose }: NotificationsSidebarPr
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", damping: 30, stiffness: 320 }}
-            className="fixed top-0 right-0 bottom-0 w-full sm:w-[440px] max-w-[100vw] bg-[#121212] border-l border-white/[0.06] z-[60] flex flex-col select-none shadow-2xl"
+            className="fixed top-0 right-0 bottom-0 w-full sm:w-[560px] md:w-[600px] max-w-[100vw] bg-[#121212] border-l border-white/[0.06] z-[60] flex flex-col select-none shadow-2xl"
           >
             {/* Top Bar Header */}
             <div className="p-6 border-b border-white/[0.04] flex items-center justify-between">
