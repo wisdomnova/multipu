@@ -14,13 +14,13 @@ function formatTimeAgo(timestampMs: number): string {
   return `${diffDays}d`;
 }
 
-// Known curated Robinhood Chain (Sherwood / Pons / DEX) active meme tokens
+// Known curated Robinhood Chain (Pons / DEX) active meme tokens
 const ROBINHOOD_MEME_TOKENS = [
   {
     address: "0x80bAa4b3bfAC6f4978700dF824B1B3d98e889136",
     name: "Crumbs",
     symbol: "CRUMBS",
-    dexId: "sherwood",
+    dexId: "pons",
     volume24h: 18460000,
     marketCap: 310000,
     holders: 24314,
@@ -32,7 +32,7 @@ const ROBINHOOD_MEME_TOKENS = [
     address: "0xb97D9e5Ad6244d27588Fe0A624A8C78E512934eE",
     name: "RECEIPT",
     symbol: "RECEIPT",
-    dexId: "sherwood",
+    dexId: "pons",
     volume24h: 4140000,
     marketCap: 1740000,
     holders: 7995,
@@ -55,7 +55,7 @@ const ROBINHOOD_MEME_TOKENS = [
     address: "0xcEcF8c51DED79d15EB14a08b704D8Fd265fea700",
     name: "CLAWDHOOD",
     symbol: "CLAWDHOOD",
-    dexId: "sherwood",
+    dexId: "pons",
     volume24h: 1980000,
     marketCap: 3000,
     holders: 9543,
@@ -66,7 +66,7 @@ const ROBINHOOD_MEME_TOKENS = [
     address: "0x97C59c0a7eAe72592EE5Ae13fd2057C7BAd7F0D9",
     name: "Golden Inu",
     symbol: "GI",
-    dexId: "sherwood",
+    dexId: "pons",
     volume24h: 1410000,
     marketCap: 6100,
     holders: 4924,
@@ -90,7 +90,7 @@ const ROBINHOOD_MEME_TOKENS = [
     address: "0x25cd2901B6d16cB33185E7667F984dbc35BcF354",
     name: "Artificial Shiba",
     symbol: "ASHIBA",
-    dexId: "sherwood",
+    dexId: "pons",
     volume24h: 1150000,
     marketCap: 216700,
     holders: 4427,
@@ -102,7 +102,7 @@ const ROBINHOOD_MEME_TOKENS = [
     address: "0x6a50F139F3eD4C9c7bDa0D067c5Ed09De1EEBbeA",
     name: "CLAWNCH",
     symbol: "CLAWNCH",
-    dexId: "sherwood",
+    dexId: "pons",
     volume24h: 973500,
     marketCap: 336600,
     holders: 3913,
@@ -125,7 +125,7 @@ const ROBINHOOD_MEME_TOKENS = [
     address: "0x83D38b519308FE02158F043952B58A6B16A4a30E",
     name: "REEL",
     symbol: "REEL",
-    dexId: "sherwood",
+    dexId: "pons",
     volume24h: 786200,
     marketCap: 10100,
     holders: 4561,

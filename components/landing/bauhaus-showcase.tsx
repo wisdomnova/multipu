@@ -104,7 +104,7 @@ export function BauhausShowcase() {
               <div>
                 <h3 className="text-2xl font-bold text-white mb-2">Launches</h3>
                 <p className="text-xs text-white/80 leading-relaxed">
-                  Simultaneous push to Meteora, Pump.fun, Bags, Four.meme, Sherwood, and Pons.
+                  Simultaneous push to Meteora, Pump.fun, Bags, Four.meme, and Pons.
                 </p>
               </div>
             </Link>

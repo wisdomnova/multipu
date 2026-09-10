@@ -93,7 +93,7 @@ export function MonomodFooter() {
                   PUMP.FUN
                 </Link>
                 <Link href="/launch" className="hover:text-white transition-colors">
-                  SHERWOOD
+                  PONS
                 </Link>
                 <Link href="/launch" className="hover:text-white transition-colors">
                   FOUR.MEME

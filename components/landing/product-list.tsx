@@ -18,7 +18,7 @@ const launchpads = [
     href: "/launch",
   },
   {
-    symbol: "SHERWOOD",
+    symbol: "PONS",
     name: "Robinhood Chain High-Throughput Launchpad",
     metricLabel: "Block Time",
     metricValue: "0.25s",

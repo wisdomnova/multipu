@@ -151,7 +151,7 @@ export function InlineEditorial() {
                 Pump.fun
               </span>
               <span className="px-3 py-1 rounded-full bg-white/10 text-neutral-300 font-mono text-[11px]">
-                Sherwood
+                Pons
               </span>
             </div>
           </div>

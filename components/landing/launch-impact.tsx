@@ -11,7 +11,7 @@ const ecosystems = [
   "OlaXBT",
   "BNB Chain",
   "Robinhood",
-  "Sherwood",
+  "Pons",
   "Four.meme",
 ];
 
