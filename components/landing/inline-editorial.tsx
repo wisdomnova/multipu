@@ -11,8 +11,10 @@ export function InlineEditorial() {
       whileInView="visible"
       viewport={{ once: true, margin: "-80px" }}
       variants={stagger}
-      className="py-24 md:py-36 px-6 md:px-12 max-w-[1360px] mx-auto"
+      className="relative py-24 md:py-36 px-6 md:px-12 max-w-[1360px] mx-auto overflow-hidden"
     >
+      {/* Perfectly Balanced Dot Matrix Background Pattern */}
+      <div className="absolute inset-0 bg-[radial-gradient(rgba(255,255,255,0.18)_1.1px,transparent_1.1px)] [background-size:22px_22px] pointer-events-none opacity-40 [mask-image:radial-gradient(ellipse_at_center,black_80%,transparent_100%)] z-0" />
       {/* Top Tag */}
       <motion.div variants={fadeUp} className="flex items-center gap-3 mb-10">
         <span className="font-mono text-xs text-neutral-500">01</span>

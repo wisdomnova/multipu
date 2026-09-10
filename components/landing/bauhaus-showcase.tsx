@@ -14,8 +14,8 @@ export function BauhausShowcase() {
     >
       {/* Outer rounded dark canvas */}
       <motion.div variants={fadeUp} className="relative w-full rounded-[40px] bg-neutral-950 p-8 sm:p-12 lg:p-16 overflow-hidden">
-        {/* Subtle Dot Matrix Background Pattern */}
-        <div className="absolute inset-0 bg-[radial-gradient(rgba(255,255,255,0.15)_1px,transparent_1px)] [background-size:24px_24px] pointer-events-none opacity-30 [mask-image:radial-gradient(ellipse_at_center,black_70%,transparent_100%)] z-0" />
+        {/* Perfectly Balanced Dot Matrix Background Pattern */}
+        <div className="absolute inset-0 bg-[radial-gradient(rgba(255,255,255,0.18)_1.1px,transparent_1.1px)] [background-size:22px_22px] pointer-events-none opacity-45 [mask-image:radial-gradient(ellipse_at_center,black_80%,transparent_100%)] z-0" />
 
         <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
           {/* Left Column: Editorial & Bauhaus Geometric Composition */}
