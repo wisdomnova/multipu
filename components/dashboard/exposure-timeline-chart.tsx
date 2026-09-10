@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   ResponsiveContainer,
   LineChart,
@@ -22,32 +22,25 @@ interface ExposureData {
   points: ExposurePoint[];
 }
 
-const fallbackPoints: ExposurePoint[] = [
-  { date: "18 Dec", value: 5200 },
-  { date: "20 Dec", value: 4300 },
-  { date: "22 Dec", value: 4800 },
-  { date: "24 Dec", value: 4600 },
-  { date: "25 Dec", value: 4200 },
-  { date: "26 Dec", value: 4500 },
-  { date: "27 Dec", value: 3600 },
-  { date: "28 Dec", value: 4100 },
-  { date: "29 Dec", value: 3200 },
-  { date: "30 Dec", value: 3700 },
-  { date: "31 Dec", value: 2900 },
-  { date: "1 Jan", value: 3400 },
-  { date: "2 Jan", value: 3800 },
-  { date: "3 Jan", value: 4500 },
-  { date: "4 Jan", value: 5400 },
-  { date: "5 Jan", value: 7100 },
-  { date: "6 Jan", value: 9284 },
-  { date: "7 Jan", value: 8100 },
-  { date: "8 Jan", value: 12200 },
-  { date: "9 Jan", value: 10400 },
-  { date: "10 Jan", value: 11200 },
-  { date: "11 Jan", value: 8900 },
-  { date: "12 Jan", value: 9400 },
-  { date: "13 Jan", value: 9600 },
-];
+function generateDynamicFallback(): ExposurePoint[] {
+  const now = new Date();
+  const days = 30;
+  const pattern = [
+    7635, 7420, 7550, 7310, 7680, 7490, 7820, 7610, 7940, 7750,
+    8120, 7890, 8250, 8040, 8390, 8180, 8520, 8310, 8640, 8450,
+    8790, 8580, 8920, 8710, 9050, 8820, 9140, 8950, 9190, 9284
+  ];
+
+  return Array.from({ length: days }).map((_, i) => {
+    const d = new Date(now.getTime() - (days - 1 - i) * 86400000);
+    const day = d.getDate();
+    const month = d.toLocaleDateString("en-US", { month: "short" });
+    return {
+      date: `${day} ${month}`,
+      value: pattern[i] || 9000,
+    };
+  });
+}
 
 interface CustomTooltipProps {
   active?: boolean;
@@ -58,10 +51,10 @@ function CustomTooltip({ active, payload }: CustomTooltipProps) {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
     return (
-      <div className="flex flex-col items-center -translate-y-2 pointer-events-none">
-        <div className="px-3 py-1 bg-white text-black text-xs font-mono font-bold rounded-lg shadow-lg flex items-center gap-2">
+      <div className="flex flex-col items-center -translate-y-3 pointer-events-none">
+        <div className="px-3 py-1.5 bg-white text-black text-xs font-mono font-bold rounded-lg shadow-xl flex items-center gap-2 border border-neutral-200">
           <span className="text-neutral-500 font-normal">{data.date}</span>
-          <span>{data.value.toLocaleString()}</span>
+          <span className="font-bold text-black">{data.value.toLocaleString()}</span>
         </div>
       </div>
     );
@@ -74,27 +67,35 @@ export function ExposureTimelineChart({
 }: {
   initialData?: ExposureData;
 }) {
+  const dynamicFallback = useMemo(() => generateDynamicFallback(), []);
+
   const [data, setData] = useState<ExposureData>(
     initialData || {
       total: "9,284",
       change: "↑ 21.6%",
       period: "last month",
-      points: fallbackPoints,
+      points: dynamicFallback,
     }
   );
   const [mounted, setMounted] = useState(false);
-  const [isHovering, setIsHovering] = useState(false);
 
+  // Synchronize when initialData arrives from parent API call
+  useEffect(() => {
+    if (initialData?.points?.length) {
+      setData(initialData);
+    }
+  }, [initialData]);
+
+  // Client-side fetch fallback if parent doesn't provide initialData
   useEffect(() => {
     setMounted(true);
-    // Fetch live data from backend if initialData wasn't passed
     if (!initialData) {
       fetch("/api/dashboard/exposure")
         .then((res) => (res.ok ? res.json() : null))
         .then((res) => {
           if (res?.points?.length) {
             setData({
-              total: res.formattedTotal || "9,284",
+              total: res.formattedTotal || res.total?.toLocaleString() || "9,284",
               change: res.changeFormatted || "↑ 21.6%",
               period: res.period || "last month",
               points: res.points,
@@ -105,7 +106,7 @@ export function ExposureTimelineChart({
     }
   }, [initialData]);
 
-  const points = data.points?.length ? data.points : fallbackPoints;
+  const points = data.points?.length ? data.points : dynamicFallback;
 
   return (
     <div className="rounded-2xl bg-[#181818] p-6 sm:p-8 mb-8">
@@ -122,36 +123,32 @@ export function ExposureTimelineChart({
         </span>
       </div>
 
-      {/* Chart Canvas */}
-      <div
-        className="relative w-full h-48 sm:h-64"
-        onMouseEnter={() => setIsHovering(true)}
-        onMouseLeave={() => setIsHovering(false)}
-      >
+      {/* Recharts Canvas */}
+      <div className="relative w-full h-48 sm:h-64">
         {mounted ? (
           <ResponsiveContainer width="100%" height="100%">
             <LineChart
               data={points}
-              margin={{ top: 35, right: 10, left: 10, bottom: 5 }}
+              margin={{ top: 25, right: 10, left: 10, bottom: 5 }}
             >
               <XAxis dataKey="date" hide />
-              <YAxis hide domain={["dataMin - 1000", "dataMax + 1000"]} />
+              <YAxis hide domain={["dataMin - 500", "dataMax + 500"]} />
               <Tooltip
                 content={<CustomTooltip />}
                 cursor={{
-                  stroke: "rgba(255,255,255,0.15)",
+                  stroke: "rgba(255,255,255,0.2)",
                   strokeWidth: 1,
                   strokeDasharray: "3 3",
                 }}
               />
               <Line
-                type="linear"
+                type="monotone"
                 dataKey="value"
                 stroke="#ffffff"
                 strokeWidth={1.8}
                 dot={false}
                 activeDot={{
-                  r: 4.5,
+                  r: 5,
                   fill: "#ffffff",
                   stroke: "#181818",
                   strokeWidth: 2,
@@ -162,17 +159,6 @@ export function ExposureTimelineChart({
           </ResponsiveContainer>
         ) : (
           <div className="w-full h-full animate-pulse bg-white/[0.02] rounded-lg" />
-        )}
-
-        {/* Static Default Tooltip matching screenshot when not actively hovering */}
-        {!isHovering && (
-          <div className="absolute top-[42px] right-[24%] sm:right-[31%] flex flex-col items-center pointer-events-none transition-opacity duration-200">
-            <div className="px-3 py-1 bg-white text-black text-xs font-mono font-bold rounded-lg shadow-lg flex items-center gap-2">
-              <span className="text-neutral-500 font-normal">6 Jan</span>
-              <span>9,284</span>
-            </div>
-            <div className="w-2 h-2 rounded-full bg-white ring-4 ring-white/20 mt-1" />
-          </div>
         )}
       </div>
     </div>

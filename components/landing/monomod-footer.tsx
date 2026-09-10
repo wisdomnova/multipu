@@ -110,8 +110,8 @@ export function MonomodFooter() {
                 <Link href="/dashboard/api" className="hover:text-white transition-colors">
                   API KEYS
                 </Link>
-                <Link href="/dashboard/api" className="hover:text-white transition-colors">
-                  KEEPERHUB
+                <Link href="/dashboard" className="hover:text-white transition-colors">
+                  X-AGENT
                 </Link>
                 <Link href="/dashboard" className="hover:text-white transition-colors">
                   OLAXBT
@@ -160,7 +160,7 @@ export function MonomodFooter() {
 
       {/* Bottom Copyright & Disclaimer matching Screenshot 4 */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-mono text-neutral-600">
-        <div>(c) 2026 Multipu Protocol. All rights reserved.</div>
+        <div>(c) 2026 Multipu Protocol. Powered by X-Agent &amp; OlaXBT.</div>
         <div className="text-neutral-500">
           Crafted for decentralized traders and creators.
         </div>

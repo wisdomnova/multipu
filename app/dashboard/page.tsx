@@ -97,12 +97,18 @@ export default function DashboardPage() {
 
   const stats = data?.stats;
   const rawTokens = data?.tokens || [];
+  const [hasAutoOpened, setHasAutoOpened] = useState(false);
 
   useEffect(() => {
-    if (rawTokens.length > 0 && selectedToken === null) {
+    if (!hasAutoOpened && rawTokens.length > 0) {
       setSelectedToken(rawTokens[0].id);
+      setHasAutoOpened(true);
     }
-  }, [rawTokens, selectedToken]);
+  }, [rawTokens, hasAutoOpened]);
+
+  const toggleToken = (id: string) => {
+    setSelectedToken((prev) => (prev === id ? null : id));
+  };
 
   const tokens = useMemo(() => {
     const list = [...rawTokens];
@@ -296,7 +302,7 @@ export default function DashboardPage() {
                       className="rounded-xl p-5 bg-[#141414] border border-white/[0.04] hover:border-white/[0.08] transition-all"
                     >
                       <div
-                        onClick={() => setSelectedToken(isExpanded ? null : token.id)}
+                        onClick={() => toggleToken(token.id)}
                         className="w-full flex items-center justify-between cursor-pointer select-none gap-4"
                       >
                         <div className="flex items-center gap-3.5 min-w-0 flex-1">
@@ -372,13 +378,23 @@ export default function DashboardPage() {
                             {totalLive} live
                           </div>
 
-                          <IconChevronDown
-                            size={16}
-                            className={cn(
-                              "text-neutral-400 transition-transform cursor-pointer",
-                              isExpanded && "rotate-180 text-white"
-                            )}
-                          />
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleToken(token.id);
+                            }}
+                            className="p-1 text-neutral-400 hover:text-white transition-colors cursor-pointer"
+                            aria-label={isExpanded ? "Collapse token details" : "Expand token details"}
+                          >
+                            <IconChevronDown
+                              size={16}
+                              className={cn(
+                                "transition-transform",
+                                isExpanded && "rotate-180 text-white"
+                              )}
+                            />
+                          </button>
                         </div>
                       </div>
 

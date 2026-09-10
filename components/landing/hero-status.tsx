@@ -7,6 +7,14 @@ export function HeroStatus() {
     <section className="relative pt-36 md:pt-48 pb-20 md:pb-32 px-6 md:px-12 max-w-[1360px] mx-auto overflow-hidden">
       {/* Top Hero Typography & Graphic Mark */}
       <div className="mb-16 md:mb-24">
+        {/* Powered by X-Agent & OlaXBT Badge */}
+        <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-white/[0.04] border border-white/[0.08] text-xs font-mono text-neutral-300 mb-8 backdrop-blur-md">
+          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+          <span className="text-white font-semibold tracking-tight">Powered by X-Agent</span>
+          <span className="text-neutral-500">|</span>
+          <span className="text-neutral-400">OlaXBT Strategy Intelligence</span>
+        </div>
+
         <h1 className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-bold tracking-tight text-white leading-[1.05] md:leading-[0.98]">
           <span className="inline-flex items-center gap-4 md:gap-6 flex-wrap">
             <span className="relative inline-flex items-center justify-center w-14 h-14 sm:w-20 sm:h-20 md:w-28 md:h-28 align-middle">
@@ -63,7 +71,7 @@ export function HeroStatus() {
         {/* Description */}
         <div className="md:col-span-5">
           <p className="text-sm md:text-base text-neutral-400 leading-relaxed max-w-md">
-            Multipu is the universal launchpad and DEX execution engine for Solana, BNB Chain, and Robinhood Chain with real-time memecoin intelligence and automated strategy execution.
+            Multipu is the universal launchpad and DEX execution engine powered by X-Agent autonomous intelligence and OlaXBT market momentum signals across Solana, BNB Chain, and Robinhood.
           </p>
         </div>
 

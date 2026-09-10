@@ -104,18 +104,18 @@ export function InlineEditorial() {
               </div>
             </div>
 
-            {/* Signal detected tag */}
+            {/* Powered by X-Agent tag */}
             <div className="px-4 py-1.5 rounded-full bg-white/5 text-orange-400 font-mono text-xs font-semibold">
-              Signal detected!
+              Powered by X-Agent
             </div>
           </div>
 
           <div className="mt-6">
             <h3 className="text-xl font-bold text-white mb-2">
-              AI-based execution
+              Autonomous X-Agent execution
             </h3>
             <p className="text-sm text-neutral-400 leading-relaxed">
-              Autonomous KeeperHub and OlaXBT agents identify early volume surges and execute optimal funding arbitrage.
+              Powered by the X-Agent autonomous framework and OlaXBT market momentum signals to detect volume surges and execute optimal bonding curve arbitrage.
             </p>
           </div>
         </div>

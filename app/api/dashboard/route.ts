@@ -91,6 +91,11 @@ export async function GET(request: Request) {
       value: Number(r.value),
     }));
 
+    const startVal = exposurePoints.length > 0 ? exposurePoints[0].value : 7635;
+    const currentVal = exposurePoints.length > 0 ? exposurePoints[exposurePoints.length - 1].value : 9284;
+    const changePct = startVal > 0 ? ((currentVal - startVal) / startVal) * 100 : 0;
+    const changeFormatted = `${changePct >= 0 ? "↑" : "↓"} ${Math.abs(changePct).toFixed(1)}%`;
+
     return Response.json({
       stats: {
         totalTokens: tokens.length,
@@ -100,8 +105,8 @@ export async function GET(request: Request) {
         launchpadsUsed,
       },
       exposure: {
-        total: "9,284",
-        change: "↑ 21.6%",
+        total: currentVal.toLocaleString(),
+        change: changeFormatted,
         period: "last month",
         points: exposurePoints,
       },

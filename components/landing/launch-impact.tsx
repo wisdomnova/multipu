@@ -7,11 +7,12 @@ const ecosystems = [
   "Pump.fun",
   "Meteora",
   "Bags",
-  "Four.meme",
+  "X-Agent",
+  "OlaXBT",
   "BNB Chain",
   "Robinhood",
   "Sherwood",
-  "Pons",
+  "Four.meme",
 ];
 
 const sampleTokens = [

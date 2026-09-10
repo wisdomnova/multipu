@@ -68,7 +68,7 @@ export function MetricsCardShowcase() {
             </h3>
 
             <p className="text-sm text-[#120b18]/80 leading-relaxed max-w-sm">
-              We deploy across Solana, BNB Smart Chain, and Robinhood Chain with autonomous OlaXBT strategy intelligence and KeeperHub execution.
+              We deploy across Solana, BNB Smart Chain, and Robinhood Chain powered by X-Agent autonomous execution and OlaXBT strategy intelligence.
             </p>
           </div>
 

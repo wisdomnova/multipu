@@ -26,11 +26,16 @@ export async function GET(request: Request) {
       recordedAt: r.recorded_at,
     }));
 
+    const startVal = points.length > 0 ? points[0].value : 7635;
+    const currentVal = points.length > 0 ? points[points.length - 1].value : 9284;
+    const changePct = startVal > 0 ? ((currentVal - startVal) / startVal) * 100 : 0;
+    const changeFormatted = `${changePct >= 0 ? "↑" : "↓"} ${Math.abs(changePct).toFixed(1)}%`;
+
     return Response.json({
-      total: 9284,
-      formattedTotal: "9,284",
-      changePct: 21.6,
-      changeFormatted: "↑ 21.6%",
+      total: currentVal,
+      formattedTotal: currentVal.toLocaleString(),
+      changePct: Math.round(changePct * 10) / 10,
+      changeFormatted,
       period: "last month",
       points,
     });
