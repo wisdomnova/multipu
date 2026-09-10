@@ -5,14 +5,10 @@ import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { fadeUp, stagger } from "@/components/motion";
 import {
-  IconPlus,
-  IconCoins,
   IconCopy,
   IconExternalLink,
   IconSearch,
-  IconChevronDown,
   IconEdit,
-  IconRocket,
   IconTrash,
   IconX,
   IconUpload,
@@ -167,7 +163,7 @@ export default function TokensPage() {
         throw new Error(errData.error || "Failed to update token");
       }
 
-      toast.success("Draft token updated successfully!");
+      toast.success("Draft token updated successfully");
       setEditingToken(null);
       refetch();
     } catch (err) {
@@ -198,31 +194,30 @@ export default function TokensPage() {
   };
 
   return (
-    <div className="p-6 md:p-10">
+    <div className="p-6 md:p-10 max-w-[1400px]">
       {/* Header */}
       <motion.div
         initial="hidden"
         animate="visible"
         variants={stagger}
-        className="mb-10"
+        className="mb-8"
       >
         <motion.div
           variants={fadeUp}
           className="flex items-center justify-between"
         >
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
+            <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-white font-sans">
               Tokens
             </h1>
-            <p className="mt-1 text-sm text-text-secondary">
+            <p className="mt-1 text-sm text-neutral-400 font-sans">
               All your deployed and draft tokens in one place.
             </p>
           </div>
           <Link
             href="/launch"
-            className="hidden md:inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold bg-accent hover:bg-accent-hover text-white rounded-full transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(139,92,246,0.3)]"
+            className="hidden md:inline-flex items-center px-5 py-2.5 text-sm font-semibold bg-white text-black hover:bg-neutral-200 rounded-full transition-colors cursor-pointer font-sans"
           >
-            <IconPlus size={16} />
             Create Token
           </Link>
         </motion.div>
@@ -235,29 +230,30 @@ export default function TokensPage() {
         variants={fadeUp}
         className="mb-6 flex flex-col sm:flex-row items-stretch sm:items-center gap-3"
       >
-        <div className="flex-1 relative">
+        <div className="flex-1 relative bg-[#181818] rounded-xl border border-white/[0.04]">
           <IconSearch
-            size={14}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-text-dim"
+            size={16}
+            className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400"
           />
           <input
             type="text"
             placeholder="Search tokens by name, symbol, or mint address..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-transparent border border-border hover:border-border-hover focus:border-accent/50 focus:outline-none pl-9 pr-4 py-2.5 text-sm text-text-primary placeholder:text-text-dim transition-colors font-mono"
+            className="w-full bg-transparent border-0 focus:outline-none pl-10 pr-4 py-2.5 text-xs text-white placeholder:text-neutral-500 font-mono"
           />
         </div>
-        <div className="flex items-center gap-2">
+
+        <div className="flex items-center gap-1.5 bg-[#181818] p-1 rounded-xl border border-white/[0.04]">
           {(["all", "active", "pending"] as const).map((st) => (
             <button
               key={st}
               onClick={() => setStatusFilter(st)}
               className={cn(
-                "px-3.5 py-2 text-xs font-mono uppercase tracking-wider transition-colors border",
+                "px-3.5 py-1.5 text-xs font-mono uppercase tracking-wider rounded-lg transition-colors cursor-pointer",
                 statusFilter === st
-                  ? "bg-accent/10 border-accent/40 text-accent font-semibold"
-                  : "border-border text-text-dim hover:text-text-secondary hover:border-border-hover"
+                  ? "bg-white/[0.1] text-white font-semibold"
+                  : "text-neutral-400 hover:text-white"
               )}
             >
               {st}
@@ -287,132 +283,115 @@ export default function TokensPage() {
               <motion.div
                 key={token.id}
                 variants={fadeUp}
-                className={cn(
-                  "group border transition-all duration-200",
-                  isPending
-                    ? "border-warning/30 bg-warning/[0.02] hover:bg-warning/[0.04]"
-                    : "border-border hover:bg-elevated"
-                )}
+                className="bg-[#181818] rounded-2xl p-5 sm:p-6 border border-white/[0.04] hover:border-white/[0.08] transition-all"
               >
-                <div className="p-5 md:p-6">
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-                    <div className="relative w-12 h-12 rounded-lg bg-accent/10 border border-accent/20 flex items-center justify-center flex-shrink-0 overflow-hidden">
-                      {token.image_url ? (
-                        <Image
-                          src={token.image_url}
-                          alt={token.name}
-                          fill
-                          sizes="48px"
-                          className="object-cover"
-                        />
-                      ) : (
-                        <IconCoins size={20} className="text-accent" />
-                      )}
-                    </div>
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                  <div className="relative w-12 h-12 rounded-xl bg-white/[0.05] border border-white/[0.08] flex items-center justify-center flex-shrink-0 overflow-hidden">
+                    {token.image_url ? (
+                      <Image
+                        src={token.image_url}
+                        alt={token.name}
+                        fill
+                        sizes="48px"
+                        className="object-cover"
+                      />
+                    ) : (
+                      <span className="font-mono text-xs font-semibold text-white">
+                        {token.symbol?.slice(0, 3) || "TK"}
+                      </span>
+                    )}
+                  </div>
 
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1 flex-wrap">
-                        <span className="text-base font-semibold text-text-primary">
-                          {token.name}
-                        </span>
-                        <span className="font-mono text-xs text-text-muted px-1.5 py-0.5 border border-border">
-                          ${token.symbol}
-                        </span>
-                        <span
-                          className={cn(
-                            "flex items-center gap-1 font-mono text-[10px] px-2 py-0.5 rounded-full border",
-                            isPending
-                              ? "text-warning border-warning/30 bg-warning/10"
-                              : "text-success border-success/30 bg-success/10"
-                          )}
-                        >
-                          <span
-                            className={cn(
-                              "w-1.5 h-1.5 rounded-full",
-                              isPending ? "bg-warning animate-pulse" : "bg-success"
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1 flex-wrap">
+                      <span className="text-base font-semibold text-white truncate font-sans">
+                        {token.name}
+                      </span>
+                      <span className="font-mono text-xs text-neutral-400">
+                        ${token.symbol}
+                      </span>
+                      <span className="font-mono text-[11px] px-2.5 py-0.5 rounded-full bg-white/[0.06] text-neutral-300 capitalize">
+                        {isPending ? "Draft / Pending" : "Active"}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-4 text-xs text-neutral-400 font-mono flex-wrap">
+                      <span className="flex items-center gap-1.5">
+                        {isPending ? (
+                          <span className="text-neutral-500">Un-minted</span>
+                        ) : (
+                          <>
+                            <span>{formatAddress(token.mint_address)}</span>
+                            {token.mint_address && (
+                              <IconCopy
+                                size={12}
+                                className="text-neutral-400 hover:text-white cursor-pointer"
+                                onClick={() => {
+                                  navigator.clipboard.writeText(token.mint_address!);
+                                  toast.success("Mint Address copied!");
+                                }}
+                              />
                             )}
-                          />
-                          {isPending ? "Draft / Pending" : "Active"}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-4 text-[11px] text-text-dim font-mono flex-wrap">
-                        <span className="flex items-center gap-1">
-                          {isPending ? (
-                            <span className="text-text-muted">Un-minted</span>
-                          ) : (
-                            <>
-                              {formatAddress(token.mint_address)}
-                              {token.mint_address && (
-                                <IconCopy
-                                  size={10}
-                                  className="hover:text-text-muted cursor-pointer"
-                                  onClick={() => {
-                                    navigator.clipboard.writeText(token.mint_address!);
-                                    toast.success("Copied!");
-                                  }}
-                                />
-                              )}
-                            </>
-                          )}
-                        </span>
-                        <span>
-                          Supply: {Number(token.supply).toLocaleString()}
-                        </span>
-                        <span>Decimals: {token.decimals}</span>
-                      </div>
+                          </>
+                        )}
+                      </span>
+                      <span>
+                        Supply: {Number(token.supply).toLocaleString()}
+                      </span>
+                      <span>Decimals: {token.decimals}</span>
                     </div>
+                  </div>
 
-                    <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end mt-3 sm:mt-0 pt-3 sm:pt-0 border-t sm:border-t-0 border-border">
-                      {isPending ? (
-                        <>
-                          <button
-                            onClick={() => openEditModal(token)}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono font-medium border border-border hover:border-accent/50 hover:text-accent rounded-sm transition-colors"
-                          >
-                            <IconEdit size={13} />
-                            Edit Draft
-                          </button>
-                          <Link
-                            href={`/launch?resume=${token.id}`}
-                            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-mono font-semibold bg-accent hover:bg-accent-hover text-white rounded-sm transition-colors"
-                          >
-                            <IconRocket size={13} />
-                            Launch
-                          </Link>
-                          <button
-                            onClick={() => handleDeleteDraft(token.id)}
-                            disabled={isDeleting === token.id}
-                            className="p-1.5 text-text-dim hover:text-error transition-colors"
-                            title="Delete draft"
-                          >
-                            <IconTrash size={14} />
-                          </button>
-                        </>
-                      ) : (
-                        <div className="hidden md:flex flex-col items-end gap-1 flex-shrink-0">
-                          <span className="text-xs text-text-muted">
+                  <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end mt-3 sm:mt-0 pt-3 sm:pt-0 border-t sm:border-t-0 border-white/[0.04]">
+                    {isPending ? (
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => openEditModal(token)}
+                          className="px-3.5 py-1.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] text-white text-xs font-medium font-sans transition-colors cursor-pointer inline-flex items-center gap-1.5"
+                        >
+                          <IconEdit size={13} />
+                          <span>Edit Draft</span>
+                        </button>
+                        <Link
+                          href={`/launch?resume=${token.id}`}
+                          className="px-4 py-1.5 rounded-xl bg-white text-black hover:bg-neutral-200 text-xs font-semibold font-sans transition-colors cursor-pointer inline-flex items-center"
+                        >
+                          Launch
+                        </Link>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteDraft(token.id)}
+                          disabled={isDeleting === token.id}
+                          className="p-1.5 text-neutral-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors cursor-pointer"
+                          title="Delete draft"
+                        >
+                          <IconTrash size={14} />
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-3">
+                        <div className="flex flex-col items-end gap-0.5">
+                          <span className="text-xs font-mono text-neutral-400">
                             {timeAgo(token.created_at)}
                           </span>
-                          <span className="font-mono text-[10px] text-text-dim">
+                          <span className="font-mono text-[10px] text-neutral-500">
                             {token.launches?.length || 0} launchpad
                             {(token.launches?.length || 0) !== 1 ? "s" : ""}
                           </span>
                         </div>
-                      )}
 
-                      {!isPending && token.mint_address && (
-                        <a
-                          href={`https://explorer.solana.com/address/${token.mint_address}?cluster=${process.env.NEXT_PUBLIC_SOLANA_NETWORK || "devnet"}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <IconExternalLink
-                            size={14}
-                            className="text-text-dim hover:text-text-muted cursor-pointer flex-shrink-0"
-                          />
-                        </a>
-                      )}
-                    </div>
+                        {token.mint_address && (
+                          <a
+                            href={`https://explorer.solana.com/address/${token.mint_address}?cluster=${process.env.NEXT_PUBLIC_SOLANA_NETWORK || "devnet"}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="p-1.5 text-neutral-400 hover:text-white rounded-lg transition-colors"
+                          >
+                            <IconExternalLink size={14} />
+                          </a>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
               </motion.div>
@@ -423,12 +402,11 @@ export default function TokensPage() {
 
       {/* Empty state */}
       {!loading && !error && tokens.length === 0 && (
-        <div className="border border-dashed border-border p-12 text-center">
-          <IconCoins size={32} className="text-text-dim mx-auto mb-4" />
-          <h3 className="text-base font-semibold text-text-primary mb-2">
+        <div className="bg-[#181818] rounded-2xl p-12 text-center border border-white/[0.04]">
+          <h3 className="text-base font-semibold text-white mb-2 font-sans">
             {search ? "No matching tokens" : "No tokens yet"}
           </h3>
-          <p className="text-sm text-text-secondary mb-6">
+          <p className="text-sm text-neutral-400 mb-6 font-sans">
             {search
               ? "Try a different search term or filter."
               : "Deploy your first token to see it here."}
@@ -436,9 +414,8 @@ export default function TokensPage() {
           {!search && (
             <Link
               href="/launch"
-              className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold bg-accent hover:bg-accent-hover text-white rounded-full transition-all"
+              className="inline-flex items-center px-5 py-2.5 text-sm font-semibold bg-white text-black hover:bg-neutral-200 rounded-full transition-colors cursor-pointer font-sans"
             >
-              <IconPlus size={16} />
               Create Token
             </Link>
           )}
@@ -461,33 +438,34 @@ export default function TokensPage() {
               initial={{ opacity: 0, scale: 0.95, y: 10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 10 }}
-              className="relative w-full max-w-lg bg-[#0c0d12] border border-white/10 p-6 md:p-8 rounded-xl shadow-2xl z-10 space-y-6 max-h-[90vh] overflow-y-auto"
+              className="relative w-full max-w-lg bg-[#141414] border border-white/[0.08] p-6 md:p-8 rounded-2xl shadow-2xl z-10 space-y-6 max-h-[90vh] overflow-y-auto"
             >
-              <div className="flex items-center justify-between pb-4 border-b border-white/[0.08]">
+              <div className="flex items-center justify-between pb-4 border-b border-white/[0.06]">
                 <div>
-                  <h3 className="text-lg font-bold text-white tracking-tight">
+                  <h3 className="text-lg font-bold text-white font-sans tracking-tight">
                     Edit Draft Token
                   </h3>
-                  <p className="text-xs text-text-muted mt-0.5">
+                  <p className="text-xs text-neutral-400 mt-0.5 font-sans">
                     Update token parameters before broadcasting on-chain.
                   </p>
                 </div>
                 <button
+                  type="button"
                   onClick={() => setEditingToken(null)}
-                  className="p-1 text-text-muted hover:text-white transition-colors"
+                  className="p-1 text-neutral-400 hover:text-white transition-colors cursor-pointer"
                 >
                   <IconX size={18} />
                 </button>
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-4 font-mono text-xs">
                 {/* Image Upload */}
                 <div>
-                  <label className="block text-xs font-mono text-text-muted mb-2">
+                  <label className="block text-neutral-400 mb-2">
                     Token Logo
                   </label>
                   <div className="flex items-center gap-4">
-                    <label className="relative w-16 h-16 border border-dashed border-white/20 hover:border-accent/60 bg-white/[0.02] rounded-lg flex flex-col items-center justify-center cursor-pointer overflow-hidden group">
+                    <label className="relative w-16 h-16 border border-dashed border-white/20 hover:border-white/40 bg-white/[0.02] rounded-xl flex flex-col items-center justify-center cursor-pointer overflow-hidden group">
                       {editImagePreview ? (
                         <Image
                           src={editImagePreview}
@@ -496,7 +474,7 @@ export default function TokensPage() {
                           className="object-cover"
                         />
                       ) : (
-                        <IconUpload size={18} className="text-text-muted group-hover:text-white transition-colors" />
+                        <IconUpload size={18} className="text-neutral-400 group-hover:text-white transition-colors" />
                       )}
                       <input
                         type="file"
@@ -505,7 +483,7 @@ export default function TokensPage() {
                         onChange={handleImageSelect}
                       />
                     </label>
-                    <span className="text-[11px] text-text-muted">
+                    <span className="text-[11px] text-neutral-500 font-sans">
                       Click box to upload or replace logo (Max 5MB PNG/JPG/WEBP).
                     </span>
                   </div>
@@ -514,7 +492,7 @@ export default function TokensPage() {
                 {/* Name & Symbol */}
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-mono text-text-muted mb-1.5">
+                    <label className="block text-neutral-400 mb-1.5">
                       Token Name
                     </label>
                     <input
@@ -522,11 +500,11 @@ export default function TokensPage() {
                       maxLength={32}
                       value={editForm.name}
                       onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                      className="w-full bg-white/[0.03] border border-white/10 hover:border-white/20 focus:border-accent/60 focus:outline-none px-3.5 py-2 text-sm text-white font-medium transition-colors"
+                      className="w-full bg-white/[0.03] border border-white/[0.08] focus:border-white/30 focus:outline-none px-3.5 py-2.5 text-xs text-white rounded-xl transition-colors font-sans"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-mono text-text-muted mb-1.5">
+                    <label className="block text-neutral-400 mb-1.5">
                       Symbol
                     </label>
                     <input
@@ -534,7 +512,7 @@ export default function TokensPage() {
                       maxLength={10}
                       value={editForm.symbol}
                       onChange={(e) => setEditForm({ ...editForm, symbol: e.target.value.toUpperCase() })}
-                      className="w-full bg-white/[0.03] border border-white/10 hover:border-white/20 focus:border-accent/60 focus:outline-none px-3.5 py-2 text-sm text-white font-mono transition-colors uppercase"
+                      className="w-full bg-white/[0.03] border border-white/[0.08] focus:border-white/30 focus:outline-none px-3.5 py-2.5 text-xs text-white font-mono transition-colors uppercase rounded-xl"
                     />
                   </div>
                 </div>
@@ -542,7 +520,7 @@ export default function TokensPage() {
                 {/* Supply & Decimals */}
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-mono text-text-muted mb-1.5">
+                    <label className="block text-neutral-400 mb-1.5">
                       Total Supply
                     </label>
                     <input
@@ -553,17 +531,17 @@ export default function TokensPage() {
                         const val = e.target.value.replace(/[^0-9]/g, "");
                         setEditForm({ ...editForm, supply: val });
                       }}
-                      className="w-full bg-white/[0.03] border border-white/10 hover:border-white/20 focus:border-accent/60 focus:outline-none px-3.5 py-2 text-sm text-white font-mono transition-colors"
+                      className="w-full bg-white/[0.03] border border-white/[0.08] focus:border-white/30 focus:outline-none px-3.5 py-2.5 text-xs text-white font-mono transition-colors rounded-xl"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-mono text-text-muted mb-1.5">
+                    <label className="block text-neutral-400 mb-1.5">
                       Decimals
                     </label>
                     <select
                       value={editForm.decimals}
                       onChange={(e) => setEditForm({ ...editForm, decimals: Number(e.target.value) })}
-                      className="w-full bg-[#12131a] border border-white/10 hover:border-white/20 focus:border-accent/60 focus:outline-none px-3.5 py-2 text-sm text-white transition-colors"
+                      className="w-full bg-[#181818] border border-white/[0.08] focus:border-white/30 focus:outline-none px-3.5 py-2.5 text-xs text-white transition-colors rounded-xl font-mono"
                     >
                       <option value={6}>6 Decimals</option>
                       <option value={8}>8 Decimals</option>
@@ -574,7 +552,7 @@ export default function TokensPage() {
 
                 {/* Description */}
                 <div>
-                  <label className="block text-xs font-mono text-text-muted mb-1.5">
+                  <label className="block text-neutral-400 mb-1.5">
                     Description
                   </label>
                   <textarea
@@ -582,17 +560,17 @@ export default function TokensPage() {
                     maxLength={500}
                     value={editForm.description}
                     onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
-                    className="w-full bg-white/[0.03] border border-white/10 hover:border-white/20 focus:border-accent/60 focus:outline-none px-3.5 py-2 text-sm text-white transition-colors resize-none"
+                    className="w-full bg-white/[0.03] border border-white/[0.08] focus:border-white/30 focus:outline-none px-3.5 py-2.5 text-xs text-white transition-colors resize-none rounded-xl font-sans"
                   />
                 </div>
               </div>
 
               {/* Actions */}
-              <div className="flex items-center justify-end gap-3 pt-4 border-t border-white/[0.08]">
+              <div className="flex items-center justify-end gap-3 pt-4 border-t border-white/[0.06]">
                 <button
                   type="button"
                   onClick={() => setEditingToken(null)}
-                  className="px-4 py-2 text-xs font-mono text-text-muted hover:text-white transition-colors"
+                  className="px-4 py-2 text-xs font-mono text-neutral-400 hover:text-white transition-colors cursor-pointer"
                 >
                   Cancel
                 </button>
@@ -601,10 +579,10 @@ export default function TokensPage() {
                   disabled={isSaving || !editForm.name || !editForm.symbol || !editForm.supply}
                   onClick={handleSaveEdit}
                   className={cn(
-                    "inline-flex items-center gap-2 px-5 py-2.5 text-xs font-mono font-semibold rounded-full transition-all",
+                    "inline-flex items-center gap-2 px-5 py-2 text-xs font-semibold rounded-xl transition-colors cursor-pointer font-sans",
                     isSaving
-                      ? "bg-accent/50 text-white/50 cursor-not-allowed"
-                      : "bg-accent hover:bg-accent-hover text-white shadow-lg shadow-accent/20"
+                      ? "bg-white/40 text-black cursor-not-allowed"
+                      : "bg-white text-black hover:bg-neutral-200"
                   )}
                 >
                   {isSaving ? (

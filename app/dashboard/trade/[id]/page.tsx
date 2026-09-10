@@ -5,7 +5,7 @@ import Link from "next/link";
 import { TradeForm } from "@/components/trade/trade-form";
 import { TradeHistory } from "@/components/trade/trade-history";
 import { CandlestickChart } from "@/components/trade/candlestick-chart";
-import { IconArrowLeft, IconRefresh } from "@tabler/icons-react";
+import { IconArrowLeft, IconRefresh, IconCopy, IconCheck } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 
 interface TokenData {
@@ -33,6 +33,7 @@ export default function TradePage({ params }: { params: Promise<{ id: string }> 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [copiedContract, setCopiedContract] = useState(false);
 
   // Live simulation states
   const [currentPrice, setCurrentPrice] = useState(0.000124);
@@ -94,22 +95,33 @@ export default function TradePage({ params }: { params: Promise<{ id: string }> 
     fetchDetails();
   };
 
+  const handleCopy = (address: string) => {
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(address);
+      setCopiedContract(true);
+      setTimeout(() => setCopiedContract(false), 2000);
+    }
+  };
+
   if (loading) {
     return (
-      <div className="p-6 md:p-10 flex items-center justify-center min-h-[50vh]">
-        <div className="text-xs text-text-muted font-mono">Loading trade interface...</div>
+      <div className="p-6 md:p-10 max-w-[1400px] mx-auto flex items-center justify-center min-h-[50vh]">
+        <div className="text-xs text-neutral-500 font-mono">Loading trade terminal...</div>
       </div>
     );
   }
 
   if (error || !launch) {
     return (
-      <div className="p-6 md:p-10 flex flex-col gap-4 max-w-md">
-        <div className="text-xs text-error font-mono">
+      <div className="p-6 md:p-10 max-w-[1400px] mx-auto flex flex-col gap-4 max-w-md">
+        <div className="text-xs text-red-400 font-mono bg-[#181818] border border-red-500/20 p-5 rounded-2xl">
           {error || "Launch details not found."}
         </div>
-        <Link href="/dashboard" className="text-xs text-accent font-mono flex items-center gap-1">
-          <IconArrowLeft size={12} /> Back to dashboard
+        <Link
+          href="/dashboard/explore"
+          className="text-xs text-white hover:text-neutral-300 font-sans flex items-center gap-1.5"
+        >
+          <IconArrowLeft size={14} /> Back to Trade &amp; Explore
         </Link>
       </div>
     );
@@ -119,66 +131,103 @@ export default function TradePage({ params }: { params: Promise<{ id: string }> 
   const gasSymbol = launch.network.toLowerCase() === "bsc" ? "BNB" : launch.network.toLowerCase() === "robinhood" ? "ETH" : "SOL";
 
   return (
-    <div className="p-6 md:p-10 flex flex-col gap-6">
-      {/* Header / Breadcrumb */}
+    <div className="p-6 md:p-10 max-w-[1400px] mx-auto flex flex-col gap-6">
+      {/* Navigation Toolbar */}
       <div className="flex items-center justify-between">
         <Link
           href="/dashboard/explore"
-          className="text-xs text-text-muted hover:text-text-primary transition-colors font-mono flex items-center gap-1.5"
+          className="text-xs text-neutral-400 hover:text-white bg-[#181818] border border-white/[0.06] hover:bg-white/[0.06] px-3.5 py-1.5 rounded-full transition-colors font-sans flex items-center gap-1.5"
         >
-          <IconArrowLeft size={12} /> Explore Memes
+          <IconArrowLeft size={14} />
+          <span>Back to Explore</span>
         </Link>
         <button
           onClick={fetchDetails}
-          className="text-xs text-text-muted hover:text-text-primary transition-colors font-mono flex items-center gap-1"
+          className="text-xs text-neutral-400 hover:text-white bg-[#181818] border border-white/[0.06] hover:bg-white/[0.06] px-3.5 py-1.5 rounded-full transition-colors font-sans flex items-center gap-1.5 cursor-pointer"
         >
-          <IconRefresh size={12} className="animate-hover" /> Refresh
+          <IconRefresh size={14} />
+          <span>Refresh</span>
         </button>
       </div>
 
-      {/* Title & Info */}
-      <div className="flex flex-col gap-1 border-b border-border pb-6">
-        <div className="flex items-center gap-2 flex-wrap">
-          <h1 className="text-2xl font-bold tracking-tight text-text-primary">
-            {token.name}
-          </h1>
-          <span className="font-mono text-xs text-text-muted px-1.5 py-0.5 border border-border">
-            ${token.symbol}
-          </span>
-          <span
+      {/* Title & Info Banner */}
+      <div className="bg-[#181818] border border-white/[0.04] p-6 rounded-2xl flex flex-col gap-5">
+        <div className="flex items-center gap-3 flex-wrap justify-between">
+          <div className="flex items-center gap-2.5 flex-wrap">
+            <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-white font-sans">
+              {token.name}
+            </h1>
+            <span className="font-mono text-xs text-neutral-300 px-2.5 py-0.5 rounded-full bg-white/[0.06]">
+              ${token.symbol}
+            </span>
+          </div>
+
+          <div
             className={cn(
-              "font-mono text-xs px-2 py-0.5 ml-2 border transition-all duration-300 font-semibold",
+              "font-mono text-xs px-3 py-1 rounded-full border transition-all duration-300 font-semibold",
               priceDirection === "up"
-                ? "text-success border-success/30 bg-success/5 animate-pulse"
+                ? "text-emerald-400 border-emerald-500/30 bg-emerald-500/10"
                 : priceDirection === "down"
-                ? "text-error border-error/30 bg-error/5 animate-pulse"
-                : "text-text-dim border-border"
+                ? "text-red-400 border-red-500/30 bg-red-500/10"
+                : "text-neutral-300 border-white/[0.06] bg-[#141414]"
             )}
           >
             Price: {currentPrice.toFixed(8)} {gasSymbol}
-          </span>
+          </div>
         </div>
         
-        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-text-secondary font-mono mt-2">
-          <div>
-            Launchpad: <span className="text-text-primary">{launch.launchpad}</span>
+        {/* Metadata Strip */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 border-t border-white/[0.04]">
+          <div className="bg-[#141414] rounded-xl p-3 border border-white/[0.04]">
+            <span className="text-[10px] font-sans font-medium uppercase tracking-wider text-neutral-500 block">
+              Launchpad
+            </span>
+            <span className="text-xs font-mono font-medium text-white block mt-1">
+              {launch.launchpad}
+            </span>
           </div>
-          <div>
-            Network: <span className="text-text-primary">{launch.network}</span>
+          <div className="bg-[#141414] rounded-xl p-3 border border-white/[0.04]">
+            <span className="text-[10px] font-sans font-medium uppercase tracking-wider text-neutral-500 block">
+              Network
+            </span>
+            <span className="text-xs font-mono font-medium text-white block mt-1 capitalize">
+              {launch.network}
+            </span>
           </div>
-          <div>
-            Contract: <span className="text-text-primary select-all">{launch.pool_address || "None"}</span>
+          <div className="bg-[#141414] rounded-xl p-3 border border-white/[0.04]">
+            <span className="text-[10px] font-sans font-medium uppercase tracking-wider text-neutral-500 block">
+              Contract
+            </span>
+            <div className="flex items-center justify-between gap-1.5 mt-1">
+              <span className="text-xs font-mono font-medium text-white truncate select-all">
+                {launch.pool_address ? `${launch.pool_address.substring(0, 6)}...${launch.pool_address.substring(launch.pool_address.length - 4)}` : "None"}
+              </span>
+              {launch.pool_address && (
+                <button
+                  onClick={() => handleCopy(launch.pool_address!)}
+                  className="text-neutral-500 hover:text-white transition-colors p-0.5"
+                  title="Copy address"
+                >
+                  {copiedContract ? <IconCheck size={12} className="text-emerald-400" /> : <IconCopy size={12} />}
+                </button>
+              )}
+            </div>
           </div>
-          <div>
-            Volume 24h: <span className="text-text-primary font-mono">{Number(accumulatedVolume || 0).toFixed(4)} {gasSymbol}</span>
+          <div className="bg-[#141414] rounded-xl p-3 border border-white/[0.04]">
+            <span className="text-[10px] font-sans font-medium uppercase tracking-wider text-neutral-500 block">
+              24h Volume
+            </span>
+            <span className="text-xs font-mono font-medium text-white block mt-1">
+              {Number(accumulatedVolume || 0).toFixed(4)} {gasSymbol}
+            </span>
           </div>
         </div>
       </div>
 
       {/* Main Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left/Middle Column - Chart */}
-        <div className="lg:col-span-2 flex flex-col gap-4">
+        {/* Left/Middle Column - Chart & Trade History */}
+        <div className="lg:col-span-2 flex flex-col gap-6">
           <CandlestickChart
             currentPrice={currentPrice}
             priceDirection={priceDirection}
@@ -189,29 +238,29 @@ export default function TradePage({ params }: { params: Promise<{ id: string }> 
           <TradeHistory launchId={launch.id} refreshTrigger={refreshTrigger} />
         </div>
 
-        {/* Right Column - Trade Panel */}
-        <div className="flex flex-col gap-4">
+        {/* Right Column - Trade Panel & Token Info */}
+        <div className="flex flex-col gap-6">
           <TradeForm launch={launch} onTradeSuccess={handleTradeSuccess} />
           
           {/* Mini Stats Card */}
-          <div className="border border-border p-5 rounded-none flex flex-col gap-3">
-            <div className="text-[10px] text-text-dim uppercase tracking-wider font-mono">
+          <div className="bg-[#181818] border border-white/[0.04] p-6 rounded-2xl flex flex-col gap-4">
+            <div className="text-xs font-sans font-medium uppercase tracking-wider text-neutral-400">
               Launch Details
             </div>
-            <div className="flex flex-col gap-2 text-xs font-mono">
-              <div className="flex justify-between">
-                <span className="text-text-muted">Total Supply</span>
-                <span className="text-text-primary">{Number(token.supply).toLocaleString()}</span>
+            <div className="flex flex-col gap-2.5">
+              <div className="bg-[#141414] rounded-xl p-3 border border-white/[0.04] flex justify-between items-center text-xs font-mono">
+                <span className="text-neutral-400">Total Supply</span>
+                <span className="text-white font-medium">{Number(token.supply).toLocaleString()}</span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-text-muted">Initial Liquidity</span>
-                <span className="text-text-primary">
+              <div className="bg-[#141414] rounded-xl p-3 border border-white/[0.04] flex justify-between items-center text-xs font-mono">
+                <span className="text-neutral-400">Initial Liquidity</span>
+                <span className="text-white font-medium">
                   {launch.initial_liquidity ? `${launch.initial_liquidity} ${gasSymbol}` : "None"}
                 </span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-text-muted">Token Decimals</span>
-                <span className="text-text-primary">{token.decimals}</span>
+              <div className="bg-[#141414] rounded-xl p-3 border border-white/[0.04] flex justify-between items-center text-xs font-mono">
+                <span className="text-neutral-400">Token Decimals</span>
+                <span className="text-white font-medium">{token.decimals}</span>
               </div>
             </div>
           </div>

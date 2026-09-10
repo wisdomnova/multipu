@@ -5,17 +5,14 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import { fadeUp, stagger } from "@/components/motion";
 import {
-  IconPlus,
-  IconRocket,
   IconExternalLink,
-  IconClock,
-  IconCircleCheck,
-  IconAlertCircle,
+  IconCopy,
 } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 import { useApi } from "@/hooks/use-api";
 import { StatsSkeleton, ListSkeleton } from "@/components/skeleton";
 import { DataError } from "@/components/error-boundary";
+import { toast } from "sonner";
 
 interface Launch {
   id: string;
@@ -42,45 +39,16 @@ const launchpadImages: Record<string, string> = {
   meteora: "/meteora.png",
   bags: "/bags.png",
   pumpfun: "/pumpfun.png",
+  fourmeme: "/four-meme.png",
+  pons: "/pons.png",
 };
 
 const launchpadNames: Record<string, string> = {
   meteora: "Meteora",
   bags: "Bags",
   pumpfun: "Pump.fun",
-};
-
-const statusConfig: Record<
-  string,
-  {
-    label: string;
-    icon: typeof IconCircleCheck;
-    color: string;
-    dotColor: string;
-    bgColor: string;
-  }
-> = {
-  live: {
-    label: "Live",
-    icon: IconCircleCheck,
-    color: "text-success",
-    dotColor: "bg-success",
-    bgColor: "bg-success/5 border-success/20",
-  },
-  pending: {
-    label: "Pending",
-    icon: IconClock,
-    color: "text-warning",
-    dotColor: "bg-warning",
-    bgColor: "bg-warning/5 border-warning/20",
-  },
-  failed: {
-    label: "Failed",
-    icon: IconAlertCircle,
-    color: "text-error",
-    dotColor: "bg-error",
-    bgColor: "bg-error/5 border-error/20",
-  },
+  fourmeme: "Four.meme",
+  pons: "Pons",
 };
 
 function formatAddress(addr: string | null) {
@@ -108,31 +76,30 @@ export default function LaunchesPage() {
   const pendingCount = launches.filter((l) => l.status === "pending").length;
 
   return (
-    <div className="p-6 md:p-10">
+    <div className="p-6 md:p-10 max-w-[1400px]">
       {/* Header */}
       <motion.div
         initial="hidden"
         animate="visible"
         variants={stagger}
-        className="mb-10"
+        className="mb-8"
       >
         <motion.div
           variants={fadeUp}
           className="flex items-center justify-between"
         >
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
+            <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-white font-sans">
               Launches
             </h1>
-            <p className="mt-1 text-sm text-text-secondary">
+            <p className="mt-1 text-sm text-neutral-400 font-sans">
               Track all your launchpad deployments.
             </p>
           </div>
           <Link
             href="/launch"
-            className="hidden md:inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold bg-accent hover:bg-accent-hover text-white rounded-full transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(139,92,246,0.3)]"
+            className="hidden md:inline-flex items-center px-5 py-2.5 text-sm font-semibold bg-white text-black hover:bg-neutral-200 rounded-full transition-colors cursor-pointer font-sans"
           >
-            <IconPlus size={16} />
             New Launch
           </Link>
         </motion.div>
@@ -151,28 +118,46 @@ export default function LaunchesPage() {
 
       {!loading && !error && (
         <>
-          {/* Status summary */}
+          {/* Status summary - 3 Rounded Matte Cards matching Overview */}
           <motion.div
             initial="hidden"
             animate="visible"
             variants={stagger}
-            className="grid grid-cols-2 md:grid-cols-3 gap-px bg-border border border-border mb-10"
+            className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8"
           >
             {[
-              { label: "Total Launches", value: launches.length.toString() },
-              { label: "Live", value: liveCount.toString() },
-              { label: "Pending", value: pendingCount.toString() },
+              {
+                label: "Total Launches",
+                value: launches.length.toString(),
+                sub: "across all launchpads",
+                color: "text-white",
+              },
+              {
+                label: "Live Pools",
+                value: liveCount.toString(),
+                sub: "active trading markets",
+                color: "text-emerald-400",
+              },
+              {
+                label: "Pending Deployments",
+                value: pendingCount.toString(),
+                sub: "draft & processing",
+                color: "text-amber-400",
+              },
             ].map((stat) => (
               <motion.div
                 key={stat.label}
                 variants={fadeUp}
-                className="bg-background p-5 hover:bg-elevated transition-colors"
+                className="bg-[#181818] rounded-2xl p-5 sm:p-6 flex flex-col justify-between min-h-[130px] border border-white/[0.04] hover:bg-[#1f1f1f] transition-colors"
               >
-                <span className="font-mono text-[0.65rem] text-text-muted uppercase tracking-wider block mb-2">
+                <span className="text-xs text-neutral-400 font-medium font-sans">
                   {stat.label}
                 </span>
-                <span className="text-2xl font-bold font-mono text-text-primary">
+                <span className={cn("text-3xl sm:text-4xl font-semibold font-mono tracking-tight my-2", stat.color)}>
                   {stat.value}
+                </span>
+                <span className="text-xs font-mono text-neutral-500">
+                  {stat.sub}
                 </span>
               </motion.div>
             ))}
@@ -189,105 +174,101 @@ export default function LaunchesPage() {
               variants={fadeUp}
               className="flex items-center justify-between mb-2"
             >
-              <h2 className="text-base font-semibold text-text-primary">
+              <h2 className="text-base font-semibold text-white font-sans">
                 All Launches
               </h2>
             </motion.div>
 
             {launches.map((launch) => {
-              const status =
-                statusConfig[launch.status] || statusConfig.pending;
+              const isLive = launch.status === "live";
+
               return (
                 <motion.div
                   key={launch.id}
                   variants={fadeUp}
-                  className="group border border-border hover:bg-elevated transition-colors"
+                  className="bg-[#181818] rounded-2xl p-5 sm:p-6 border border-white/[0.04] hover:border-white/[0.08] transition-all"
                 >
-                  <div className="p-5 md:p-6">
-                    <div className="flex items-center gap-4">
-                      <div className="relative w-10 h-10 rounded-lg overflow-hidden border border-border flex-shrink-0 bg-elevated">
-                        <Image
-                          src={
-                            launch.token?.image_url ||
-                            launchpadImages[launch.launchpad] ||
-                            "/meteora.png"
-                          }
-                          alt={launch.token?.name || launch.launchpad}
-                          fill
-                          className="object-cover"
-                        />
-                      </div>
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                    <div className="relative w-12 h-12 rounded-xl bg-white/[0.05] border border-white/[0.08] flex items-center justify-center flex-shrink-0 overflow-hidden">
+                      <Image
+                        src={
+                          launch.token?.image_url ||
+                          launchpadImages[launch.launchpad] ||
+                          "/meteora.png"
+                        }
+                        alt={launch.token?.name || launch.launchpad}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
 
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="text-sm font-semibold text-text-primary">
-                            {launch.token?.name || "Unknown"}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1 flex-wrap">
+                        <span className="text-base font-semibold text-white font-sans">
+                          {launch.token?.name || "Unnamed Token"}
+                        </span>
+                        {launch.token?.symbol && (
+                          <span className="font-mono text-xs text-neutral-400">
+                            ${launch.token.symbol}
                           </span>
-                          <span className="font-mono text-xs text-text-muted">
-                            ${launch.token?.symbol || "???"}
-                          </span>
-                          <span className="text-text-dim mx-1">→</span>
-                          <span className="text-sm text-text-secondary">
-                            {launchpadNames[launch.launchpad] ||
-                              launch.launchpad}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-4 text-[11px] text-text-dim font-mono">
-                          <span>
-                            Pool: {formatAddress(launch.pool_address)}
-                          </span>
-                          <span>
-                            {timeAgo(launch.launched_at || launch.created_at)}
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="hidden md:flex items-center gap-6 flex-shrink-0">
-                        <div className="text-right">
-                          <div className="text-[10px] font-mono text-text-dim uppercase tracking-wider mb-0.5">
-                            Liquidity
-                          </div>
-                          <div className="text-xs font-mono text-text-primary">
-                            {launch.initial_liquidity
-                              ? `${launch.initial_liquidity} SOL`
-                              : "—"}
-                          </div>
-                        </div>
-                      </div>
-
-                      <div
-                        className={cn(
-                          "flex items-center gap-1.5 px-2.5 py-1 border text-xs font-mono flex-shrink-0",
-                          status.bgColor
                         )}
-                      >
+                        <span className="font-mono text-[11px] px-2.5 py-0.5 rounded-full bg-white/[0.06] text-neutral-300 capitalize">
+                          {launchpadNames[launch.launchpad] || launch.launchpad}
+                        </span>
                         <span
                           className={cn(
-                            "w-1.5 h-1.5 rounded-full",
-                            status.dotColor
+                            "text-[10px] font-mono px-2 py-0.5 rounded-full",
+                            isLive
+                              ? "bg-emerald-500/10 text-emerald-400"
+                              : "bg-amber-500/10 text-amber-400"
                           )}
-                        />
-                        <span className={status.color}>{status.label}</span>
+                        >
+                          {launch.status}
+                        </span>
                       </div>
 
-                      {launch.status === "live" && (
+                      <div className="flex items-center gap-4 text-xs text-neutral-400 font-mono flex-wrap">
+                        <span className="flex items-center gap-1.5">
+                          <span>Pool: {formatAddress(launch.pool_address)}</span>
+                          {launch.pool_address && (
+                            <IconCopy
+                              size={12}
+                              className="text-neutral-400 hover:text-white cursor-pointer"
+                              onClick={() => {
+                                navigator.clipboard.writeText(launch.pool_address!);
+                                toast.success("Pool Address copied!");
+                              }}
+                            />
+                          )}
+                        </span>
+                        {launch.initial_liquidity !== null && (
+                          <span>
+                            Liquidity: {launch.initial_liquidity} SOL
+                          </span>
+                        )}
+                        <span>{timeAgo(launch.launched_at || launch.created_at)}</span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end mt-3 sm:mt-0 pt-3 sm:pt-0 border-t sm:border-t-0 border-white/[0.04]">
+                      {isLive && (
                         <Link
                           href={`/dashboard/trade/${launch.id}`}
-                          className="text-xs font-mono text-accent hover:text-accent-hover transition-colors px-2 py-1 flex-shrink-0 font-normal"
+                          className="px-4 py-1.5 rounded-xl bg-white text-black hover:bg-neutral-200 text-xs font-semibold font-sans transition-colors cursor-pointer"
                         >
                           Trade
                         </Link>
                       )}
-                      {launch.launch_tx && (
+
+                      {launch.pool_address && (
                         <a
-                          href={`https://explorer.solana.com/tx/${launch.launch_tx}?cluster=${process.env.NEXT_PUBLIC_SOLANA_NETWORK || "devnet"}`}
+                          href={`https://explorer.solana.com/address/${launch.pool_address}?cluster=${process.env.NEXT_PUBLIC_SOLANA_NETWORK || "devnet"}`}
                           target="_blank"
                           rel="noopener noreferrer"
+                          className="p-1.5 text-neutral-400 hover:text-white rounded-lg transition-colors"
+                          title="View on Solana Explorer"
                         >
-                          <IconExternalLink
-                            size={14}
-                            className="text-text-dim hover:text-text-muted cursor-pointer flex-shrink-0"
-                          />
+                          <IconExternalLink size={16} />
                         </a>
                       )}
                     </div>
@@ -297,15 +278,20 @@ export default function LaunchesPage() {
             })}
           </motion.div>
 
-          {/* Empty state */}
           {launches.length === 0 && (
-            <div className="border border-border p-12 text-center bg-white/[0.01]">
-              <h3 className="text-sm font-semibold text-text-primary mb-1">
+            <div className="bg-[#181818] rounded-2xl p-12 text-center border border-white/[0.04]">
+              <h3 className="text-base font-semibold text-white mb-2 font-sans">
                 No launches yet
               </h3>
-              <p className="text-xs text-text-secondary font-mono">
+              <p className="text-sm text-neutral-400 mb-6 font-sans">
                 Deploy a token and push it to a launchpad.
               </p>
+              <Link
+                href="/launch"
+                className="inline-flex items-center px-5 py-2.5 text-sm font-semibold bg-white text-black hover:bg-neutral-200 rounded-full transition-colors cursor-pointer font-sans"
+              >
+                Launch Token
+              </Link>
             </div>
           )}
         </>

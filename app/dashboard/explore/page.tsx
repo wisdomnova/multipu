@@ -79,30 +79,30 @@ export default function ExplorePage() {
   ];
 
   return (
-    <div className="p-6 md:p-10 flex flex-col gap-6">
+    <div className="p-6 md:p-10 max-w-[1400px] mx-auto flex flex-col gap-8">
       {/* Header */}
-      <div className="flex flex-col gap-1 border-b border-border pb-6">
-        <h1 className="text-2xl font-bold tracking-tight text-text-primary">
-          Explore Memes
+      <div>
+        <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-white font-sans">
+          Trade &amp; Explore
         </h1>
-        <p className="text-xs text-text-secondary font-mono mt-1">
-          Search and trade active token launches across all supported chains.
+        <p className="mt-1 text-sm text-neutral-400 font-sans">
+          Real-time token discovery, bonding curves, and decentralized execution across Solana, BNB, and Robinhood.
         </p>
       </div>
 
       {/* Toolbar: Chain Selector & Search */}
-      <div className="flex flex-col md:flex-row items-center justify-between gap-3">
+      <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
         {/* Chain Selector */}
-        <div className="flex items-center gap-1.5 overflow-x-auto w-full md:w-auto pb-1 md:pb-0">
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0">
           {chains.map((chain) => (
             <button
               key={chain.id}
               onClick={() => handleChainChange(chain.id)}
               className={cn(
-                "px-3 py-1.5 text-xs font-mono rounded transition-colors whitespace-nowrap",
+                "px-4 py-2 text-xs font-sans rounded-full transition-colors whitespace-nowrap cursor-pointer",
                 activeChain === chain.id
-                  ? "bg-accent/20 text-accent border border-accent/30"
-                  : "bg-white/[0.02] text-text-secondary hover:text-text-primary border border-border"
+                  ? "bg-white text-black font-semibold"
+                  : "bg-[#181818] text-neutral-400 hover:text-white border border-white/[0.06]"
               )}
             >
               {chain.label}
@@ -111,30 +111,30 @@ export default function ExplorePage() {
         </div>
 
         {/* Search & Refresh */}
-        <div className="flex items-center gap-2 w-full md:w-80">
+        <div className="flex items-center gap-2.5 w-full md:w-88">
           <div className="relative flex-1">
             <IconSearch
-              size={13}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-text-dim"
+              size={15}
+              className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-500"
             />
             <input
               type="text"
-              placeholder="Search by token name or symbol..."
+              placeholder="Search by name or symbol..."
               value={search}
               onChange={(e) => handleSearchChange(e.target.value)}
-              className="w-full bg-white/[0.02] border border-border hover:border-border-hover focus:border-accent focus:outline-none pl-8 pr-3 py-1.5 text-xs text-text-primary placeholder:text-text-dim font-mono rounded transition-colors"
+              className="w-full bg-[#181818] border border-white/[0.08] focus:border-white/30 rounded-full pl-10 pr-4 py-2 text-xs text-white placeholder:text-neutral-500 font-mono transition-colors focus:outline-none"
             />
           </div>
 
           <button
             onClick={() => fetchExploreData(search, activeChain, page, false)}
             disabled={isRefreshing}
-            className="p-1.5 border border-border hover:border-border-hover bg-white/[0.02] text-text-muted hover:text-text-primary rounded transition-colors"
+            className="p-2.5 bg-[#181818] border border-white/[0.06] hover:bg-white/[0.08] text-neutral-400 hover:text-white rounded-full transition-colors cursor-pointer flex-shrink-0"
             title="Refresh"
           >
             <IconRefresh
-              size={13}
-              className={cn(isRefreshing && "animate-spin text-accent")}
+              size={15}
+              className={cn(isRefreshing && "animate-spin text-white")}
             />
           </button>
         </div>
@@ -142,14 +142,14 @@ export default function ExplorePage() {
 
       {/* Loading State */}
       {loading && (
-        <div className="py-20 text-center text-xs text-text-dim font-mono">
-          Loading live token pairs...
+        <div className="py-24 text-center text-xs text-neutral-500 font-mono bg-[#181818] rounded-2xl border border-white/[0.04]">
+          Loading live trading pairs...
         </div>
       )}
 
       {/* Error State */}
       {error && !loading && (
-        <div className="py-12 text-center text-xs text-error font-mono border border-border p-4 rounded">
+        <div className="py-12 text-center text-xs text-red-400 font-sans bg-[#181818] border border-red-500/20 p-6 rounded-2xl">
           {error}
         </div>
       )}

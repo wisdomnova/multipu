@@ -11,6 +11,7 @@ import {
   IconLock,
   IconArrowUpRight,
   IconBook,
+  IconCode,
 } from "@tabler/icons-react";
 import { fadeUp, stagger } from "@/components/motion";
 import { useAuth } from "@/hooks/use-auth";
@@ -34,6 +35,7 @@ export default function ApiKeysPage() {
   // State for newly generated key banner
   const [generatedKey, setGeneratedKey] = useState<string | null>(null);
   const [copiedKey, setCopiedKey] = useState(false);
+  const [copiedMcp, setCopiedMcp] = useState(false);
 
   const fetchKeys = async () => {
     try {
@@ -113,8 +115,30 @@ export default function ApiKeysPage() {
     setTimeout(() => setCopiedKey(false), 2000);
   };
 
+  const copyMcpConfig = (keySample: string) => {
+    const config = JSON.stringify(
+      {
+        mcpServers: {
+          multipu: {
+            command: "npx",
+            args: ["-y", "multipu-mcp@latest"],
+            env: {
+              MULTIPU_API_KEY: keySample,
+            },
+          },
+        },
+      },
+      null,
+      2
+    );
+    navigator.clipboard.writeText(config);
+    setCopiedMcp(true);
+    toast.success("MCP configuration copied to clipboard");
+    setTimeout(() => setCopiedMcp(false), 2000);
+  };
+
   return (
-    <div className="p-6 md:p-10">
+    <div className="p-6 md:p-10 max-w-[1400px] mx-auto">
       {/* Header */}
       <motion.div
         initial="hidden"
@@ -127,10 +151,10 @@ export default function ApiKeysPage() {
           className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
         >
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
+            <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-white font-sans">
               API Keys &amp; Developer Access
             </h1>
-            <p className="mt-1 text-sm text-text-secondary">
+            <p className="mt-1 text-sm text-neutral-400 font-sans">
               Manage developer authentication keys for programmatic and autonomous agent access.
             </p>
           </div>
@@ -138,11 +162,11 @@ export default function ApiKeysPage() {
             href="https://docs.multipu.fun"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-4 py-2 border border-border hover:border-accent/50 hover:bg-accent/5 text-text-primary text-xs font-mono font-semibold transition-all rounded-sm cursor-pointer self-start sm:self-auto"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-white/[0.05] hover:bg-white/[0.1] text-white text-xs font-sans font-medium rounded-full border border-white/[0.06] transition-colors cursor-pointer self-start sm:self-auto"
           >
-            <IconBook size={14} className="text-accent" />
+            <IconBook size={14} className="text-neutral-400" />
             <span>Open Documentation</span>
-            <IconArrowUpRight size={13} className="text-text-muted" />
+            <IconArrowUpRight size={13} className="text-neutral-400" />
           </a>
         </motion.div>
       </motion.div>
@@ -154,94 +178,107 @@ export default function ApiKeysPage() {
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="mb-6 p-5 border border-accent/20 bg-accent/5 rounded-none space-y-4"
+            className="mb-6 p-5 sm:p-6 bg-[#181818] rounded-2xl border border-emerald-500/30 space-y-4"
           >
-            <div className="flex items-start gap-3">
-              <div className="p-1.5 bg-accent/15 rounded-sm flex-shrink-0">
-                <IconLock size={15} className="text-accent" />
+            <div className="flex items-start gap-3.5">
+              <div className="p-2 bg-emerald-500/10 rounded-xl flex-shrink-0">
+                <IconLock size={18} className="text-emerald-400" />
               </div>
               <div className="space-y-1">
-                <h3 className="text-xs font-semibold text-text-primary">
+                <h3 className="text-sm font-semibold text-white font-sans">
                   Store Your New API Key Securely
                 </h3>
-                <p className="text-[11px] text-text-secondary leading-relaxed">
-                  For security, we only display this API key once. You cannot recover it later. If you lose it, you will need to revoke it and generate a new key.
+                <p className="text-xs text-neutral-400 font-sans leading-relaxed">
+                  For security, we only display this API key once. You cannot recover it later. If you lose it, revoke it and generate a new one.
                 </p>
               </div>
             </div>
 
-            <div className="bg-white/[0.02] border border-border p-3.5 flex items-center justify-between gap-4">
-              <span className="font-mono text-xs text-accent break-all select-all font-semibold">
+            <div className="bg-[#141414] border border-white/[0.06] rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <span className="font-mono text-xs text-emerald-400 break-all select-all font-semibold">
                 {generatedKey}
               </span>
               <button
                 onClick={() => copyToClipboard(generatedKey)}
-                className="flex-shrink-0 flex items-center gap-1 px-3 py-1.5 bg-accent hover:bg-accent-hover text-white transition-all text-[10px] font-semibold font-mono cursor-pointer"
+                className="flex-shrink-0 inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-white text-black hover:bg-neutral-200 text-xs font-semibold font-sans rounded-full transition-colors cursor-pointer"
               >
-                {copiedKey ? <IconCheck size={11} /> : <IconCopy size={11} />}
-                {copiedKey ? "Copied" : "Copy"}
+                {copiedKey ? <IconCheck size={14} /> : <IconCopy size={14} />}
+                <span>{copiedKey ? "Copied" : "Copy Key"}</span>
               </button>
             </div>
 
             <div className="text-right">
               <button
                 onClick={() => setGeneratedKey(null)}
-                className="text-xs text-text-dim hover:text-text-primary font-mono cursor-pointer"
+                className="text-xs text-neutral-400 hover:text-white font-sans transition-colors cursor-pointer"
               >
-                Dismiss
+                Dismiss notification
               </button>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Full-Width API Key Controls */}
-      <div className="w-full space-y-6">
-        <div className="border border-border p-6 md:p-8 space-y-6 bg-white/[0.005]">
-          <h2 className="text-sm font-semibold text-text-primary flex items-center gap-2">
-            <IconKey size={16} className="text-accent" /> API Key Controls
-          </h2>
+      <div className="space-y-6">
+        {/* Main API Key Controls Card */}
+        <div className="bg-[#181818] rounded-2xl p-6 md:p-8 border border-white/[0.04] space-y-6">
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-white font-sans flex items-center gap-2">
+              <IconKey size={16} className="text-neutral-400" />
+              API Key Management
+            </h2>
+            <span className="text-xs font-mono text-neutral-400 bg-white/[0.04] px-2.5 py-1 rounded-full border border-white/[0.04]">
+              {keys.length} active
+            </span>
+          </div>
 
           {/* Create API Key Form */}
-          <form onSubmit={handleCreateKey} className="space-y-4 max-w-xl">
-            <div className="space-y-2">
-              <label className="text-[10px] text-text-dim uppercase tracking-wider font-mono block">
-                New Key Label
-              </label>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  placeholder="e.g. Trading Bot / Agent Worker"
-                  value={newKeyName}
-                  onChange={(e) => setNewKeyName(e.target.value)}
-                  className="flex-1 bg-transparent border border-border hover:border-border-hover focus:border-accent/50 focus:outline-none px-4 py-2.5 text-xs text-text-primary placeholder:text-text-dim transition-colors font-mono"
-                />
-                <button
-                  type="submit"
-                  disabled={isGenerating}
-                  className="px-5 py-2.5 border border-border hover:border-border-hover bg-white/[0.02] hover:bg-white/[0.05] text-text-primary text-xs font-mono font-semibold transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
-                >
-                  {isGenerating ? "Generating..." : <><IconPlus size={14} /> Add Key</>}
-                </button>
-              </div>
+          <form onSubmit={handleCreateKey} className="space-y-3 max-w-xl">
+            <label className="text-xs font-sans font-medium text-neutral-300 block">
+              Create New API Key
+            </label>
+            <div className="flex flex-col sm:flex-row gap-2.5">
+              <input
+                type="text"
+                placeholder="e.g. Trading Bot / Agent Worker"
+                value={newKeyName}
+                onChange={(e) => setNewKeyName(e.target.value)}
+                className="flex-1 bg-[#141414] border border-white/[0.08] focus:border-white/30 rounded-xl px-4 py-2.5 text-xs text-white placeholder:text-neutral-500 font-mono transition-colors focus:outline-none"
+              />
+              <button
+                type="submit"
+                disabled={isGenerating}
+                className="bg-white text-black hover:bg-neutral-200 font-semibold text-xs px-5 py-2.5 rounded-full transition-colors cursor-pointer font-sans inline-flex items-center justify-center gap-1.5 flex-shrink-0 disabled:opacity-50"
+              >
+                {isGenerating ? (
+                  "Generating..."
+                ) : (
+                  <>
+                    <IconPlus size={14} />
+                    <span>Create Key</span>
+                  </>
+                )}
+              </button>
             </div>
           </form>
 
-          {/* Keys list */}
-          <div className="space-y-3 pt-4 border-t border-border">
+          {/* Active Keys List */}
+          <div className="space-y-3 pt-6 border-t border-white/[0.04]">
             <div className="flex items-center justify-between">
-              <label className="text-[10px] text-text-dim uppercase tracking-wider font-mono block">
-                Active Keys ({keys.length})
-              </label>
-              <span className="text-[11px] font-mono text-text-muted">
-                Authenticated non-custodial keys
+              <span className="text-xs font-sans font-medium text-neutral-300">
+                Active Keys
+              </span>
+              <span className="text-[11px] font-mono text-neutral-500">
+                Non-custodial bearer tokens
               </span>
             </div>
 
             {loading ? (
-              <div className="text-xs text-text-dim font-mono py-4">Loading keys...</div>
+              <div className="text-xs text-neutral-500 font-mono py-6 text-center">
+                Loading keys...
+              </div>
             ) : keys.length === 0 ? (
-              <div className="text-xs text-text-dim font-mono py-10 border border-dashed border-border text-center">
+              <div className="text-xs text-neutral-400 font-sans py-10 bg-[#141414] rounded-xl border border-dashed border-white/[0.06] text-center">
                 No active keys. Create a key above to authenticate your API and MCP requests.
               </div>
             ) : (
@@ -249,37 +286,82 @@ export default function ApiKeysPage() {
                 {keys.map((key) => (
                   <div
                     key={key.id}
-                    className="p-4 border border-border hover:bg-elevated/80 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-3 group"
+                    className="bg-[#141414] rounded-xl p-4 border border-white/[0.04] hover:border-white/[0.08] transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-3 group"
                   >
                     <div className="space-y-1 min-w-0">
-                      <div className="text-xs font-semibold text-text-primary">
+                      <div className="text-xs font-semibold text-white font-sans">
                         {key.name}
                       </div>
-                      <div className="font-mono text-xs text-text-dim select-all break-all">
+                      <div className="font-mono text-xs text-neutral-400 select-all break-all">
                         {key.api_key}
                       </div>
                     </div>
                     <div className="flex items-center gap-2 self-end sm:self-auto flex-shrink-0">
                       <button
                         onClick={() => copyToClipboard(key.api_key)}
-                        className="px-2.5 py-1.5 text-xs text-text-dim hover:text-text-primary bg-white/[0.02] hover:bg-white/[0.06] border border-border rounded-sm transition-colors flex items-center gap-1 font-mono cursor-pointer"
+                        className="px-3 py-1.5 text-xs text-neutral-300 hover:text-white bg-white/[0.05] hover:bg-white/[0.1] rounded-lg transition-colors flex items-center gap-1.5 font-mono cursor-pointer"
                         title="Copy Key"
                       >
-                        <IconCopy size={12} />
+                        <IconCopy size={13} />
                         <span>Copy</span>
                       </button>
                       <button
                         onClick={() => handleRevokeKey(key.id)}
-                        className="p-1.5 text-text-muted hover:text-error hover:bg-error/5 border border-transparent hover:border-error/20 rounded-sm transition-colors cursor-pointer"
+                        className="p-1.5 text-neutral-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors cursor-pointer"
                         title="Revoke Key"
                       >
-                        <IconTrash size={14} />
+                        <IconTrash size={15} />
                       </button>
                     </div>
                   </div>
                 ))}
               </div>
             )}
+          </div>
+        </div>
+
+        {/* MCP & Autonomous Agents Card */}
+        <div className="bg-[#181818] rounded-2xl p-6 md:p-8 border border-white/[0.04] space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <IconCode size={16} className="text-neutral-400" />
+              <h2 className="text-sm font-semibold text-white font-sans">
+                MCP &amp; Agent Configuration
+              </h2>
+            </div>
+            <button
+              onClick={() =>
+                copyMcpConfig(keys.length > 0 ? keys[0].api_key : "YOUR_MULTIPU_API_KEY")
+              }
+              className="px-3 py-1.5 text-xs text-neutral-300 hover:text-white bg-white/[0.05] hover:bg-white/[0.1] rounded-full transition-colors flex items-center gap-1.5 font-sans cursor-pointer"
+            >
+              {copiedMcp ? <IconCheck size={13} /> : <IconCopy size={13} />}
+              <span>{copiedMcp ? "Copied" : "Copy Config"}</span>
+            </button>
+          </div>
+
+          <p className="text-xs text-neutral-400 font-sans leading-relaxed">
+            Integrate Multipu capabilities directly into Claude Desktop, Cursor, Antigravity, or your custom autonomous trading bot using the Model Context Protocol (MCP).
+          </p>
+
+          <div className="bg-[#141414] rounded-xl p-4 border border-white/[0.06] font-mono text-xs text-neutral-300 overflow-x-auto">
+            <pre>
+{JSON.stringify(
+  {
+    mcpServers: {
+      multipu: {
+        command: "npx",
+        args: ["-y", "multipu-mcp@latest"],
+        env: {
+          MULTIPU_API_KEY: keys.length > 0 ? keys[0].api_key : "YOUR_MULTIPU_API_KEY",
+        },
+      },
+    },
+  },
+  null,
+  2
+)}
+            </pre>
           </div>
         </div>
       </div>

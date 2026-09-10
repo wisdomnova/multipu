@@ -127,18 +127,18 @@ export function TerminalColumnBoard({
   return (
     <div className="flex flex-col gap-6">
       {/* Quick Amount Selector Bar */}
-      <div className="flex items-center justify-between bg-white/[0.02] border border-border px-4 py-3 rounded-lg flex-wrap gap-3">
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-mono text-text-muted">Preset:</span>
+      <div className="bg-[#181818] border border-white/[0.04] px-5 py-3.5 rounded-2xl flex items-center justify-between flex-wrap gap-4">
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-xs font-sans font-medium text-neutral-400">Quick Buy Preset:</span>
           {[0.1, 0.5, 1, 5, 10].map((amt) => (
             <button
               key={amt}
               onClick={() => setQuickBuyAmount(amt)}
               className={cn(
-                "px-2.5 py-1 text-xs font-mono rounded transition-colors",
+                "px-3.5 py-1.5 text-xs font-mono rounded-full transition-colors cursor-pointer",
                 quickBuyAmount === amt
-                  ? "bg-accent text-white font-medium"
-                  : "bg-white/[0.04] text-text-secondary hover:text-text-primary"
+                  ? "bg-white text-black font-semibold"
+                  : "bg-[#141414] text-neutral-400 hover:text-white border border-white/[0.06]"
               )}
             >
               {amt} SOL
@@ -146,8 +146,9 @@ export function TerminalColumnBoard({
           ))}
         </div>
 
-        <div className="text-[11px] font-mono text-text-dim">
-          Real-time DEX Data
+        <div className="text-xs font-mono text-neutral-400 flex items-center gap-2">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+          <span>Real-time Decentralized Feed</span>
         </div>
       </div>
 
@@ -156,37 +157,40 @@ export function TerminalColumnBoard({
         {columnConfig.map((col) => (
           <div
             key={col.key}
-            className="flex flex-col bg-white/[0.02] border border-border rounded-lg overflow-hidden"
+            className="flex flex-col bg-[#181818] border border-white/[0.04] rounded-2xl overflow-hidden"
           >
             {/* Column Header */}
-            <div className="p-4 border-b border-border flex items-center justify-between bg-white/[0.01]">
+            <div className="p-5 border-b border-white/[0.04] flex items-center justify-between bg-white/[0.01]">
               <div>
-                <h3 className="text-xs font-semibold uppercase tracking-wider text-text-primary font-mono">
+                <h3 className="text-sm font-semibold text-white font-sans">
                   {col.title}
                 </h3>
-                <p className="text-[10px] text-text-dim font-mono mt-0.5">
-                  {col.subtitle} ({col.totalCount})
+                <p className="text-xs text-neutral-400 font-sans mt-0.5">
+                  {col.subtitle}
                 </p>
               </div>
+              <span className="text-xs font-mono text-neutral-400 bg-white/[0.04] px-2.5 py-1 rounded-full border border-white/[0.04]">
+                {col.totalCount}
+              </span>
             </div>
 
             {/* Column Tokens List */}
-            <div className="flex-1 overflow-y-auto divide-y divide-border p-3 space-y-3 min-h-[500px]">
+            <div className="flex-1 overflow-y-auto p-4 space-y-3 min-h-[500px]">
               {col.tokens.map((item) => {
                 const t = item.tokens;
                 const isCopied = copiedId === item.id;
                 const net = item.network?.toLowerCase() || "";
-                const gas = net === "bsc" ? "BNB" : net === "robinhood" ? "ROBIN" : "SOL";
+                const gas = net === "bsc" ? "BNB" : net === "robinhood" ? "ETH" : "SOL";
 
                 return (
                   <div
                     key={item.id}
-                    className="p-3.5 bg-white/[0.02] hover:bg-white/[0.04] border border-border hover:border-border-hover rounded-lg transition-colors flex flex-col gap-3"
+                    className="p-4 bg-[#141414] hover:bg-[#161616] border border-white/[0.04] hover:border-white/[0.08] rounded-xl transition-all flex flex-col gap-3.5"
                   >
                     {/* Top Row: Thumbnail + Ticker/Name + Price/MC */}
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex items-center gap-3 min-w-0">
-                        <div className="w-10 h-10 rounded bg-white/[0.04] border border-border flex-shrink-0 overflow-hidden">
+                        <div className="w-10 h-10 rounded-xl bg-black/40 border border-white/[0.06] flex-shrink-0 overflow-hidden">
                           <img
                             src={t.image_url}
                             alt={t.name}
@@ -199,23 +203,23 @@ export function TerminalColumnBoard({
 
                         <div className="min-w-0">
                           <div className="flex items-center gap-1.5">
-                            <span className="text-xs font-semibold text-text-primary truncate">
+                            <span className="text-xs font-semibold text-white truncate font-sans">
                               {t.name}
                             </span>
                             <button
                               onClick={(e) => handleCopyAddress(e, t.mint_address || item.id, item.id)}
-                              className="text-text-dim hover:text-text-secondary transition-colors p-0.5"
+                              className="text-neutral-500 hover:text-neutral-300 transition-colors p-0.5"
                               title="Copy contract address"
                             >
-                              {isCopied ? <IconCheck size={11} className="text-success" /> : <IconCopy size={11} />}
+                              {isCopied ? <IconCheck size={12} className="text-emerald-400" /> : <IconCopy size={12} />}
                             </button>
                           </div>
 
                           <div className="flex items-center gap-2 mt-0.5">
-                            <span className="text-xs font-mono text-accent">
+                            <span className="text-xs font-mono text-neutral-300">
                               ${t.symbol}
                             </span>
-                            <span className="text-[10px] font-mono text-text-dim">
+                            <span className="text-[11px] font-mono text-neutral-500">
                               {item.time_ago}
                             </span>
                           </div>
@@ -224,45 +228,45 @@ export function TerminalColumnBoard({
 
                       {/* Right: MC & Volume */}
                       <div className="text-right flex-shrink-0 font-mono">
-                        <div className="text-xs text-text-primary font-medium">
+                        <div className="text-xs text-white font-medium">
                           MC: {formatUSD(item.market_cap)}
                         </div>
-                        <div className="text-[10px] text-text-dim">
+                        <div className="text-[11px] text-neutral-500">
                           Vol: {formatUSD(item.volume_24h)}
                         </div>
                       </div>
                     </div>
 
                     {/* Middle Row: On-chain Holder Metrics */}
-                    <div className="grid grid-cols-4 gap-2 py-2 px-2.5 bg-white/[0.02] rounded border border-border text-[10px] font-mono text-text-muted">
+                    <div className="grid grid-cols-4 gap-2 py-2 px-3 bg-[#101010] rounded-lg border border-white/[0.03] text-[10px] font-mono text-neutral-400">
                       <div>
-                        <span className="text-text-dim block">Holders</span>
-                        <span className="text-text-primary">{item.holders_count}</span>
+                        <span className="text-neutral-500 block">Holders</span>
+                        <span className="text-white">{item.holders_count}</span>
                       </div>
                       <div>
-                        <span className="text-text-dim block">Top 10</span>
-                        <span className="text-text-secondary">{item.top_10_pct}%</span>
+                        <span className="text-neutral-500 block">Top 10</span>
+                        <span className="text-neutral-300">{item.top_10_pct}%</span>
                       </div>
                       <div>
-                        <span className="text-text-dim block">Dev</span>
-                        <span className="text-text-secondary">{item.dev_holding_pct}%</span>
+                        <span className="text-neutral-500 block">Dev</span>
+                        <span className="text-neutral-300">{item.dev_holding_pct}%</span>
                       </div>
                       <div>
-                        <span className="text-text-dim block">Snipers</span>
-                        <span className="text-text-secondary">{item.snipers_pct}%</span>
+                        <span className="text-neutral-500 block">Snipers</span>
+                        <span className="text-neutral-300">{item.snipers_pct}%</span>
                       </div>
                     </div>
 
                     {/* Bonding curve progress bar */}
                     {item.progress > 0 && (
-                      <div className="w-full flex flex-col gap-1">
-                        <div className="flex justify-between text-[9px] font-mono text-text-dim">
+                      <div className="w-full flex flex-col gap-1.5">
+                        <div className="flex justify-between text-[10px] font-mono text-neutral-500">
                           <span>Curve Progress</span>
-                          <span className="text-text-secondary">{item.progress}%</span>
+                          <span className="text-emerald-400">{item.progress}%</span>
                         </div>
-                        <div className="w-full h-1 bg-white/[0.04] rounded overflow-hidden">
+                        <div className="w-full h-1.5 bg-neutral-800 rounded-full overflow-hidden">
                           <div
-                            className="h-full bg-accent transition-all duration-300 rounded"
+                            className="h-full bg-emerald-400 transition-all duration-300 rounded-full"
                             style={{ width: `${item.progress}%` }}
                           />
                         </div>
@@ -270,16 +274,16 @@ export function TerminalColumnBoard({
                     )}
 
                     {/* Bottom Row: Social links + Actions */}
-                    <div className="flex items-center justify-between pt-1 border-t border-border">
+                    <div className="flex items-center justify-between pt-2 border-t border-white/[0.04]">
                       {/* Social & DEX Icons */}
-                      <div className="flex items-center gap-1 text-text-dim">
+                      <div className="flex items-center gap-1 text-neutral-400">
                         {t.socials.website && (
                           <a
                             href={t.socials.website}
                             target="_blank"
                             rel="noreferrer"
                             title="Website"
-                            className="p-1 hover:text-text-primary hover:bg-white/[0.05] rounded transition-colors"
+                            className="p-1.5 hover:text-white hover:bg-white/[0.05] rounded-lg transition-colors"
                           >
                             <IconWorld size={14} />
                           </a>
@@ -290,7 +294,7 @@ export function TerminalColumnBoard({
                             target="_blank"
                             rel="noreferrer"
                             title="X (Twitter)"
-                            className="p-1 hover:text-text-primary hover:bg-white/[0.05] rounded transition-colors"
+                            className="p-1.5 hover:text-white hover:bg-white/[0.05] rounded-lg transition-colors"
                           >
                             <IconBrandX size={14} />
                           </a>
@@ -301,7 +305,7 @@ export function TerminalColumnBoard({
                             target="_blank"
                             rel="noreferrer"
                             title="Telegram"
-                            className="p-1 hover:text-text-primary hover:bg-white/[0.05] rounded transition-colors"
+                            className="p-1.5 hover:text-white hover:bg-white/[0.05] rounded-lg transition-colors"
                           >
                             <IconBrandTelegram size={14} />
                           </a>
@@ -311,7 +315,7 @@ export function TerminalColumnBoard({
                           target="_blank"
                           rel="noreferrer"
                           title="DexScreener"
-                          className="p-1 hover:text-text-primary hover:bg-white/[0.05] rounded transition-colors"
+                          className="p-1.5 hover:text-white hover:bg-white/[0.05] rounded-lg transition-colors"
                         >
                           <IconChartCandle size={14} />
                         </a>
@@ -322,7 +326,7 @@ export function TerminalColumnBoard({
                         {onQuickBuy && (
                           <button
                             onClick={() => onQuickBuy(item, quickBuyAmount)}
-                            className="px-2.5 py-1 text-xs font-mono text-text-primary bg-white/[0.04] hover:bg-white/[0.08] border border-border rounded transition-colors"
+                            className="px-3 py-1.5 text-xs font-mono text-neutral-300 hover:text-white bg-white/[0.05] hover:bg-white/[0.1] rounded-full border border-white/[0.06] transition-colors cursor-pointer"
                           >
                             Buy {quickBuyAmount} {gas}
                           </button>
@@ -330,7 +334,7 @@ export function TerminalColumnBoard({
 
                         <Link
                           href={`/dashboard/trade/${item.id}`}
-                          className="px-3 py-1 text-xs font-mono text-white bg-accent hover:bg-accent-hover rounded transition-colors"
+                          className="px-4 py-1.5 text-xs font-sans font-semibold text-black bg-white hover:bg-neutral-200 rounded-full transition-colors"
                         >
                           Trade
                         </Link>
@@ -341,8 +345,8 @@ export function TerminalColumnBoard({
               })}
 
               {col.tokens.length === 0 && (
-                <div className="py-12 text-center text-xs font-mono text-text-dim">
-                  No active tokens
+                <div className="py-16 text-center text-xs font-sans text-neutral-500 bg-[#141414] rounded-xl border border-dashed border-white/[0.04]">
+                  No active tokens in this category
                 </div>
               )}
             </div>
@@ -352,8 +356,8 @@ export function TerminalColumnBoard({
 
       {/* Pagination Controls */}
       {totalPages > 1 && (
-        <div className="border border-border bg-white/[0.02] p-4 rounded-lg flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="text-xs font-mono text-text-dim">
+        <div className="border border-white/[0.04] bg-[#181818] p-4 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="text-xs font-mono text-neutral-400">
             Showing page {currentPage} of {totalPages} ({totalItems} total tokens)
           </div>
 
@@ -361,7 +365,7 @@ export function TerminalColumnBoard({
             <button
               onClick={() => onPageChange && onPageChange(currentPage - 1)}
               disabled={currentPage === 1}
-              className="px-3 py-1.5 text-xs font-mono bg-white/[0.04] hover:bg-white/[0.08] disabled:opacity-30 disabled:hover:bg-white/[0.04] text-text-secondary hover:text-white border border-border rounded transition-colors flex items-center gap-1"
+              className="px-3.5 py-1.5 text-xs font-sans font-medium bg-white/[0.05] hover:bg-white/[0.1] disabled:opacity-30 text-white rounded-full transition-colors flex items-center gap-1 cursor-pointer disabled:cursor-not-allowed"
             >
               <IconChevronLeft size={14} />
               <span>Previous</span>
@@ -379,10 +383,10 @@ export function TerminalColumnBoard({
                     key={pageNum}
                     onClick={() => onPageChange && onPageChange(pageNum)}
                     className={cn(
-                      "w-8 h-8 text-xs font-mono rounded transition-colors",
+                      "w-8 h-8 text-xs font-mono rounded-full transition-colors cursor-pointer",
                       currentPage === pageNum
-                        ? "bg-accent text-white font-semibold"
-                        : "bg-white/[0.04] text-text-secondary hover:text-white border border-border"
+                        ? "bg-white text-black font-semibold"
+                        : "bg-[#141414] text-neutral-400 hover:text-white border border-white/[0.06]"
                     )}
                   >
                     {pageNum}
@@ -394,7 +398,7 @@ export function TerminalColumnBoard({
             <button
               onClick={() => onPageChange && onPageChange(currentPage + 1)}
               disabled={currentPage === totalPages}
-              className="px-3 py-1.5 text-xs font-mono bg-white/[0.04] hover:bg-white/[0.08] disabled:opacity-30 disabled:hover:bg-white/[0.04] text-text-secondary hover:text-white border border-border rounded transition-colors flex items-center gap-1"
+              className="px-3.5 py-1.5 text-xs font-sans font-medium bg-white/[0.05] hover:bg-white/[0.1] disabled:opacity-30 text-white rounded-full transition-colors flex items-center gap-1 cursor-pointer disabled:cursor-not-allowed"
             >
               <span>Next</span>
               <IconChevronRight size={14} />

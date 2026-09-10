@@ -28,7 +28,7 @@ export function TradeHistory({ launchId, refreshTrigger }: TradeHistoryProps) {
       const type = Math.random() > 0.5 ? ("buy" as const) : ("sell" as const);
       const amountPay = parseFloat((Math.random() * 2 + 0.1).toFixed(4));
       const amountReceive = amountPay * 1000000;
-      const wallet = "0x" + Math.random().toString(16).substring(2, 10) + "..." + Math.random().toString(16).substring(2, 6);
+      const wallet = "0x" + Math.random().toString(16).substring(2, 6) + "..." + Math.random().toString(16).substring(2, 6);
       const timeOffset = (i + 1) * 3 * 60 * 1000; // minutes ago
       
       list.push({
@@ -49,7 +49,7 @@ export function TradeHistory({ launchId, refreshTrigger }: TradeHistoryProps) {
       const type = Math.random() > 0.45 ? ("buy" as const) : ("sell" as const);
       const amountPay = parseFloat((Math.random() * 1.8 + 0.02).toFixed(4));
       const amountReceive = amountPay * 1000000;
-      const wallet = "0x" + Math.random().toString(16).substring(2, 10) + "..." + Math.random().toString(16).substring(2, 6);
+      const wallet = "0x" + Math.random().toString(16).substring(2, 6) + "..." + Math.random().toString(16).substring(2, 6);
       
       const newTrade: Trade = {
         id: "live-" + Date.now(),
@@ -85,33 +85,46 @@ export function TradeHistory({ launchId, refreshTrigger }: TradeHistoryProps) {
   }, [refreshTrigger]);
 
   return (
-    <div className="bg-white/[0.02] p-5 rounded-lg flex flex-col gap-4">
-      <div className="text-[10px] text-text-dim uppercase tracking-wider font-normal">
-        Recent Trades
+    <div className="bg-[#181818] p-6 rounded-2xl border border-white/[0.04] flex flex-col gap-4">
+      <div className="flex items-center justify-between">
+        <div>
+          <h3 className="text-sm font-semibold text-white font-sans">
+            Recent Trades
+          </h3>
+          <p className="text-xs text-neutral-400 font-sans mt-0.5">
+            Real-time settled order flow
+          </p>
+        </div>
+        <span className="text-xs font-mono text-neutral-400 bg-white/[0.04] px-2.5 py-1 rounded-full border border-white/[0.04]">
+          Live stream
+        </span>
       </div>
       
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-2">
         {trades.map((trade) => (
-          <div key={trade.id} className="flex items-center justify-between text-xs py-1">
-            <div className="flex items-center gap-2">
+          <div
+            key={trade.id}
+            className="bg-[#141414] rounded-xl p-3 border border-white/[0.04] hover:border-white/[0.08] transition-colors flex items-center justify-between"
+          >
+            <div className="flex items-center gap-3">
               <span
                 className={cn(
-                  "font-normal uppercase tracking-wider text-[10px]",
-                  trade.type === "buy" ? "text-success" : "text-error"
+                  "uppercase tracking-wider text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full",
+                  trade.type === "buy" ? "text-emerald-400 bg-emerald-400/10" : "text-red-400 bg-red-400/10"
                 )}
               >
                 {trade.type}
               </span>
-              <span className="font-mono text-text-muted font-normal">
+              <span className="font-mono text-xs text-neutral-300">
                 {trade.wallet}
               </span>
             </div>
             
             <div className="flex items-center gap-3">
-              <span className="font-mono text-text-primary font-normal">
+              <span className="font-mono text-xs text-white font-medium">
                 {trade.amountPay.toFixed(4)}
               </span>
-              <span className="text-[10px] text-text-dim font-normal">
+              <span className="text-[11px] font-mono text-neutral-500">
                 {trade.timestamp}
               </span>
             </div>

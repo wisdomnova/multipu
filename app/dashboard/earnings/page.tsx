@@ -3,8 +3,7 @@
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { fadeUp, stagger } from "@/components/motion";
-import { IconTrendingUp, IconArrowUpRight, IconArrowDownRight } from "@tabler/icons-react";
-import { cn } from "@/lib/utils";
+import { IconTrendingUp, IconArrowUpRight } from "@tabler/icons-react";
 import { useApi } from "@/hooks/use-api";
 import { StatsSkeleton, ListSkeleton } from "@/components/skeleton";
 import { DataError } from "@/components/error-boundary";
@@ -88,91 +87,98 @@ export default function EarningsPage() {
   const error = allError;
 
   return (
-    <div className="p-6 md:p-10">
+    <div className="p-6 md:p-10 max-w-[1400px] mx-auto">
       {/* Header */}
       <motion.div
         initial="hidden"
         animate="visible"
         variants={stagger}
-        className="mb-10"
+        className="mb-8"
       >
         <motion.div variants={fadeUp}>
-          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-white font-sans">
             Earnings
           </h1>
-          <p className="mt-1 text-sm text-text-secondary">
-            Creator fees and revenue from all launchpads.
+          <p className="mt-1 text-sm text-neutral-400 font-sans">
+            Creator fees and protocol revenue from all launchpads.
           </p>
         </motion.div>
       </motion.div>
 
       {loading && (
-        <>
+        <div className="space-y-6">
           <StatsSkeleton count={4} />
           <ListSkeleton count={3} />
-        </>
+        </div>
       )}
 
       {error && !loading && <DataError message={error} onRetry={refetch} />}
 
       {!loading && !error && (
         <>
-          {/* Summary cards */}
+          {/* Summary Metric Cards */}
           <motion.div
             initial="hidden"
             animate="visible"
             variants={stagger}
-            className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-border border border-border mb-10"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8"
           >
             {[
               {
                 label: "Total Earnings",
                 value: totalAll,
                 period: "all time",
+                positive: totalAll > 0,
               },
               {
                 label: "Today",
                 value: totalToday,
-                period: "24h",
+                period: "last 24 hours",
                 positive: totalToday > 0,
               },
               {
                 label: "This Week",
                 value: totalWeek,
-                period: "7d",
+                period: "last 7 days",
                 positive: totalWeek > 0,
               },
               {
                 label: "This Month",
                 value: totalMonth,
-                period: "30d",
+                period: "last 30 days",
                 positive: totalMonth > 0,
               },
             ].map((stat) => (
               <motion.div
                 key={stat.label}
                 variants={fadeUp}
-                className="bg-background p-5 md:p-6 hover:bg-elevated transition-colors"
+                className="bg-[#181818] rounded-2xl p-5 border border-white/[0.04] flex flex-col justify-between"
               >
-                <div className="mb-3">
-                  <span className="font-mono text-[0.65rem] text-text-muted uppercase tracking-wider">
+                <div>
+                  <span className="text-[11px] font-sans font-medium text-neutral-400 uppercase tracking-wider block">
                     {stat.label}
                   </span>
+                  <div className="flex items-baseline gap-1.5 mt-2">
+                    <span className="text-2xl md:text-3xl font-bold font-mono text-white tracking-tight">
+                      {stat.value.toFixed(2)}
+                    </span>
+                    <span className="text-xs font-mono text-neutral-400">
+                      SOL
+                    </span>
+                  </div>
                 </div>
-                <div className="flex items-baseline gap-1.5">
-                  <span className="text-2xl font-bold font-mono text-text-primary">
-                    {stat.value.toFixed(2)}
-                  </span>
-                  <span className="text-sm font-mono text-text-muted">
-                    SOL
-                  </span>
+
+                <div className="mt-4 pt-3 border-t border-white/[0.04] flex items-center justify-between text-xs font-mono">
+                  <span className="text-neutral-500">{stat.period}</span>
+                  {stat.positive ? (
+                    <span className="text-emerald-400 font-medium flex items-center gap-0.5">
+                      <IconArrowUpRight size={12} />
+                      +{stat.value.toFixed(2)} SOL
+                    </span>
+                  ) : (
+                    <span className="text-neutral-500">0.00 SOL</span>
+                  )}
                 </div>
-                {stat.positive && (
-                  <span className="mt-1.5 text-xs text-success flex items-center gap-0.5">
-                    <IconArrowUpRight size={10} />+{stat.value.toFixed(2)}{" "}
-                    {stat.period}
-                  </span>
-                )}
               </motion.div>
             ))}
           </motion.div>
@@ -183,53 +189,64 @@ export default function EarningsPage() {
               initial="hidden"
               animate="visible"
               variants={stagger}
-              className="lg:col-span-3"
+              className="lg:col-span-3 bg-[#181818] rounded-2xl p-6 border border-white/[0.04]"
             >
-              <motion.h2
-                variants={fadeUp}
-                className="text-base font-semibold text-text-primary mb-4"
-              >
-                By Launchpad
-              </motion.h2>
+              <motion.div variants={fadeUp} className="flex items-center justify-between mb-5">
+                <div>
+                  <h2 className="text-sm font-semibold text-white font-sans">
+                    By Launchpad
+                  </h2>
+                  <p className="text-xs text-neutral-400 font-sans mt-0.5">
+                    Accumulated creator revenue across decentralized pools
+                  </p>
+                </div>
+                <span className="text-xs font-mono text-neutral-400 bg-white/[0.04] px-2.5 py-1 rounded-full border border-white/[0.04]">
+                  {launchpadSections.length} pools
+                </span>
+              </motion.div>
 
               {launchpadSections.length > 0 ? (
-                <div className="space-y-4">
+                <div className="space-y-3">
                   {launchpadSections.map((pad) => (
                     <motion.div
                       key={pad.id}
                       variants={fadeUp}
-                      className="border border-border hover:bg-elevated transition-colors"
+                      className="bg-[#141414] rounded-xl p-4 border border-white/[0.04] hover:border-white/[0.08] transition-colors"
                     >
-                      <div className="p-5 md:p-6">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <div className="relative w-8 h-8 rounded-lg overflow-hidden border border-border">
-                              <Image
-                                src={pad.image}
-                                alt={pad.name}
-                                fill
-                                className="object-cover"
-                              />
-                            </div>
-                            <div>
-                              <span className="text-sm font-semibold text-text-primary">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3.5">
+                          <div className="relative w-10 h-10 rounded-xl overflow-hidden bg-black/40 border border-white/[0.06] flex-shrink-0">
+                            <Image
+                              src={pad.image}
+                              alt={pad.name}
+                              fill
+                              className="object-cover"
+                            />
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm font-semibold text-white font-sans">
                                 {pad.name}
                               </span>
                               {pad.todayEarnings > 0 && (
-                                <div className="text-[10px] font-mono text-success flex items-center gap-0.5 mt-0.5">
-                                  <IconArrowUpRight size={8} />+
-                                  {pad.todayEarnings.toFixed(2)} SOL today
-                                </div>
+                                <span className="text-[10px] font-mono text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded-full flex items-center gap-0.5">
+                                  <IconArrowUpRight size={10} />
+                                  +{pad.todayEarnings.toFixed(2)} SOL today
+                                </span>
                               )}
                             </div>
+                            <span className="text-xs font-mono text-neutral-500 block mt-0.5">
+                              ID: {pad.id}
+                            </span>
                           </div>
-                          <div className="text-right">
-                            <div className="text-lg font-bold font-mono text-text-primary">
-                              {pad.totalEarnings.toFixed(2)} SOL
-                            </div>
-                            <div className="text-[10px] font-mono text-text-dim">
-                              total earned
-                            </div>
+                        </div>
+
+                        <div className="text-right">
+                          <div className="text-base font-bold font-mono text-white">
+                            {pad.totalEarnings.toFixed(2)} SOL
+                          </div>
+                          <div className="text-[11px] font-mono text-neutral-500">
+                            total earned
                           </div>
                         </div>
                       </div>
@@ -237,61 +254,65 @@ export default function EarningsPage() {
                   ))}
                 </div>
               ) : (
-                <div className="border border-dashed border-border p-8 text-center">
+                <div className="bg-[#141414] rounded-xl p-10 text-center border border-dashed border-white/[0.06]">
                   <IconTrendingUp
-                    size={24}
-                    className="text-text-dim mx-auto mb-3"
+                    size={28}
+                    className="text-neutral-500 mx-auto mb-3"
                   />
-                  <p className="text-sm text-text-secondary">
-                    No earnings recorded yet. Creator fees will appear here
-                    once your tokens are trading.
+                  <p className="text-sm text-neutral-300 font-sans font-medium">
+                    No earnings recorded yet
+                  </p>
+                  <p className="text-xs text-neutral-500 font-sans mt-1 max-w-sm mx-auto">
+                    Creator fees will appear here once your tokens begin trading on Meteora, Bags, or Pump.fun.
                   </p>
                 </div>
               )}
             </motion.div>
 
-            {/* Recent transactions */}
+            {/* Recent activity */}
             <motion.div
               initial="hidden"
               animate="visible"
               variants={stagger}
-              className="lg:col-span-2"
+              className="lg:col-span-2 bg-[#181818] rounded-2xl p-6 border border-white/[0.04]"
             >
-              <motion.h2
-                variants={fadeUp}
-                className="text-base font-semibold text-text-primary mb-4"
-              >
-                Recent Activity
-              </motion.h2>
+              <motion.div variants={fadeUp} className="flex items-center justify-between mb-5">
+                <div>
+                  <h2 className="text-sm font-semibold text-white font-sans">
+                    Recent Activity
+                  </h2>
+                  <p className="text-xs text-neutral-400 font-sans mt-0.5">
+                    Latest settled transaction events
+                  </p>
+                </div>
+              </motion.div>
 
               {recentEarnings.length > 0 ? (
                 <motion.div
                   variants={fadeUp}
-                  className="border border-border divide-y divide-border"
+                  className="space-y-2.5"
                 >
                   {recentEarnings.map((tx) => (
                     <div
                       key={tx.id}
-                      className="p-4 hover:bg-elevated transition-colors"
+                      className="bg-[#141414] rounded-xl p-3.5 border border-white/[0.04] hover:border-white/[0.08] transition-colors"
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                          <div className="w-7 h-7 rounded-sm bg-success/10 border border-success/20 flex items-center justify-center">
-                            <IconArrowUpRight size={12} className="text-success" />
+                          <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center flex-shrink-0">
+                            <IconArrowUpRight size={14} className="text-emerald-400" />
                           </div>
                           <div>
-                            <div className="flex items-center gap-1.5">
-                              <span className="text-xs font-medium text-text-primary">
-                                Creator fee
-                              </span>
-                            </div>
-                            <div className="text-[10px] text-text-dim font-mono mt-0.5">
-                              {launchpadNames[tx.launchpad] || tx.launchpad} ·{" "}
-                              {timeAgo(tx.created_at)}
-                            </div>
+                            <span className="text-xs font-semibold text-white font-sans block">
+                              Creator fee
+                            </span>
+                            <span className="text-[11px] text-neutral-500 font-mono mt-0.5 block">
+                              {launchpadNames[tx.launchpad] || tx.launchpad} · {timeAgo(tx.created_at)}
+                            </span>
                           </div>
                         </div>
-                        <span className="font-mono text-xs font-semibold text-success">
+
+                        <span className="font-mono text-xs font-semibold text-emerald-400">
                           +{tx.amount.toFixed(4)} SOL
                         </span>
                       </div>
@@ -299,9 +320,9 @@ export default function EarningsPage() {
                   ))}
                 </motion.div>
               ) : (
-                <div className="border border-dashed border-border p-8 text-center">
-                  <p className="text-sm text-text-secondary">
-                    No recent activity.
+                <div className="bg-[#141414] rounded-xl p-8 text-center border border-dashed border-white/[0.06]">
+                  <p className="text-xs text-neutral-400 font-sans">
+                    No recent transaction activity.
                   </p>
                 </div>
               )}

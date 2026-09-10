@@ -113,7 +113,7 @@ export function CandlestickChart({ currentPrice, priceDirection, gasSymbol }: Ca
   }, [timeFilter]);
 
   if (candles.length === 0) {
-    return <div className="h-[300px] flex items-center justify-center text-xs text-text-dim">Loading chart...</div>;
+    return <div className="h-[300px] flex items-center justify-center text-xs text-neutral-500 font-mono">Loading chart...</div>;
   }
 
   // Calculate pricing bounds for scaling
@@ -161,42 +161,42 @@ export function CandlestickChart({ currentPrice, priceDirection, gasSymbol }: Ca
   const isOverallUp = candles.length > 0 && candles[candles.length - 1].close >= candles[0].open;
 
   return (
-    <div className="border border-border p-5 rounded-none flex flex-col gap-4 bg-white/[0.002]" ref={containerRef}>
+    <div className="bg-[#181818] border border-white/[0.04] p-6 rounded-2xl flex flex-col gap-4" ref={containerRef}>
       {/* Chart Top Info Bar */}
-      <div className="flex items-center justify-between text-[11px] font-mono border-b border-border pb-3 flex-wrap gap-2">
+      <div className="flex items-center justify-between text-xs font-mono border-b border-white/[0.04] pb-3.5 flex-wrap gap-3">
         <div className="flex flex-wrap items-center gap-3">
-          <span className="text-text-primary font-semibold">TradingView Live</span>
-          <span className="text-text-dim">|</span>
-          <span className="text-text-muted">O:</span>
-          <span className={cn("font-medium", displayCandle.close >= displayCandle.open ? "text-success" : "text-error")}>
+          <span className="text-white font-semibold font-sans">Live Chart</span>
+          <span className="text-neutral-600">|</span>
+          <span className="text-neutral-500">O:</span>
+          <span className={cn("font-medium", displayCandle.close >= displayCandle.open ? "text-emerald-400" : "text-red-400")}>
             {displayCandle.open.toFixed(8)}
           </span>
-          <span className="text-text-muted">H:</span>
-          <span className="text-text-primary">{displayCandle.high.toFixed(8)}</span>
-          <span className="text-text-muted">L:</span>
-          <span className="text-text-primary">{displayCandle.low.toFixed(8)}</span>
-          <span className="text-text-muted">C:</span>
-          <span className={cn("font-medium", displayCandle.close >= displayCandle.open ? "text-success" : "text-error")}>
+          <span className="text-neutral-500">H:</span>
+          <span className="text-neutral-300">{displayCandle.high.toFixed(8)}</span>
+          <span className="text-neutral-500">L:</span>
+          <span className="text-neutral-300">{displayCandle.low.toFixed(8)}</span>
+          <span className="text-neutral-500">C:</span>
+          <span className={cn("font-medium", displayCandle.close >= displayCandle.open ? "text-emerald-400" : "text-red-400")}>
             {displayCandle.close.toFixed(8)}
           </span>
-          <div className={cn("text-[10px] px-1.5 py-0.5 font-bold rounded-sm uppercase inline-block", changePct >= 0 ? "text-success bg-success/5" : "text-error bg-error/5")}>
+          <div className={cn("text-[10px] px-2 py-0.5 font-semibold font-mono rounded-full uppercase inline-block", changePct >= 0 ? "text-emerald-400 bg-emerald-400/10" : "text-red-400 bg-red-400/10")}>
             {changePct >= 0 ? "+" : ""}{changePct.toFixed(2)}%
           </div>
         </div>
 
         {/* Filters and Chart Type Toggles */}
-        <div className="flex items-center gap-3 flex-wrap">
+        <div className="flex items-center gap-2.5 flex-wrap">
           {/* Timeframe Filters */}
-          <div className="flex items-center bg-white/[0.03] p-0.5 rounded border border-border/40">
+          <div className="flex items-center bg-[#141414] p-1 rounded-full border border-white/[0.04]">
             {(["15m", "1h", "4h", "1d"] as const).map((filter) => (
               <button
                 key={filter}
                 onClick={() => setTimeFilter(filter)}
                 className={cn(
-                  "px-2 py-0.5 text-[9px] font-mono rounded transition-all",
+                  "px-2.5 py-0.5 text-[10px] font-mono rounded-full transition-all cursor-pointer",
                   timeFilter === filter
-                    ? "bg-white/[0.08] text-white font-semibold"
-                    : "text-text-dim hover:text-text-muted"
+                    ? "bg-white text-black font-semibold"
+                    : "text-neutral-400 hover:text-white"
                 )}
               >
                 {filter}
@@ -205,16 +205,16 @@ export function CandlestickChart({ currentPrice, priceDirection, gasSymbol }: Ca
           </div>
 
           {/* Chart View Toggle Switch */}
-          <div className="flex items-center bg-white/[0.04] p-0.5 rounded border border-border/40">
+          <div className="flex items-center bg-[#141414] p-1 rounded-full border border-white/[0.04]">
             {(["candles", "line"] as const).map((type) => (
               <button
                 key={type}
                 onClick={() => setChartType(type)}
                 className={cn(
-                  "px-2.5 py-0.5 text-[9px] font-mono rounded capitalize transition-all",
+                  "px-3 py-0.5 text-[10px] font-mono rounded-full capitalize transition-all cursor-pointer",
                   chartType === type
-                    ? "bg-white/[0.08] text-white font-semibold"
-                    : "text-text-dim hover:text-text-muted"
+                    ? "bg-white text-black font-semibold"
+                    : "text-neutral-400 hover:text-white"
                 )}
               >
                 {type}
@@ -242,7 +242,7 @@ export function CandlestickChart({ currentPrice, priceDirection, gasSymbol }: Ca
               <text
                 x={chartWidth + 8}
                 y={line.y + 3}
-                fill="var(--text-dim)"
+                fill="#737373"
                 fontSize={9}
                 fontFamily="monospace"
                 textAnchor="start"
@@ -261,7 +261,7 @@ export function CandlestickChart({ currentPrice, priceDirection, gasSymbol }: Ca
                 key={idx}
                 x={x}
                 y={height - 2}
-                fill="var(--text-dim)"
+                fill="#737373"
                 fontSize={9}
                 fontFamily="monospace"
                 textAnchor="middle"
@@ -277,8 +277,8 @@ export function CandlestickChart({ currentPrice, priceDirection, gasSymbol }: Ca
               {/* Linear Gradient Fill */}
               <defs>
                 <linearGradient id="chartLineGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor={isOverallUp ? "rgb(16, 185, 129)" : "rgb(239, 68, 68)"} stopOpacity={0.25} />
-                  <stop offset="100%" stopColor={isOverallUp ? "rgb(16, 185, 129)" : "rgb(239, 68, 68)"} stopOpacity={0.0} />
+                  <stop offset="0%" stopColor={isOverallUp ? "rgb(52, 211, 153)" : "rgb(248, 113, 113)"} stopOpacity={0.25} />
+                  <stop offset="100%" stopColor={isOverallUp ? "rgb(52, 211, 153)" : "rgb(248, 113, 113)"} stopOpacity={0.0} />
                 </linearGradient>
               </defs>
 
@@ -293,12 +293,12 @@ export function CandlestickChart({ currentPrice, priceDirection, gasSymbol }: Ca
               <path
                 d={linePath}
                 fill="none"
-                stroke={isOverallUp ? "rgb(16, 185, 129)" : "rgb(239, 68, 68)"}
+                stroke={isOverallUp ? "rgb(52, 211, 153)" : "rgb(248, 113, 113)"}
                 strokeWidth={2}
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 className="transition-all duration-300"
-                filter={isOverallUp ? "drop-shadow(0 0 3px rgba(16, 185, 129, 0.4))" : "drop-shadow(0 0 3px rgba(239, 68, 68, 0.4))"}
+                filter={isOverallUp ? "drop-shadow(0 0 3px rgba(52, 211, 153, 0.4))" : "drop-shadow(0 0 3px rgba(248, 113, 113, 0.4))"}
               />
 
               {/* Hover overlay targets for line chart details */}
@@ -362,7 +362,7 @@ export function CandlestickChart({ currentPrice, priceDirection, gasSymbol }: Ca
                   y1={yHigh}
                   x2={xCenter}
                   y2={yLow}
-                  stroke={isGreen ? "rgb(16, 185, 129)" : "rgb(239, 68, 68)"}
+                  stroke={isGreen ? "rgb(52, 211, 153)" : "rgb(248, 113, 113)"}
                   strokeWidth={1.2}
                 />
                 {/* Glowing candle body */}
@@ -371,9 +371,9 @@ export function CandlestickChart({ currentPrice, priceDirection, gasSymbol }: Ca
                   y={yMax}
                   width={bodyWidth}
                   height={bodyHeight}
-                  fill={isGreen ? "rgba(16, 185, 129, 0.85)" : "rgba(239, 68, 68, 0.85)"}
+                  fill={isGreen ? "rgba(52, 211, 153, 0.85)" : "rgba(248, 113, 113, 0.85)"}
                   className="transition-all duration-300"
-                  filter={isGreen ? "drop-shadow(0 0 2px rgba(16, 185, 129, 0.2))" : "drop-shadow(0 0 2px rgba(239, 68, 68, 0.2))"}
+                  filter={isGreen ? "drop-shadow(0 0 2px rgba(52, 211, 153, 0.2))" : "drop-shadow(0 0 2px rgba(248, 113, 113, 0.2))"}
                 />
               </g>
             );
@@ -386,7 +386,7 @@ export function CandlestickChart({ currentPrice, priceDirection, gasSymbol }: Ca
               y1={scaleY(currentPrice)}
               x2={chartWidth}
               y2={scaleY(currentPrice)}
-              stroke={priceDirection === "up" ? "#10B981" : priceDirection === "down" ? "#EF4444" : "rgba(255,255,255,0.25)"}
+              stroke={priceDirection === "up" ? "#34D399" : priceDirection === "down" ? "#F87171" : "rgba(255,255,255,0.25)"}
               strokeDasharray="2 2"
               strokeWidth={1}
             />
@@ -396,13 +396,13 @@ export function CandlestickChart({ currentPrice, priceDirection, gasSymbol }: Ca
               y={scaleY(currentPrice) - 8}
               width={75}
               height={16}
-              fill={priceDirection === "up" ? "rgba(16, 185, 129, 0.95)" : priceDirection === "down" ? "rgba(239, 68, 68, 0.95)" : "rgba(30, 41, 59, 0.95)"}
-              rx={2}
+              fill={priceDirection === "up" ? "rgba(52, 211, 153, 0.95)" : priceDirection === "down" ? "rgba(248, 113, 113, 0.95)" : "rgba(30, 41, 59, 0.95)"}
+              rx={4}
             />
             <text
               x={chartWidth + 37}
-              y={scaleY(currentPrice) + 3}
-              fill="#ffffff"
+              y={scaleY(currentPrice) + 4}
+              fill={priceDirection === "up" || priceDirection === "down" ? "#000000" : "#ffffff"}
               fontSize={8.5}
               fontFamily="monospace"
               fontWeight="bold"

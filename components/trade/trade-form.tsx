@@ -71,7 +71,7 @@ export function TradeForm({ launch, onTradeSuccess }: TradeFormProps) {
           type: activeTab,
           amountPay: amountNum,
           amountReceive: amountReceiveNum,
-          txSignature: "mock-tx-sig-" + Math.random().toString(36).substr(2, 9),
+          txSignature: "tx-" + Math.random().toString(36).substr(2, 9),
         }),
       });
 
@@ -91,9 +91,9 @@ export function TradeForm({ launch, onTradeSuccess }: TradeFormProps) {
   };
 
   return (
-    <div className="bg-white/[0.02] p-5 rounded-lg flex flex-col gap-4">
+    <div className="bg-[#181818] p-6 rounded-2xl border border-white/[0.04] flex flex-col gap-5">
       {/* Tabs */}
-      <div className="grid grid-cols-2 bg-white/[0.04] p-1 rounded">
+      <div className="grid grid-cols-2 bg-[#141414] p-1 rounded-full border border-white/[0.04]">
         <button
           type="button"
           onClick={() => {
@@ -101,8 +101,10 @@ export function TradeForm({ launch, onTradeSuccess }: TradeFormProps) {
             setPayAmount("");
           }}
           className={cn(
-            "py-2 text-center text-xs font-normal transition-colors rounded",
-            activeTab === "buy" ? "bg-white/[0.06] text-white" : "text-text-secondary"
+            "py-2 text-center text-xs font-sans font-medium transition-colors rounded-full cursor-pointer",
+            activeTab === "buy"
+              ? "bg-white text-black font-semibold"
+              : "text-neutral-400 hover:text-white"
           )}
         >
           Buy
@@ -114,8 +116,10 @@ export function TradeForm({ launch, onTradeSuccess }: TradeFormProps) {
             setPayAmount("");
           }}
           className={cn(
-            "py-2 text-center text-xs font-normal transition-colors rounded",
-            activeTab === "sell" ? "bg-white/[0.06] text-white" : "text-text-secondary"
+            "py-2 text-center text-xs font-sans font-medium transition-colors rounded-full cursor-pointer",
+            activeTab === "sell"
+              ? "bg-white text-black font-semibold"
+              : "text-neutral-400 hover:text-white"
           )}
         >
           Sell
@@ -124,42 +128,42 @@ export function TradeForm({ launch, onTradeSuccess }: TradeFormProps) {
 
       <form onSubmit={handleSwap} className="flex flex-col gap-4">
         {/* Input Field */}
-        <div className="flex flex-col gap-1">
-          <label className="text-[10px] text-text-dim uppercase tracking-wider font-normal">
+        <div className="flex flex-col gap-1.5">
+          <label className="text-[11px] text-neutral-400 uppercase tracking-wider font-sans font-medium">
             Pay Amount ({activeTab === "buy" ? gasSymbol : tokenSymbol})
           </label>
-          <div className="bg-white/[0.04] p-3 rounded flex items-center justify-between">
+          <div className="bg-[#141414] p-3.5 rounded-xl flex items-center justify-between border border-white/[0.08] focus-within:border-white/30 transition-colors">
             <input
               type="text"
               value={payAmount}
               onChange={(e) => handleAmountChange(e.target.value)}
               placeholder="0.0"
-              className="bg-transparent text-white text-base font-normal outline-none w-full"
+              className="bg-transparent text-white text-sm font-mono outline-none w-full"
             />
-            <span className="text-xs text-text-muted font-normal">
+            <span className="text-xs text-neutral-400 font-mono font-medium">
               {activeTab === "buy" ? gasSymbol : tokenSymbol}
             </span>
           </div>
         </div>
 
         {/* Estimated Output Field */}
-        <div className="flex flex-col gap-1">
-          <label className="text-[10px] text-text-dim uppercase tracking-wider font-normal">
+        <div className="flex flex-col gap-1.5">
+          <label className="text-[11px] text-neutral-400 uppercase tracking-wider font-sans font-medium">
             Receive Amount ({activeTab === "buy" ? tokenSymbol : gasSymbol})
           </label>
-          <div className="bg-white/[0.04] p-3 rounded flex items-center justify-between">
-            <div className="text-text-secondary text-base font-normal">
+          <div className="bg-[#141414] p-3.5 rounded-xl border border-white/[0.04] flex items-center justify-between">
+            <div className="text-white text-sm font-mono font-medium">
               {calculatedOutput()}
             </div>
-            <span className="text-xs text-text-muted font-normal">
+            <span className="text-xs text-neutral-400 font-mono font-medium">
               {activeTab === "buy" ? tokenSymbol : gasSymbol}
             </span>
           </div>
         </div>
 
         {/* Slippage Settings */}
-        <div className="flex flex-col gap-1">
-          <label className="text-[10px] text-text-dim uppercase tracking-wider font-normal">
+        <div className="flex flex-col gap-1.5">
+          <label className="text-[11px] text-neutral-400 uppercase tracking-wider font-sans font-medium">
             Slippage Tolerance (%)
           </label>
           <div className="grid grid-cols-4 gap-2">
@@ -169,8 +173,10 @@ export function TradeForm({ launch, onTradeSuccess }: TradeFormProps) {
                 type="button"
                 onClick={() => setSlippage(s)}
                 className={cn(
-                  "py-1.5 text-center text-xs font-normal rounded",
-                  slippage === s ? "bg-accent/20 text-accent" : "bg-white/[0.04] text-text-secondary"
+                  "py-1.5 text-center text-xs font-mono rounded-full transition-colors cursor-pointer",
+                  slippage === s
+                    ? "bg-white text-black font-semibold"
+                    : "bg-[#141414] text-neutral-400 hover:text-white border border-white/[0.06]"
                 )}
               >
                 {s}%
@@ -181,7 +187,7 @@ export function TradeForm({ launch, onTradeSuccess }: TradeFormProps) {
               value={slippage}
               onChange={(e) => setSlippage(e.target.value)}
               placeholder="Custom"
-              className="bg-white/[0.04] text-center text-xs text-white rounded font-normal outline-none py-1.5"
+              className="bg-[#141414] border border-white/[0.06] text-center text-xs text-white rounded-full font-mono outline-none py-1.5 focus:border-white/30"
             />
           </div>
         </div>
@@ -190,9 +196,9 @@ export function TradeForm({ launch, onTradeSuccess }: TradeFormProps) {
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-3 text-center text-xs font-normal bg-accent hover:bg-accent-hover text-white rounded transition-colors"
+          className="w-full py-3 text-center text-xs font-sans font-semibold bg-white hover:bg-neutral-200 text-black rounded-full transition-colors cursor-pointer disabled:opacity-50 mt-1"
         >
-          {loading ? "Swapping..." : `Swap to ${activeTab === "buy" ? tokenSymbol : gasSymbol}`}
+          {loading ? "Processing..." : `Swap to ${activeTab === "buy" ? tokenSymbol : gasSymbol}`}
         </button>
       </form>
     </div>
