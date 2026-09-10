@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { useRouter, usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   IconTrendingUp,
@@ -12,9 +12,9 @@ import {
   IconLayoutGrid,
   IconSearch,
   IconKey,
-  IconMenu2,
   IconX,
   IconBell,
+  IconLogout,
 } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
@@ -22,6 +22,8 @@ import { WalletButton } from "@/components/wallet-button";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { NotificationsSidebar } from "@/components/dashboard/notifications-sidebar";
 import { TradingAgentCopilot } from "@/components/dashboard/trading-agent-copilot";
+import { DisconnectModal } from "@/components/dashboard/disconnect-modal";
+import { toast } from "sonner";
 
 const navItems = [
   { label: "Dashboard", icon: IconLayoutGrid, href: "/dashboard" },
@@ -37,10 +39,12 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const router = useRouter();
   const pathname = usePathname();
-  const { session } = useAuth();
+  const { session, signOut } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [disconnectModalOpen, setDisconnectModalOpen] = useState(false);
   const [hasUnread, setHasUnread] = useState(true);
 
   // Close mobile sidebar on route change
@@ -66,11 +70,24 @@ export default function DashboardLayout({
       if (e.key === "Escape") {
         setMobileOpen(false);
         setNotificationsOpen(false);
+        setDisconnectModalOpen(false);
       }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
+
+  const handleDisconnect = useCallback(async () => {
+    try {
+      await signOut();
+      setMobileOpen(false);
+      toast.success("Wallet disconnected");
+      router.push("/");
+    } catch (err) {
+      console.error("Failed to disconnect:", err);
+      toast.error("Failed to disconnect wallet");
+    }
+  }, [signOut, router]);
 
   const isItemActive = (href: string) => {
     if (href === "/dashboard") {
@@ -123,19 +140,30 @@ export default function DashboardLayout({
             })}
           </nav>
 
-          {/* Wallet info */}
+          {/* Wallet info with Disconnect */}
           <div className="p-4 border-t border-border">
             {session.isLoggedIn ? (
-              <div className="flex items-center gap-3 p-3 bg-elevated rounded-sm">
-                <div className="w-2 h-2 rounded-full bg-success" />
-                <div className="flex-1 min-w-0">
-                  <div className="font-mono text-xs text-text-primary truncate">
-                    {walletShort}
-                  </div>
-                  <div className="font-mono text-[10px] text-text-dim">
-                    Connected
+              <div className="flex items-center justify-between p-3 bg-elevated rounded-sm border border-border">
+                <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                  <div className="w-2 h-2 rounded-full bg-success flex-shrink-0" />
+                  <div className="min-w-0">
+                    <div className="font-mono text-xs text-text-primary truncate">
+                      {walletShort}
+                    </div>
+                    <div className="font-mono text-[10px] text-text-dim capitalize">
+                      {session.walletKind || "Connected"}
+                    </div>
                   </div>
                 </div>
+                <button
+                  type="button"
+                  onClick={() => setDisconnectModalOpen(true)}
+                  className="p-1.5 text-text-dim hover:text-red-400 hover:bg-red-500/10 rounded-sm transition-colors cursor-pointer flex-shrink-0 ml-2"
+                  title="Disconnect session"
+                  aria-label="Disconnect session"
+                >
+                  <IconLogout size={16} />
+                </button>
               </div>
             ) : (
               <WalletButton className="w-full justify-center" />
@@ -244,22 +272,33 @@ export default function DashboardLayout({
                   </div>
                 </nav>
 
-                {/* Wallet Info & Footer */}
+                {/* Single Connected Account Widget at Base */}
                 <div className="p-4 border-t border-border bg-elevated/40">
                   {session.isLoggedIn ? (
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-3 p-3 bg-elevated rounded-sm border border-border">
-                        <div className="w-2 h-2 rounded-full bg-success" />
-                        <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between p-3 bg-elevated rounded-sm border border-border">
+                      <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                        <div className="w-2 h-2 rounded-full bg-success flex-shrink-0" />
+                        <div className="min-w-0">
                           <div className="font-mono text-xs text-text-primary truncate">
                             {walletShort}
                           </div>
-                          <div className="font-mono text-[10px] text-text-dim">
-                            Connected
+                          <div className="font-mono text-[10px] text-text-dim capitalize">
+                            {session.walletKind || "Connected"}
                           </div>
                         </div>
                       </div>
-                      <WalletButton className="w-full justify-center text-xs" />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setMobileOpen(false);
+                          setDisconnectModalOpen(true);
+                        }}
+                        className="p-1.5 text-text-dim hover:text-red-400 hover:bg-red-500/10 rounded-sm transition-colors cursor-pointer flex-shrink-0 ml-2"
+                        title="Disconnect session"
+                        aria-label="Disconnect session"
+                      >
+                        <IconLogout size={16} />
+                      </button>
                     </div>
                   ) : (
                     <WalletButton className="w-full justify-center" />
@@ -272,53 +311,9 @@ export default function DashboardLayout({
 
         {/* Main content */}
         <main className="flex-1 h-full overflow-y-auto min-w-0 flex flex-col">
-          {/* Top bar (mobile) with Hamburger Menu, Activity Bell & Wallet */}
-          <div className="lg:hidden border-b border-border bg-[rgba(5,5,5,0.85)] backdrop-blur-xl sticky top-0 z-40">
-            <div className="flex items-center justify-between px-3 sm:px-6 h-14 sm:h-16 gap-2">
-              <div className="flex items-center gap-2.5">
-                {/* Hamburger Trigger */}
-                <button
-                  onClick={() => setMobileOpen(true)}
-                  className="p-1.5 -ml-1 text-text-secondary hover:text-text-primary hover:bg-white/[0.05] rounded-sm transition-colors cursor-pointer"
-                  aria-label="Open navigation menu"
-                >
-                  <IconMenu2 size={20} />
-                </button>
-
-                <Link href="/" className="flex items-center gap-2">
-                  <div className="relative w-6 h-6 flex-shrink-0">
-                    <Image src="/logo.png" alt="Multipu" fill sizes="24px" className="object-contain" />
-                  </div>
-                  <span className="text-sm font-semibold text-text-primary font-mono">
-                    Multipu
-                  </span>
-                </Link>
-              </div>
-
-              <div className="flex items-center gap-1.5 sm:gap-2">
-                {/* Activity Bell on Mobile Navbar */}
-                <button
-                  onClick={() => {
-                    setNotificationsOpen(true);
-                    setHasUnread(false);
-                  }}
-                  className="relative p-2 text-text-dim hover:text-text-primary hover:bg-white/[0.05] rounded-sm transition-colors cursor-pointer"
-                  title="Activity Feed"
-                  aria-label="Activity Feed"
-                >
-                  <IconBell size={18} />
-                  {hasUnread && (
-                    <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-accent animate-pulse" />
-                  )}
-                </button>
-
-                <WalletButton />
-              </div>
-            </div>
-          </div>
-
-          {/* Unified Header with Supported Chain Balances */}
+          {/* Unified Header with Balances on Mobile and Desktop */}
           <DashboardHeader
+            onOpenMobileMenu={() => setMobileOpen(true)}
             onOpenNotifications={() => {
               setNotificationsOpen(true);
               setHasUnread(false);
@@ -340,6 +335,15 @@ export default function DashboardLayout({
 
       {/* Live AI Trading Agent Copilot */}
       <TradingAgentCopilot />
+
+      {/* Custom Disconnect Confirmation Modal */}
+      <DisconnectModal
+        isOpen={disconnectModalOpen}
+        onClose={() => setDisconnectModalOpen(false)}
+        onConfirm={handleDisconnect}
+        walletAddress={session.walletAddress}
+        walletKind={session.walletKind}
+      />
     </div>
   );
 }
