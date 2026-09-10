@@ -11,8 +11,11 @@ export function HeroStatus() {
       variants={stagger}
       className="relative pt-36 md:pt-48 pb-20 md:pb-32 px-6 md:px-12 max-w-[1360px] mx-auto overflow-hidden"
     >
+      {/* Subtle Dot Matrix Background Pattern */}
+      <div className="absolute inset-0 bg-[radial-gradient(rgba(255,255,255,0.15)_1px,transparent_1px)] [background-size:24px_24px] pointer-events-none opacity-35 [mask-image:radial-gradient(ellipse_at_center,black_50%,transparent_100%)] z-0" />
+
       {/* Top Hero Typography & Graphic Mark */}
-      <div className="mb-16 md:mb-24">
+      <div className="relative z-10 mb-16 md:mb-24">
         {/* Powered by X-Agent & OlaXBT Badge */}
         <motion.div
           variants={fadeUp}

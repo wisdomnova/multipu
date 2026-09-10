@@ -13,8 +13,11 @@ export function BauhausShowcase() {
       className="py-16 md:py-24 px-6 md:px-12 max-w-[1360px] mx-auto"
     >
       {/* Outer rounded dark canvas */}
-      <motion.div variants={fadeUp} className="w-full rounded-[40px] bg-neutral-950 p-8 sm:p-12 lg:p-16 overflow-hidden">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+      <motion.div variants={fadeUp} className="relative w-full rounded-[40px] bg-neutral-950 p-8 sm:p-12 lg:p-16 overflow-hidden">
+        {/* Subtle Dot Matrix Background Pattern */}
+        <div className="absolute inset-0 bg-[radial-gradient(rgba(255,255,255,0.15)_1px,transparent_1px)] [background-size:24px_24px] pointer-events-none opacity-30 [mask-image:radial-gradient(ellipse_at_center,black_70%,transparent_100%)] z-0" />
+
+        <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
           {/* Left Column: Editorial & Bauhaus Geometric Composition */}
           <motion.div variants={slideInLeft} className="lg:col-span-5 flex flex-col justify-between h-full min-h-[580px]">
             <div>
