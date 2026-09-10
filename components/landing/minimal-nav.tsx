@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 
@@ -31,8 +32,10 @@ export function MinimalNav() {
       <div className="mx-auto max-w-[1360px] px-6 md:px-12">
         <div className="flex h-20 items-center justify-between">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 text-white">
-            <span className="text-xl leading-none select-none text-accent">●</span>
+          <Link href="/" className="flex items-center gap-2.5 text-white group">
+            <div className="relative w-7 h-7 flex-shrink-0">
+              <Image src="/logo.png" alt="Multipu" fill sizes="28px" className="object-contain" />
+            </div>
             <span className="text-lg font-bold tracking-tight">multipu</span>
           </Link>
 
