@@ -14,6 +14,7 @@ import {
   IconUpload,
   IconLoader2,
   IconCheck,
+  IconChevronDown,
 } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 import { useApi } from "@/hooks/use-api";
@@ -73,6 +74,7 @@ export default function TokensPage() {
   });
   const [editImageFile, setEditImageFile] = useState<File | null>(null);
   const [editImagePreview, setEditImagePreview] = useState<string | null>(null);
+  const [decimalsOpen, setDecimalsOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
 
@@ -438,34 +440,34 @@ export default function TokensPage() {
               initial={{ opacity: 0, scale: 0.95, y: 10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 10 }}
-              className="relative w-full max-w-lg bg-[#141414] border border-white/[0.08] p-6 md:p-8 rounded-2xl shadow-2xl z-10 space-y-6 max-h-[90vh] overflow-y-auto"
+              className="relative w-full max-w-2xl bg-[#181818] border border-white/[0.08] p-8 md:p-10 rounded-3xl shadow-2xl z-10 space-y-6 max-h-[90vh] overflow-y-auto"
             >
-              <div className="flex items-center justify-between pb-4 border-b border-white/[0.06]">
+              <div className="flex items-center justify-between pb-5 border-b border-white/[0.06]">
                 <div>
-                  <h3 className="text-lg font-bold text-white font-sans tracking-tight">
+                  <h3 className="text-xl md:text-2xl font-bold text-white font-sans tracking-tight">
                     Edit Draft Token
                   </h3>
-                  <p className="text-xs text-neutral-400 mt-0.5 font-sans">
+                  <p className="text-xs sm:text-sm text-neutral-400 mt-1 font-sans">
                     Update token parameters before broadcasting on-chain.
                   </p>
                 </div>
                 <button
                   type="button"
                   onClick={() => setEditingToken(null)}
-                  className="p-1 text-neutral-400 hover:text-white transition-colors cursor-pointer"
+                  className="p-2 text-neutral-400 hover:text-white rounded-full hover:bg-white/[0.05] transition-colors cursor-pointer"
                 >
-                  <IconX size={18} />
+                  <IconX size={20} />
                 </button>
               </div>
 
-              <div className="space-y-4 font-mono text-xs">
+              <div className="space-y-5">
                 {/* Image Upload */}
                 <div>
-                  <label className="block text-neutral-400 mb-2">
+                  <label className="block text-xs font-sans font-semibold text-neutral-300 mb-2">
                     Token Logo
                   </label>
-                  <div className="flex items-center gap-4">
-                    <label className="relative w-16 h-16 border border-dashed border-white/20 hover:border-white/40 bg-white/[0.02] rounded-xl flex flex-col items-center justify-center cursor-pointer overflow-hidden group">
+                  <div className="flex items-center gap-5">
+                    <label className="relative w-20 h-20 border border-dashed border-white/20 hover:border-white/40 bg-[#141414] rounded-2xl flex flex-col items-center justify-center cursor-pointer overflow-hidden group transition-colors">
                       {editImagePreview ? (
                         <Image
                           src={editImagePreview}
@@ -474,7 +476,7 @@ export default function TokensPage() {
                           className="object-cover"
                         />
                       ) : (
-                        <IconUpload size={18} className="text-neutral-400 group-hover:text-white transition-colors" />
+                        <IconUpload size={22} className="text-neutral-400 group-hover:text-white transition-colors" />
                       )}
                       <input
                         type="file"
@@ -483,16 +485,16 @@ export default function TokensPage() {
                         onChange={handleImageSelect}
                       />
                     </label>
-                    <span className="text-[11px] text-neutral-500 font-sans">
+                    <span className="text-xs text-neutral-400 font-sans max-w-xs leading-relaxed">
                       Click box to upload or replace logo (Max 5MB PNG/JPG/WEBP).
                     </span>
                   </div>
                 </div>
 
                 {/* Name & Symbol */}
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-neutral-400 mb-1.5">
+                    <label className="block text-xs font-sans font-semibold text-neutral-300 mb-2">
                       Token Name
                     </label>
                     <input
@@ -500,11 +502,11 @@ export default function TokensPage() {
                       maxLength={32}
                       value={editForm.name}
                       onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                      className="w-full bg-white/[0.03] border border-white/[0.08] focus:border-white/30 focus:outline-none px-3.5 py-2.5 text-xs text-white rounded-xl transition-colors font-sans"
+                      className="w-full h-12 bg-[#141414] border border-white/[0.08] focus:border-white/30 focus:outline-none px-4 text-sm text-white rounded-xl transition-colors font-sans"
                     />
                   </div>
                   <div>
-                    <label className="block text-neutral-400 mb-1.5">
+                    <label className="block text-xs font-sans font-semibold text-neutral-300 mb-2">
                       Symbol
                     </label>
                     <input
@@ -512,15 +514,15 @@ export default function TokensPage() {
                       maxLength={10}
                       value={editForm.symbol}
                       onChange={(e) => setEditForm({ ...editForm, symbol: e.target.value.toUpperCase() })}
-                      className="w-full bg-white/[0.03] border border-white/[0.08] focus:border-white/30 focus:outline-none px-3.5 py-2.5 text-xs text-white font-mono transition-colors uppercase rounded-xl"
+                      className="w-full h-12 bg-[#141414] border border-white/[0.08] focus:border-white/30 focus:outline-none px-4 text-sm text-white font-mono transition-colors uppercase rounded-xl"
                     />
                   </div>
                 </div>
 
-                {/* Supply & Decimals */}
-                <div className="grid grid-cols-2 gap-3">
+                {/* Supply & Custom Decimals Dropdown */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-neutral-400 mb-1.5">
+                    <label className="block text-xs font-sans font-semibold text-neutral-300 mb-2">
                       Total Supply
                     </label>
                     <input
@@ -531,28 +533,62 @@ export default function TokensPage() {
                         const val = e.target.value.replace(/[^0-9]/g, "");
                         setEditForm({ ...editForm, supply: val });
                       }}
-                      className="w-full bg-white/[0.03] border border-white/[0.08] focus:border-white/30 focus:outline-none px-3.5 py-2.5 text-xs text-white font-mono transition-colors rounded-xl"
+                      className="w-full h-12 bg-[#141414] border border-white/[0.08] focus:border-white/30 focus:outline-none px-4 text-sm text-white font-mono transition-colors rounded-xl"
                     />
                   </div>
                   <div>
-                    <label className="block text-neutral-400 mb-1.5">
+                    <label className="block text-xs font-sans font-semibold text-neutral-300 mb-2">
                       Decimals
                     </label>
-                    <select
-                      value={editForm.decimals}
-                      onChange={(e) => setEditForm({ ...editForm, decimals: Number(e.target.value) })}
-                      className="w-full bg-[#181818] border border-white/[0.08] focus:border-white/30 focus:outline-none px-3.5 py-2.5 text-xs text-white transition-colors rounded-xl font-mono"
-                    >
-                      <option value={6}>6 Decimals</option>
-                      <option value={8}>8 Decimals</option>
-                      <option value={9}>9 Decimals</option>
-                    </select>
+                    <div className="relative">
+                      <button
+                        type="button"
+                        onClick={() => setDecimalsOpen(!decimalsOpen)}
+                        className="w-full h-12 bg-[#141414] border border-white/[0.08] hover:border-white/20 focus:border-white/30 px-4 text-sm text-white transition-colors rounded-xl flex items-center justify-between font-mono cursor-pointer"
+                      >
+                        <span>{editForm.decimals} Decimals</span>
+                        <IconChevronDown
+                          size={16}
+                          className={cn("text-neutral-400 transition-transform duration-200", decimalsOpen && "rotate-180")}
+                        />
+                      </button>
+                      <AnimatePresence>
+                        {decimalsOpen && (
+                          <motion.div
+                            initial={{ opacity: 0, y: -4 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -4 }}
+                            className="absolute left-0 right-0 top-full mt-2 z-50 bg-[#141414] border border-white/[0.1] rounded-xl p-1.5 space-y-1 shadow-2xl"
+                          >
+                            {[6, 8, 9].map((d) => (
+                              <button
+                                key={d}
+                                type="button"
+                                onClick={() => {
+                                  setEditForm({ ...editForm, decimals: d });
+                                  setDecimalsOpen(false);
+                                }}
+                                className={cn(
+                                  "w-full flex items-center justify-between px-3.5 py-2.5 rounded-lg text-xs font-mono transition-colors cursor-pointer",
+                                  editForm.decimals === d
+                                    ? "bg-white/[0.1] text-white font-semibold"
+                                    : "text-neutral-400 hover:text-white hover:bg-white/[0.04]"
+                                )}
+                              >
+                                <span>{d} Decimals</span>
+                                {editForm.decimals === d && <IconCheck size={14} className="text-white" />}
+                              </button>
+                            ))}
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
                   </div>
                 </div>
 
                 {/* Description */}
                 <div>
-                  <label className="block text-neutral-400 mb-1.5">
+                  <label className="block text-xs font-sans font-semibold text-neutral-300 mb-2">
                     Description
                   </label>
                   <textarea
@@ -560,17 +596,17 @@ export default function TokensPage() {
                     maxLength={500}
                     value={editForm.description}
                     onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
-                    className="w-full bg-white/[0.03] border border-white/[0.08] focus:border-white/30 focus:outline-none px-3.5 py-2.5 text-xs text-white transition-colors resize-none rounded-xl font-sans"
+                    className="w-full bg-[#141414] border border-white/[0.08] focus:border-white/30 focus:outline-none p-4 text-sm text-white transition-colors resize-none rounded-xl font-sans"
                   />
                 </div>
               </div>
 
               {/* Actions */}
-              <div className="flex items-center justify-end gap-3 pt-4 border-t border-white/[0.06]">
+              <div className="flex items-center justify-end gap-3 pt-5 border-t border-white/[0.06]">
                 <button
                   type="button"
                   onClick={() => setEditingToken(null)}
-                  className="px-4 py-2 text-xs font-mono text-neutral-400 hover:text-white transition-colors cursor-pointer"
+                  className="px-6 py-2.5 text-xs font-sans font-semibold text-white bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.06] rounded-full transition-colors cursor-pointer"
                 >
                   Cancel
                 </button>
@@ -579,7 +615,7 @@ export default function TokensPage() {
                   disabled={isSaving || !editForm.name || !editForm.symbol || !editForm.supply}
                   onClick={handleSaveEdit}
                   className={cn(
-                    "inline-flex items-center gap-2 px-5 py-2 text-xs font-semibold rounded-xl transition-colors cursor-pointer font-sans",
+                    "inline-flex items-center justify-center gap-2 px-6 py-2.5 text-xs font-sans font-semibold rounded-full transition-colors cursor-pointer",
                     isSaving
                       ? "bg-white/40 text-black cursor-not-allowed"
                       : "bg-white text-black hover:bg-neutral-200"
@@ -588,12 +624,12 @@ export default function TokensPage() {
                   {isSaving ? (
                     <>
                       <IconLoader2 size={14} className="animate-spin" />
-                      Saving...
+                      <span>Saving...</span>
                     </>
                   ) : (
                     <>
                       <IconCheck size={14} />
-                      Save Changes
+                      <span>Save Changes</span>
                     </>
                   )}
                 </button>

@@ -18,6 +18,7 @@ import {
   IconExternalLink,
   IconCopy,
   IconAlertCircle,
+  IconChevronDown,
 } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
@@ -55,6 +56,7 @@ export default function LaunchPage() {
   const [error, setError] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [decimalsOpen, setDecimalsOpen] = useState(false);
 
   // Result state
   const [mintAddress, setMintAddress] = useState<string | null>(null);
@@ -689,24 +691,54 @@ export default function LaunchPage() {
                   </div>
                 </div>
 
-                {/* Decimals */}
+                {/* Custom Decimals Dropdown */}
                 <div>
                   <label className="font-sans text-xs font-medium text-neutral-300 block mb-2">
                     Decimals
                   </label>
-                  <select
-                    value={tokenData.decimals}
-                    onChange={(e) =>
-                      setTokenData({ ...tokenData, decimals: e.target.value })
-                    }
-                    className="w-full bg-[#141414] border border-white/[0.08] focus:border-white/30 rounded-xl px-4 py-3 text-sm text-white transition-colors appearance-none cursor-pointer focus:outline-none font-mono"
-                  >
-                    {[6, 8, 9].map((d) => (
-                      <option key={d} value={d} className="bg-[#181818] text-white">
-                        {d} decimals
-                      </option>
-                    ))}
-                  </select>
+                  <div className="relative">
+                    <button
+                      type="button"
+                      onClick={() => setDecimalsOpen(!decimalsOpen)}
+                      className="w-full bg-[#141414] border border-white/[0.08] hover:border-white/20 focus:border-white/30 rounded-xl px-4 py-3 text-sm text-white transition-colors flex items-center justify-between font-mono cursor-pointer"
+                    >
+                      <span>{tokenData.decimals} decimals</span>
+                      <IconChevronDown
+                        size={16}
+                        className={cn("text-neutral-400 transition-transform duration-200", decimalsOpen && "rotate-180")}
+                      />
+                    </button>
+                    <AnimatePresence>
+                      {decimalsOpen && (
+                        <motion.div
+                          initial={{ opacity: 0, y: -4 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -4 }}
+                          className="absolute left-0 right-0 top-full mt-2 z-50 bg-[#181818] border border-white/[0.1] rounded-xl p-1.5 space-y-1 shadow-2xl"
+                        >
+                          {[6, 8, 9].map((d) => (
+                            <button
+                              key={d}
+                              type="button"
+                              onClick={() => {
+                                setTokenData({ ...tokenData, decimals: String(d) });
+                                setDecimalsOpen(false);
+                              }}
+                              className={cn(
+                                "w-full flex items-center justify-between px-3.5 py-2.5 rounded-lg text-xs font-mono transition-colors cursor-pointer",
+                                tokenData.decimals === String(d)
+                                  ? "bg-white/[0.1] text-white font-semibold"
+                                  : "text-neutral-400 hover:text-white hover:bg-white/[0.04]"
+                              )}
+                            >
+                              <span>{d} decimals</span>
+                              {tokenData.decimals === String(d) && <IconCheck size={14} className="text-white" />}
+                            </button>
+                          ))}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
                 </div>
 
                 {/* Description */}

@@ -239,11 +239,11 @@ export function TradingAgentCopilot() {
 
   return (
     <>
-      {/* Floating Trigger Button - Plain Text Pill */}
+      {/* Floating Trigger Button - Plain Text Bigger Purple Pill */}
       <div className="fixed bottom-6 right-6 z-40">
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="px-4 py-2 rounded-full text-xs font-sans font-semibold bg-white text-black hover:bg-neutral-200 transition-colors shadow-lg cursor-pointer"
+          className="px-6 py-3.5 rounded-full text-sm font-sans font-bold bg-purple-600 hover:bg-purple-500 text-white transition-all shadow-xl hover:shadow-purple-600/30 cursor-pointer"
         >
           {isAgentRunning
             ? `Agent Active (${totalPnl >= 0 ? "+" : ""}${totalPnl}%)`
