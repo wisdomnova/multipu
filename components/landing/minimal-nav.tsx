@@ -35,8 +35,10 @@ export function MinimalNav() {
     <>
       <nav
         className={cn(
-          "fixed top-0 left-0 right-0 z-50 transition-colors duration-300",
-          scrolled ? "bg-black/90 backdrop-blur-xl" : "bg-transparent"
+          "fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-out",
+          scrolled
+            ? "translate-y-0 opacity-100 bg-black/90 backdrop-blur-xl border-b border-white/[0.08]"
+            : "-translate-y-full opacity-0 pointer-events-none"
         )}
       >
         <div className="mx-auto max-w-[1360px] px-6 md:px-12">
