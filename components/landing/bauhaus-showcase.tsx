@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { IconRobot, IconWallet } from "@tabler/icons-react";
 import { motion, fadeUp, stagger, scaleIn, slideInLeft } from "@/components/motion";
 
 export function BauhausShowcase() {
@@ -74,7 +75,7 @@ export function BauhausShowcase() {
                 className="h-72 sm:h-80 rounded-3xl bg-[#2b4fff] p-6 sm:p-8 flex flex-col justify-between group transition-transform duration-300 hover:scale-[1.02] cursor-pointer"
               >
                 <div className="flex justify-between items-start">
-                  {/* Explore Launchpad illustration */}
+                  {/* Explore Launchpad / Meme illustration */}
                   <div className="w-12 h-12 relative">
                     <Image
                       src="/meteora.png"
@@ -105,7 +106,7 @@ export function BauhausShowcase() {
                 className="h-72 sm:h-80 rounded-3xl bg-[#ff5520] p-8 flex flex-col justify-between group transition-transform duration-300 hover:scale-[1.02] cursor-pointer"
               >
                 <div className="flex justify-between items-start">
-                  {/* Launches Launchpad illustration */}
+                  {/* Launches Meme illustration */}
                   <div className="w-12 h-12 relative">
                     <Image
                       src="/pumpfun.png"
@@ -136,15 +137,9 @@ export function BauhausShowcase() {
                 className="h-72 sm:h-80 rounded-3xl bg-[#ede9fe] p-8 flex flex-col justify-between group transition-transform duration-300 hover:scale-[1.02] cursor-pointer"
               >
                 <div className="flex justify-between items-start">
-                  {/* Agents Launchpad illustration */}
-                  <div className="w-12 h-12 relative">
-                    <Image
-                      src="/bags.png"
-                      alt="Bags"
-                      width={48}
-                      height={48}
-                      className="w-full h-full object-contain"
-                    />
+                  {/* Existing Agent illustration */}
+                  <div className="w-12 h-12 flex items-center justify-center text-neutral-900">
+                    <IconRobot size={32} stroke={1.75} />
                   </div>
                   <span className="text-xl font-mono text-neutral-900 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform">
                     ↗
@@ -167,15 +162,9 @@ export function BauhausShowcase() {
                 className="h-72 sm:h-80 rounded-3xl bg-[#7c65c1] p-8 flex flex-col justify-between group transition-transform duration-300 hover:scale-[1.02] cursor-pointer"
               >
                 <div className="flex justify-between items-start">
-                  {/* Earnings Launchpad illustration */}
-                  <div className="w-12 h-12 relative">
-                    <Image
-                      src="/four-meme.png"
-                      alt="Four.meme"
-                      width={48}
-                      height={48}
-                      className="w-full h-full object-contain"
-                    />
+                  {/* Existing Wallet illustration */}
+                  <div className="w-12 h-12 flex items-center justify-center text-white">
+                    <IconWallet size={32} stroke={1.75} />
                   </div>
                   <span className="text-xl font-mono text-white group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform">
                     ↗
