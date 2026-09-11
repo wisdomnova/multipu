@@ -112,7 +112,7 @@ export function Launchpads() {
       </div>
 
       <div className="relative">
-        <div className="flex overflow-x-auto no-scrollbar pb-10 px-6 md:px-10 gap-0 border-l border-white/10 mx-auto max-w-[1400px]">
+        <div className="flex overflow-x-auto no-scrollbar pb-10 px-4 sm:px-6 md:px-10 gap-0 border-l border-white/10 mx-auto max-w-[1400px]">
           {launchpads.map((pad, idx) => (
             <motion.div
               key={pad.name}
@@ -120,7 +120,7 @@ export function Launchpads() {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ delay: idx * 0.1 }}
-              className="flex-shrink-0 w-[320px] md:w-[400px] px-8 py-12 border-r border-white/10 flex flex-col min-h-[600px] bg-white/[0.01] hover:bg-white/[0.02] transition-colors group"
+              className="flex-shrink-0 w-[280px] sm:w-[320px] md:w-[380px] px-6 sm:px-8 py-10 sm:py-12 border-r border-white/10 flex flex-col min-h-[560px] sm:min-h-[600px] bg-white/[0.01] hover:bg-white/[0.02] transition-colors group"
             >
               <div className="flex-1">
                 <div className="relative w-full h-32 mb-8 overflow-hidden rounded-xl border border-white/5 bg-white/[0.02]">

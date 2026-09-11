@@ -33,7 +33,7 @@ export function CTA() {
         variants={stagger}
         className="relative z-10 mx-auto max-w-[1400px] px-6 md:px-10"
       >
-        <div className="border border-border bg-background p-12 md:p-20 text-center relative overflow-hidden">
+        <div className="border border-border bg-background p-8 sm:p-12 md:p-20 text-center relative overflow-hidden">
           {/* Corner accents */}
           <div className="absolute top-0 left-0 w-12 h-12 border-l border-t border-accent/30" />
           <div className="absolute top-0 right-0 w-12 h-12 border-r border-t border-accent/30" />

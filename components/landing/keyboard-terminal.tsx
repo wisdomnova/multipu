@@ -10,19 +10,19 @@ export function KeyboardTerminal() {
       whileInView="visible"
       viewport={{ once: true, margin: "-80px" }}
       variants={stagger}
-      className="py-24 md:py-36 px-6 md:px-12 max-w-[1360px] mx-auto"
+      className="py-16 sm:py-24 md:py-36 px-4 sm:px-6 md:px-12 max-w-[1360px] mx-auto"
     >
       {/* Outer Forest Green Container matching Screenshot 3 */}
-      <motion.div variants={fadeUp} className="rounded-[40px] bg-[#1a2d24] text-white p-8 sm:p-14 lg:p-20 overflow-hidden flex flex-col items-center">
+      <motion.div variants={fadeUp} className="rounded-3xl sm:rounded-[40px] bg-[#1a2d24] text-white p-6 sm:p-10 md:p-14 lg:p-20 overflow-hidden flex flex-col items-center">
         {/* Header Text */}
-        <motion.div variants={fadeUp} className="text-center max-w-2xl mb-12">
+        <motion.div variants={fadeUp} className="text-center max-w-2xl mb-8 sm:mb-12">
           <div className="text-xs font-mono uppercase tracking-widest text-[#fbc5b3] mb-3">
             Developer Controls &amp; Terminal Hotkeys
           </div>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-normal tracking-tight text-white mb-4">
+          <h2 className="text-2xl sm:text-4xl md:text-5xl font-normal tracking-tight text-white mb-3 sm:mb-4">
             Engineered for high-speed algorithmic execution
           </h2>
-          <p className="text-sm text-neutral-300 leading-relaxed">
+          <p className="text-xs sm:text-sm text-neutral-300 leading-relaxed">
             Use high-performance SDK commands or keyboard-driven terminal hotkeys to swap, launch, and rebalance liquidity in milliseconds.
           </p>
         </motion.div>
@@ -232,29 +232,29 @@ export function KeyboardTerminal() {
         </motion.div>
 
         {/* Action buttons */}
-        <motion.div variants={stagger} className="flex flex-wrap items-center justify-center gap-4 mt-8">
+        <motion.div variants={stagger} className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center justify-center gap-3 sm:gap-4 mt-8 w-full sm:w-auto">
           <motion.a
             variants={fadeUp}
             href="https://docs.multipu.fun"
             target="_blank"
             rel="noopener noreferrer"
-            className="px-8 py-3 rounded-full bg-white text-[#1a2d24] font-mono text-xs font-semibold hover:bg-[#fbc5b3] transition-colors cursor-pointer inline-flex items-center gap-1.5 hover:scale-105 active:scale-95 duration-200"
+            className="px-8 py-3 rounded-full bg-white text-[#1a2d24] font-mono text-xs font-semibold hover:bg-[#fbc5b3] transition-colors cursor-pointer inline-flex items-center justify-center gap-1.5 hover:scale-105 active:scale-95 duration-200 text-center"
           >
             <span>API Documentation</span>
             <span className="text-[10px]">↗</span>
           </motion.a>
-          <motion.div variants={fadeUp}>
+          <motion.div variants={fadeUp} className="w-full sm:w-auto">
             <Link
               href="/dashboard/api"
-              className="px-8 py-3 rounded-full bg-[#fbc5b3] text-[#1a2d24] font-mono text-xs font-semibold hover:bg-white transition-colors cursor-pointer inline-block hover:scale-105 active:scale-95 duration-200"
+              className="w-full sm:w-auto block text-center px-8 py-3 rounded-full bg-[#fbc5b3] text-[#1a2d24] font-mono text-xs font-semibold hover:bg-white transition-colors cursor-pointer hover:scale-105 active:scale-95 duration-200"
             >
               Developer API Keys
             </Link>
           </motion.div>
-          <motion.div variants={fadeUp}>
+          <motion.div variants={fadeUp} className="w-full sm:w-auto">
             <Link
               href="/dashboard"
-              className="px-8 py-3 rounded-full bg-black/40 text-white font-mono text-xs hover:bg-black/60 transition-colors cursor-pointer inline-block hover:scale-105 active:scale-95 duration-200"
+              className="w-full sm:w-auto block text-center px-8 py-3 rounded-full bg-black/40 text-white font-mono text-xs hover:bg-black/60 transition-colors cursor-pointer hover:scale-105 active:scale-95 duration-200"
             >
               Open Trading Terminal
             </Link>

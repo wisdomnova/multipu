@@ -9,30 +9,19 @@ export function HeroStatus() {
       initial="hidden"
       animate="visible"
       variants={stagger}
-      className="relative pt-36 md:pt-48 pb-20 md:pb-32 px-6 md:px-12 max-w-[1360px] mx-auto overflow-hidden"
+      className="relative pt-28 sm:pt-36 md:pt-48 pb-16 md:pb-32 px-4 sm:px-6 md:px-12 max-w-[1360px] mx-auto overflow-hidden"
     >
       {/* Perfectly Balanced Dot Matrix Background Pattern */}
       <div className="absolute inset-0 bg-[radial-gradient(rgba(255,255,255,0.18)_1.1px,transparent_1.1px)] [background-size:22px_22px] pointer-events-none opacity-45 [mask-image:radial-gradient(ellipse_at_center,black_75%,transparent_100%)] z-0" />
 
       {/* Top Hero Typography & Graphic Mark */}
-      <div className="relative z-10 mb-16 md:mb-24">
-        {/* Powered by X-Agent & OlaXBT Badge */}
-        <motion.div
-          variants={fadeUp}
-          className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-white/[0.04] border border-white/[0.08] text-xs font-mono text-neutral-300 mb-8 backdrop-blur-md"
-        >
-          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-          <span className="text-white font-semibold tracking-tight">Powered by X-Agent</span>
-          <span className="text-neutral-500">|</span>
-          <span className="text-neutral-400">OlaXBT Strategy Intelligence</span>
-        </motion.div>
-
+      <div className="relative z-10 mb-12 sm:mb-16 md:mb-24">
         <motion.h1
           variants={fadeUp}
-          className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-bold tracking-tight text-white leading-[1.05] md:leading-[0.98]"
+          className="text-4xl sm:text-6xl md:text-8xl lg:text-9xl font-bold tracking-tight text-white leading-[1.08] sm:leading-[1.02] md:leading-[0.98]"
         >
-          <span className="inline-flex items-center gap-4 md:gap-6 flex-wrap">
-            <span className="relative inline-flex items-center justify-center w-14 h-14 sm:w-20 sm:h-20 md:w-28 md:h-28 align-middle">
+          <span className="inline-flex items-center gap-3 sm:gap-4 md:gap-6 flex-wrap">
+            <span className="relative inline-flex items-center justify-center w-11 h-11 sm:w-16 sm:h-16 md:w-24 md:h-24 align-middle">
               {/* Organic purple highlight blob */}
               <svg
                 viewBox="0 0 100 100"
@@ -68,19 +57,19 @@ export function HeroStatus() {
       {/* Sub-hero Row: CTAs, Description, Scroll Prompt */}
       <motion.div
         variants={fadeUp}
-        className="grid grid-cols-1 md:grid-cols-12 gap-8 items-end mb-24 md:mb-32"
+        className="grid grid-cols-1 md:grid-cols-12 gap-6 sm:gap-8 items-end mb-16 sm:mb-24 md:mb-32"
       >
         {/* CTAs */}
-        <div className="md:col-span-4 flex flex-wrap items-center gap-3">
+        <div className="md:col-span-5 lg:col-span-4 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
           <Link
             href="/launch"
-            className="px-8 py-3.5 rounded-full bg-accent hover:bg-accent-hover text-white text-sm font-semibold transition-colors cursor-pointer shadow-lg hover:scale-105 active:scale-95 duration-200"
+            className="px-8 py-3.5 rounded-full bg-accent hover:bg-accent-hover text-white text-sm font-semibold transition-colors cursor-pointer shadow-lg hover:scale-105 active:scale-95 duration-200 text-center"
           >
             Launch Token
           </Link>
           <Link
             href="/dashboard/explore"
-            className="px-8 py-3.5 rounded-full bg-neutral-900 hover:bg-neutral-800 text-neutral-200 text-sm font-semibold transition-colors cursor-pointer hover:scale-105 active:scale-95 duration-200"
+            className="px-8 py-3.5 rounded-full bg-neutral-900 hover:bg-neutral-800 text-neutral-200 text-sm font-semibold transition-colors cursor-pointer hover:scale-105 active:scale-95 duration-200 text-center"
           >
             Explore Memes
           </Link>
@@ -94,7 +83,7 @@ export function HeroStatus() {
         </div>
 
         {/* Scroll indicator */}
-        <div className="md:col-span-3 flex md:justify-end">
+        <div className="md:col-span-2 lg:col-span-3 flex md:justify-end">
           <a
             href="#editorial"
             className="inline-flex items-center gap-2 text-xs font-mono text-neutral-500 hover:text-neutral-300 transition-colors cursor-pointer"
@@ -108,9 +97,9 @@ export function HeroStatus() {
       {/* Proof Stats Row matching Screenshot 1 */}
       <motion.div
         variants={stagger}
-        className="pt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-8 items-center border-t border-white/[0.08]"
+        className="pt-10 sm:pt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-6 sm:gap-8 items-center border-t border-white/[0.08]"
       >
-        <motion.div variants={fadeUp} className="lg:col-span-3">
+        <motion.div variants={fadeUp} className="sm:col-span-2 lg:col-span-3">
           <div className="text-sm font-medium text-neutral-400">
             Built for decentralized liquidity
           </div>
@@ -120,7 +109,7 @@ export function HeroStatus() {
         </motion.div>
 
         <motion.div variants={scaleIn} className="lg:col-span-3">
-          <div className="text-3xl md:text-4xl font-bold font-mono text-white tracking-tight">
+          <div className="text-3xl sm:text-4xl font-bold font-mono text-white tracking-tight">
             6+ Launchpads
           </div>
           <div className="text-xs text-neutral-500 mt-1">
@@ -129,7 +118,7 @@ export function HeroStatus() {
         </motion.div>
 
         <motion.div variants={scaleIn} className="lg:col-span-3">
-          <div className="text-3xl md:text-4xl font-bold font-mono text-white tracking-tight">
+          <div className="text-3xl sm:text-4xl font-bold font-mono text-white tracking-tight">
             &lt; 1s Routing
           </div>
           <div className="text-xs text-neutral-500 mt-1">
@@ -139,7 +128,7 @@ export function HeroStatus() {
 
         <motion.div variants={scaleIn} className="lg:col-span-3 flex items-center justify-between">
           <div>
-            <div className="text-3xl md:text-4xl font-bold font-mono text-white tracking-tight">
+            <div className="text-3xl sm:text-4xl font-bold font-mono text-white tracking-tight">
               100% Direct
             </div>
             <div className="text-xs text-neutral-500 mt-1">
@@ -148,7 +137,7 @@ export function HeroStatus() {
           </div>
 
           {/* Artistic hand-drawn squiggle mark from Screenshot 1 */}
-          <div className="w-16 h-16 flex-shrink-0 text-neutral-600">
+          <div className="w-14 h-14 sm:w-16 sm:h-16 flex-shrink-0 text-neutral-600">
             <svg
               viewBox="0 0 100 100"
               className="w-full h-full stroke-current fill-none"

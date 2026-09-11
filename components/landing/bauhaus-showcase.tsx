@@ -10,28 +10,28 @@ export function BauhausShowcase() {
       whileInView="visible"
       viewport={{ once: true, margin: "-80px" }}
       variants={stagger}
-      className="py-16 md:py-24 px-6 md:px-12 max-w-[1360px] mx-auto"
+      className="py-12 sm:py-16 md:py-24 px-4 sm:px-6 md:px-12 max-w-[1360px] mx-auto"
     >
       {/* Outer rounded dark canvas */}
-      <motion.div variants={fadeUp} className="relative w-full rounded-[40px] bg-neutral-950 p-8 sm:p-12 lg:p-16 overflow-hidden">
+      <motion.div variants={fadeUp} className="relative w-full rounded-3xl sm:rounded-[40px] bg-neutral-950 p-6 sm:p-10 md:p-12 lg:p-16 overflow-hidden">
         {/* Perfectly Balanced Dot Matrix Background Pattern */}
         <div className="absolute inset-0 bg-[radial-gradient(rgba(255,255,255,0.18)_1.1px,transparent_1.1px)] [background-size:22px_22px] pointer-events-none opacity-45 [mask-image:radial-gradient(ellipse_at_center,black_80%,transparent_100%)] z-0" />
 
-        <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+        <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-12 lg:gap-16 items-center">
           {/* Left Column: Editorial & Bauhaus Geometric Composition */}
-          <motion.div variants={slideInLeft} className="lg:col-span-5 flex flex-col justify-between h-full min-h-[580px]">
+          <motion.div variants={slideInLeft} className="lg:col-span-5 flex flex-col justify-between h-full min-h-0 lg:min-h-[580px]">
             <div>
-              <div className="flex items-center gap-4 text-xs font-mono text-neutral-400 mb-8">
+              <div className="flex items-center gap-4 text-xs font-mono text-neutral-400 mb-6 sm:mb-8">
                 <span>Architecture</span>
                 <span>●</span>
                 <span>Multi-Chain</span>
               </div>
 
-              <h2 className="text-4xl sm:text-5xl lg:text-6xl font-normal tracking-tight text-white leading-[1.1] mb-6">
+              <h2 className="text-3xl sm:text-5xl lg:text-6xl font-normal tracking-tight text-white leading-[1.1] mb-4 sm:mb-6">
                 It&apos;s never too late to deploy something new
               </h2>
 
-              <p className="text-sm text-neutral-400 leading-relaxed mb-8 max-w-md">
+              <p className="text-sm text-neutral-400 leading-relaxed mb-6 sm:mb-8 max-w-md">
                 Three paths lead to liquidity: the path of reflection is the noblest, the path of imitation is the easiest, and the path of innovation is the most rewarding.
               </p>
 
@@ -45,7 +45,7 @@ export function BauhausShowcase() {
             </div>
 
             {/* Bauhaus Abstract Geometric SVG composition */}
-            <div className="relative w-full h-56 mt-8 overflow-hidden rounded-2xl bg-neutral-900/50 p-6 flex items-center justify-center">
+            <div className="relative w-full h-48 sm:h-56 mt-8 overflow-hidden rounded-2xl bg-neutral-900/50 p-4 sm:p-6 flex items-center justify-center">
               {/* Angled orange bar */}
               <div className="absolute w-28 h-2.5 rounded-full bg-orange-500 rotate-[-35deg] translate-x-[-40px] translate-y-[-10px]" />
               {/* Blue circle */}
@@ -71,7 +71,7 @@ export function BauhausShowcase() {
             <motion.div variants={scaleIn}>
               <Link
                 href="/dashboard/explore"
-                className="h-72 sm:h-80 rounded-3xl bg-[#2b4fff] p-8 flex flex-col justify-between group transition-transform duration-300 hover:scale-[1.02] cursor-pointer"
+                className="h-72 sm:h-80 rounded-3xl bg-[#2b4fff] p-6 sm:p-8 flex flex-col justify-between group transition-transform duration-300 hover:scale-[1.02] cursor-pointer"
               >
                 <div className="flex justify-between items-start">
                   {/* Abstract vector illustration */}
