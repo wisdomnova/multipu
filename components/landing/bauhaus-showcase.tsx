@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { motion, fadeUp, stagger, scaleIn, slideInLeft } from "@/components/motion";
 
 export function BauhausShowcase() {
@@ -44,23 +45,22 @@ export function BauhausShowcase() {
               </Link>
             </div>
 
-            {/* Bauhaus Abstract Geometric SVG composition */}
-            <div className="relative w-full h-48 sm:h-56 mt-8 overflow-hidden rounded-2xl bg-neutral-900/50 p-4 sm:p-6 flex items-center justify-center">
-              {/* Angled orange bar */}
-              <div className="absolute w-28 h-2.5 rounded-full bg-orange-500 rotate-[-35deg] translate-x-[-40px] translate-y-[-10px]" />
-              {/* Blue circle */}
-              <div className="absolute w-10 h-10 rounded-full bg-blue-600 translate-x-[-50px] translate-y-[-50px]" />
-              {/* Lavender horizontal bar */}
-              <div className="absolute w-16 h-2 rounded-full bg-indigo-400 translate-x-[-40px] translate-y-[45px]" />
-              {/* Orange circle with wavy line */}
-              <div className="absolute w-14 h-14 rounded-full bg-orange-600 translate-x-[40px] translate-y-[35px]" />
-              {/* Fine vector squiggle */}
-              <svg className="absolute w-full h-full stroke-neutral-500/40 fill-none" strokeWidth="1.5">
-                <path d="M40,160 Q80,120 120,160 T200,160 T280,140" />
-              </svg>
-              {/* Textured angled pill capsule */}
-              <div className="absolute w-16 h-32 rounded-full bg-neutral-800 rotate-[40deg] translate-x-[45px] translate-y-[-20px] overflow-hidden flex items-center justify-center">
-                <div className="w-full h-full bg-neutral-700/60" />
+            {/* Launchpads illustrations */}
+            <div className="w-full h-44 sm:h-52 mt-8 rounded-2xl bg-neutral-900 flex items-center justify-center gap-3 sm:gap-5 px-4">
+              <div className="w-11 h-11 sm:w-12 sm:h-12 relative flex items-center justify-center">
+                <Image src="/meteora.png" alt="Meteora" width={48} height={48} className="w-full h-full object-contain" />
+              </div>
+              <div className="w-11 h-11 sm:w-12 sm:h-12 relative flex items-center justify-center">
+                <Image src="/pumpfun.png" alt="Pump.fun" width={48} height={48} className="w-full h-full object-contain" />
+              </div>
+              <div className="w-11 h-11 sm:w-12 sm:h-12 relative flex items-center justify-center">
+                <Image src="/bags.png" alt="Bags" width={48} height={48} className="w-full h-full object-contain" />
+              </div>
+              <div className="w-11 h-11 sm:w-12 sm:h-12 relative flex items-center justify-center">
+                <Image src="/four-meme.png" alt="Four.meme" width={48} height={48} className="w-full h-full object-contain" />
+              </div>
+              <div className="w-11 h-11 sm:w-12 sm:h-12 relative flex items-center justify-center">
+                <Image src="/pons.png" alt="Pons" width={48} height={48} className="w-full h-full object-contain" />
               </div>
             </div>
           </motion.div>
@@ -74,13 +74,15 @@ export function BauhausShowcase() {
                 className="h-72 sm:h-80 rounded-3xl bg-[#2b4fff] p-6 sm:p-8 flex flex-col justify-between group transition-transform duration-300 hover:scale-[1.02] cursor-pointer"
               >
                 <div className="flex justify-between items-start">
-                  {/* Abstract vector illustration */}
-                  <div className="relative w-24 h-16">
-                    <div className="absolute w-16 h-2 rounded-full bg-orange-400 rotate-[-25deg] top-2" />
-                    <div className="absolute w-12 h-1.5 rounded-full bg-white/40 top-8 left-1" />
-                    <svg className="w-full h-full stroke-white/40 fill-none" strokeWidth="1">
-                      <path d="M0,35 Q30,10 60,30 T100,20" />
-                    </svg>
+                  {/* Explore Launchpad illustration */}
+                  <div className="w-12 h-12 relative">
+                    <Image
+                      src="/meteora.png"
+                      alt="Meteora"
+                      width={48}
+                      height={48}
+                      className="w-full h-full object-contain"
+                    />
                   </div>
                   <span className="text-xl font-mono text-white group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform">
                     ↗
@@ -103,11 +105,15 @@ export function BauhausShowcase() {
                 className="h-72 sm:h-80 rounded-3xl bg-[#ff5520] p-8 flex flex-col justify-between group transition-transform duration-300 hover:scale-[1.02] cursor-pointer"
               >
                 <div className="flex justify-between items-start">
-                  {/* Geometric shapes */}
-                  <div className="relative w-24 h-16">
-                    <div className="w-7 h-7 rounded-full bg-white mb-2" />
-                    <div className="w-16 h-2 rounded-full bg-white rotate-[-15deg]" />
-                    <div className="w-10 h-1.5 rounded-full bg-blue-300 mt-2 ml-8" />
+                  {/* Launches Launchpad illustration */}
+                  <div className="w-12 h-12 relative">
+                    <Image
+                      src="/pumpfun.png"
+                      alt="Pump.fun"
+                      width={48}
+                      height={48}
+                      className="w-full h-full object-contain"
+                    />
                   </div>
                   <span className="text-xl font-mono text-white group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform">
                     ↗
@@ -130,13 +136,15 @@ export function BauhausShowcase() {
                 className="h-72 sm:h-80 rounded-3xl bg-[#ede9fe] p-8 flex flex-col justify-between group transition-transform duration-300 hover:scale-[1.02] cursor-pointer"
               >
                 <div className="flex justify-between items-start">
-                  {/* Soft shapes */}
-                  <div className="relative w-24 h-16">
-                    <div className="w-8 h-8 rounded-full bg-blue-600 mb-1" />
-                    <div className="w-3 h-3 rounded-full bg-orange-500 absolute top-0 right-8" />
-                    <svg className="w-full h-full stroke-neutral-400 fill-none" strokeWidth="1">
-                      <path d="M10,25 Q40,5 70,30" />
-                    </svg>
+                  {/* Agents Launchpad illustration */}
+                  <div className="w-12 h-12 relative">
+                    <Image
+                      src="/bags.png"
+                      alt="Bags"
+                      width={48}
+                      height={48}
+                      className="w-full h-full object-contain"
+                    />
                   </div>
                   <span className="text-xl font-mono text-neutral-900 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform">
                     ↗
@@ -159,10 +167,15 @@ export function BauhausShowcase() {
                 className="h-72 sm:h-80 rounded-3xl bg-[#7c65c1] p-8 flex flex-col justify-between group transition-transform duration-300 hover:scale-[1.02] cursor-pointer"
               >
                 <div className="flex justify-between items-start">
-                  {/* Switch toggle illustration */}
-                  <div className="w-24 h-10 rounded-full bg-black/20 p-1 flex items-center justify-between">
-                    <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center" />
-                    <div className="w-8 h-8 rounded-full bg-orange-500" />
+                  {/* Earnings Launchpad illustration */}
+                  <div className="w-12 h-12 relative">
+                    <Image
+                      src="/four-meme.png"
+                      alt="Four.meme"
+                      width={48}
+                      height={48}
+                      className="w-full h-full object-contain"
+                    />
                   </div>
                   <span className="text-xl font-mono text-white group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform">
                     ↗
