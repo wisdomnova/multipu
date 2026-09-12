@@ -8,16 +8,10 @@ import {
   IconRefresh,
   IconCheck,
   IconChecks,
-  IconRocket,
-  IconArrowsExchange,
-  IconCoins,
-  IconTrendingUp,
-  IconBell,
   IconArrowRight,
-  IconCircleCheck,
 } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
-import type { NotificationItem, NotificationCategory } from "@/app/api/notifications/route";
+import type { NotificationItem } from "@/app/api/notifications/route";
 
 interface NotificationsPopupProps {
   isOpen: boolean;
@@ -122,47 +116,11 @@ export function NotificationsPopup({
     (n) => n.category === "SIGNAL" || n.category === "TRADE"
   ).length;
 
-  const getCategoryIcon = (category: NotificationCategory) => {
-    switch (category) {
-      case "LAUNCH":
-        return {
-          icon: <IconRocket size={18} className="text-emerald-400" />,
-          containerBg: "bg-emerald-500/10 border-emerald-500/20",
-          badgeColor: "bg-emerald-400",
-        };
-      case "TRADE":
-        return {
-          icon: <IconArrowsExchange size={18} className="text-amber-400" />,
-          containerBg: "bg-amber-500/10 border-amber-500/20",
-          badgeColor: "bg-amber-400",
-        };
-      case "FEE":
-        return {
-          icon: <IconCoins size={18} className="text-purple-400" />,
-          containerBg: "bg-purple-500/10 border-purple-500/20",
-          badgeColor: "bg-purple-400",
-        };
-      case "SIGNAL":
-        return {
-          icon: <IconTrendingUp size={18} className="text-cyan-400" />,
-          containerBg: "bg-cyan-500/10 border-cyan-500/20",
-          badgeColor: "bg-cyan-400",
-        };
-      case "SYSTEM":
-      default:
-        return {
-          icon: <IconBell size={18} className="text-neutral-300" />,
-          containerBg: "bg-white/[0.05] border-white/[0.08]",
-          badgeColor: "bg-neutral-400",
-        };
-    }
-  };
-
   return (
     <AnimatePresence>
       {isOpen && (
         <>
-          {/* Mobile backdrop for small screens */}
+          {/* Mobile backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -171,16 +129,16 @@ export function NotificationsPopup({
             onClick={onClose}
           />
 
-          {/* Floating Popup Card */}
+          {/* Spacious Floating Popup Card */}
           <motion.div
             ref={popupRef}
-            initial={{ opacity: 0, y: 8, scale: 0.97 }}
+            initial={{ opacity: 0, y: 8, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 8, scale: 0.97 }}
+            exit={{ opacity: 0, y: 8, scale: 0.98 }}
             transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
             className={cn(
               "fixed sm:absolute top-16 sm:top-full right-3 sm:right-0 sm:mt-2.5 z-50",
-              "w-[calc(100vw-24px)] sm:w-[420px] max-w-[440px]",
+              "w-[calc(100vw-24px)] sm:w-[500px] md:w-[540px] max-w-[560px]",
               "bg-[#0c0c0e]/95 backdrop-blur-2xl",
               "border border-white/[0.08]",
               "shadow-[0_24px_60px_-12px_rgba(0,0,0,0.9)]",
@@ -189,26 +147,26 @@ export function NotificationsPopup({
             )}
           >
             {/* Header */}
-            <div className="px-5 pt-4 pb-3 border-b border-white/[0.05] flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <h3 className="text-[15px] sm:text-base font-bold text-white tracking-tight font-[family-name:var(--font-geist-sans)]">
+            <div className="px-6 pt-5 pb-3.5 border-b border-white/[0.05] flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <h3 className="text-base sm:text-lg font-bold text-white tracking-tight font-[family-name:var(--font-geist-sans)]">
                   Notifications
                 </h3>
                 {unreadCount > 0 && (
-                  <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold font-[family-name:var(--font-geist-mono)] bg-purple-500/15 border border-purple-500/25 text-purple-300">
-                    {unreadCount} new
+                  <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold font-[family-name:var(--font-geist-mono)] bg-purple-500/15 text-purple-300">
+                    {unreadCount} unread
                   </span>
                 )}
               </div>
 
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-2">
                 {unreadCount > 0 && (
                   <button
                     onClick={markAllAsRead}
-                    className="text-xs font-medium text-neutral-400 hover:text-white transition-colors flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-white/[0.05] cursor-pointer"
+                    className="text-xs font-medium text-neutral-400 hover:text-white transition-colors flex items-center gap-1.5 px-2.5 py-1 rounded-lg hover:bg-white/[0.05] cursor-pointer"
                     title="Mark all as read"
                   >
-                    <IconChecks size={14} className="text-purple-400" />
+                    <IconChecks size={15} className="text-purple-400" />
                     <span>Mark all read</span>
                   </button>
                 )}
@@ -221,7 +179,7 @@ export function NotificationsPopup({
                   aria-label="Refresh"
                 >
                   <IconRefresh
-                    size={14}
+                    size={15}
                     className={cn(loading && "animate-spin text-purple-400")}
                   />
                 </button>
@@ -232,24 +190,24 @@ export function NotificationsPopup({
                   title="Close popup"
                   aria-label="Close"
                 >
-                  <IconX size={14} />
+                  <IconX size={15} />
                 </button>
               </div>
             </div>
 
             {/* Filter Navigation Tabs */}
-            <div className="px-5 pt-2.5 pb-2 flex items-center gap-1.5 border-b border-white/[0.04] overflow-x-auto scrollbar-none">
+            <div className="px-6 pt-3 pb-2.5 flex items-center gap-2 border-b border-white/[0.04] overflow-x-auto scrollbar-none">
               <button
                 onClick={() => setActiveTab("ALL")}
                 className={cn(
-                  "px-3 py-1 rounded-lg text-xs font-medium transition-all whitespace-nowrap cursor-pointer",
+                  "px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap cursor-pointer",
                   activeTab === "ALL"
                     ? "bg-white/[0.08] text-white font-semibold"
                     : "text-neutral-400 hover:text-neutral-200 hover:bg-white/[0.03]"
                 )}
               >
                 All
-                <span className="ml-1.5 text-[10px] opacity-70 font-mono">
+                <span className="ml-1.5 text-[11px] opacity-70 font-mono">
                   {notifications.length}
                 </span>
               </button>
@@ -257,7 +215,7 @@ export function NotificationsPopup({
               <button
                 onClick={() => setActiveTab("UNREAD")}
                 className={cn(
-                  "px-3 py-1 rounded-lg text-xs font-medium transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer",
+                  "px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer",
                   activeTab === "UNREAD"
                     ? "bg-white/[0.08] text-white font-semibold"
                     : "text-neutral-400 hover:text-neutral-200 hover:bg-white/[0.03]"
@@ -272,14 +230,14 @@ export function NotificationsPopup({
               <button
                 onClick={() => setActiveTab("LAUNCHES")}
                 className={cn(
-                  "px-3 py-1 rounded-lg text-xs font-medium transition-all whitespace-nowrap cursor-pointer",
+                  "px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap cursor-pointer",
                   activeTab === "LAUNCHES"
                     ? "bg-white/[0.08] text-white font-semibold"
                     : "text-neutral-400 hover:text-neutral-200 hover:bg-white/[0.03]"
                 )}
               >
                 Launches
-                <span className="ml-1.5 text-[10px] opacity-70 font-mono">
+                <span className="ml-1.5 text-[11px] opacity-70 font-mono">
                   {launchCount}
                 </span>
               </button>
@@ -287,111 +245,89 @@ export function NotificationsPopup({
               <button
                 onClick={() => setActiveTab("SIGNALS")}
                 className={cn(
-                  "px-3 py-1 rounded-lg text-xs font-medium transition-all whitespace-nowrap cursor-pointer",
+                  "px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap cursor-pointer",
                   activeTab === "SIGNALS"
                     ? "bg-white/[0.08] text-white font-semibold"
                     : "text-neutral-400 hover:text-neutral-200 hover:bg-white/[0.03]"
                 )}
               >
-                Signals
-                <span className="ml-1.5 text-[10px] opacity-70 font-mono">
+                Signals &amp; Trades
+                <span className="ml-1.5 text-[11px] opacity-70 font-mono">
                   {signalCount}
                 </span>
               </button>
             </div>
 
-            {/* Notification Items List */}
-            <div className="max-h-[380px] sm:max-h-[420px] overflow-y-auto divide-y divide-white/[0.03] p-2">
+            {/* Notification Items List - Clean, Icon-free & Spacious */}
+            <div className="max-h-[440px] sm:max-h-[480px] overflow-y-auto divide-y divide-white/[0.03] p-3 sm:p-4">
               {filteredNotifications.length === 0 ? (
-                <div className="py-12 px-6 flex flex-col items-center justify-center text-center">
-                  <div className="w-12 h-12 rounded-2xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-center text-neutral-400 mb-3">
-                    <IconCircleCheck size={22} className="text-purple-400/80" />
-                  </div>
+                <div className="py-16 px-6 flex flex-col items-center justify-center text-center">
                   <h4 className="text-sm font-semibold text-white">All caught up</h4>
-                  <p className="text-xs text-neutral-400 mt-1 max-w-[240px] leading-relaxed">
+                  <p className="text-xs text-neutral-400 mt-1 max-w-[260px] leading-relaxed">
                     {activeTab === "UNREAD"
-                      ? "You have read all pending notifications and updates."
-                      : "No activity records found in this category yet."}
+                      ? "You have read all pending notifications."
+                      : "No activity records found in this view."}
                   </p>
                 </div>
               ) : (
                 filteredNotifications.map((item) => {
                   const isUnread = !readIds.has(item.id);
-                  const { icon, containerBg, badgeColor } = getCategoryIcon(item.category);
 
                   const content = (
                     <div
                       onClick={() => markSingleAsRead(item.id)}
                       className={cn(
-                        "group relative flex items-start gap-3.5 p-3 rounded-xl transition-all cursor-pointer",
+                        "group relative flex items-start justify-between gap-4 p-4 rounded-xl transition-all cursor-pointer",
                         isUnread
                           ? "bg-white/[0.025] hover:bg-white/[0.05]"
                           : "hover:bg-white/[0.02]"
                       )}
                     >
-                      {/* Avatar / Category Icon */}
-                      <div className="relative shrink-0 mt-0.5">
-                        <div
-                          className={cn(
-                            "w-10 h-10 rounded-xl flex items-center justify-center border transition-transform group-hover:scale-105",
-                            containerBg
-                          )}
-                        >
-                          {icon}
-                        </div>
-                        {/* Status mini pip */}
-                        <span
-                          className={cn(
-                            "absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-[#0c0c0e]",
-                            badgeColor
-                          )}
-                        />
-                      </div>
-
-                      {/* Content Column */}
-                      <div className="flex-1 min-w-0 pr-1">
-                        <div className="flex items-baseline justify-between gap-2">
+                      {/* Left Column: Title, Detail & Metric */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
                           <h4
                             className={cn(
-                              "text-xs sm:text-[13px] font-semibold tracking-tight truncate",
+                              "text-sm font-semibold tracking-tight truncate",
                               isUnread ? "text-white" : "text-neutral-300"
                             )}
                           >
                             {item.title}
                           </h4>
-                          <span className="text-[11px] text-neutral-400 font-mono shrink-0 whitespace-nowrap">
-                            {item.timeAgo}
-                          </span>
                         </div>
 
-                        <p className="text-xs text-neutral-400 line-clamp-2 leading-relaxed mt-0.5 font-[family-name:var(--font-geist-sans)]">
+                        <p className="text-xs text-neutral-400 leading-relaxed mt-1 font-[family-name:var(--font-geist-sans)]">
                           {item.detail}
                         </p>
 
-                        {/* Metric / Status Badge */}
+                        {/* Metric Badge */}
                         {item.metric && (
-                          <div className="mt-1.5 flex items-center gap-1.5">
-                            <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-medium bg-white/[0.04] border border-white/[0.06] text-neutral-300">
+                          <div className="mt-2 flex items-center gap-2">
+                            <span className="px-2 py-0.5 rounded text-[11px] font-mono font-medium bg-white/[0.04] text-neutral-300">
                               {item.metric}
                             </span>
                           </div>
                         )}
                       </div>
 
-                      {/* Right Indicator / Hover Action */}
-                      <div className="shrink-0 flex items-center pt-1">
-                        {isUnread ? (
+                      {/* Right Column: Time & Unread Status */}
+                      <div className="shrink-0 flex flex-col items-end gap-2 pt-0.5">
+                        <span className="text-xs text-neutral-400 font-mono whitespace-nowrap">
+                          {item.timeAgo}
+                        </span>
+
+                        {isUnread && (
                           <div className="flex items-center">
                             <button
                               onClick={(e) => markSingleAsRead(item.id, e)}
                               className="hidden group-hover:flex items-center justify-center w-5 h-5 rounded-full bg-white/[0.08] hover:bg-purple-500/20 text-neutral-400 hover:text-purple-300 transition-colors"
                               title="Mark as read"
                             >
-                              <IconCheck size={11} />
+                              <IconCheck size={12} />
                             </button>
                             <span className="group-hover:hidden w-2 h-2 rounded-full bg-purple-500 shadow-[0_0_8px_rgba(139,92,246,0.8)]" />
                           </div>
-                        ) : null}
+                        )}
                       </div>
                     </div>
                   );
@@ -416,17 +352,12 @@ export function NotificationsPopup({
               )}
             </div>
 
-            {/* Bottom Footer Bar */}
-            <div className="px-4 py-2.5 border-t border-white/[0.05] bg-white/[0.01] flex items-center justify-between text-xs">
-              <div className="flex items-center gap-2 text-neutral-400 font-mono text-[11px]">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                <span>Live Feed</span>
-              </div>
-
+            {/* Simple Minimalist Footer Bar */}
+            <div className="px-6 py-3 border-t border-white/[0.05] bg-white/[0.01] flex items-center justify-end text-xs">
               <Link
                 href="/dashboard/explore"
                 onClick={onClose}
-                className="text-neutral-300 hover:text-white font-medium flex items-center gap-1 transition-colors hover:translate-x-0.5 cursor-pointer font-[family-name:var(--font-geist-sans)]"
+                className="text-neutral-300 hover:text-white font-medium flex items-center gap-1.5 transition-colors hover:translate-x-0.5 cursor-pointer font-[family-name:var(--font-geist-sans)]"
               >
                 <span>View all activity</span>
                 <IconArrowRight size={13} />
