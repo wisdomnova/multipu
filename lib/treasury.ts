@@ -1,11 +1,7 @@
-import { Keypair, Connection, Transaction, SystemProgram, PublicKey, LAMPORTS_PER_SOL, sendAndConfirmTransaction } from "@solana/web3.js";
-
-/**
- * SERVER-SIDE SECURITY WARNING:
- * This file handles sensitive wallet keys and treasury operations.
- * It must only be executed in a secure server-side environment.
- * Ensure environment variables are properly protected.
- */
+import { Connection, PublicKey, LAMPORTS_PER_SOL, Keypair, Transaction, SystemProgram, sendAndConfirmTransaction } from "@solana/web3.js";
+import { ethers } from "ethers";
+import { privyTreasuryClient } from "./privy-treasury";
+import { createAdminSupabase } from "./supabase/server";
 
 export type TreasuryChain = "solana" | "bsc";
 
@@ -14,42 +10,73 @@ class TreasuryManager {
   private solanaConnection: Connection | null = null;
   private solanaTreasuryAddress: string | null = null;
   private bscTreasuryAddress: string | null = null;
+  private privySolanaWalletId: string | null = null;
+  private privyBscWalletId: string | null = null;
 
   constructor() {
-    this.initializeSolana();
-    this.initializeBscAddress();
+    this.initializeAddresses();
+    this.initializeLocalKeypair();
   }
 
-  private initializeSolana() {
-    const address = process.env.TREASURY_SOLANA_WALLET_ADDRESS;
-    const secretKeyString = process.env.TREASURY_SOLANA_WALLET_SECRET;
-    const clusterUrl = process.env.SOLANA_RPC_URL || "https://api.mainnet-beta.solana.com";
+  private initializeAddresses() {
+    // 1. Solana
+    this.solanaTreasuryAddress = process.env.TREASURY_SOLANA_WALLET_ADDRESS || null;
+    this.privySolanaWalletId = process.env.PRIVY_SOLANA_WALLET_ID || null;
 
-    if (address && secretKeyString) {
+    // 2. BSC
+    this.bscTreasuryAddress = process.env.TREASURY_BSC_WALLET_ADDRESS || null;
+    this.privyBscWalletId = process.env.PRIVY_BSC_WALLET_ID || null;
+
+    // Setup Solana Connection
+    const rpcUrl =
+      process.env.NEXT_PUBLIC_SOLANA_RPC_URL ||
+      process.env.SOLANA_RPC_URL ||
+      (process.env.NEXT_PUBLIC_SOLANA_NETWORK === "mainnet-beta"
+        ? "https://api.mainnet-beta.solana.com"
+        : "https://api.devnet.solana.com");
+    this.solanaConnection = new Connection(rpcUrl, "confirmed");
+  }
+
+  private initializeLocalKeypair() {
+    const secretKeyString = process.env.TREASURY_SOLANA_WALLET_SECRET;
+    if (secretKeyString) {
       try {
         const secretKey = Uint8Array.from(JSON.parse(secretKeyString));
         this.solanaKeypair = Keypair.fromSecretKey(secretKey);
-        this.solanaTreasuryAddress = address;
-        this.solanaConnection = new Connection(clusterUrl, "confirmed");
+        if (!this.solanaTreasuryAddress) {
+          this.solanaTreasuryAddress = this.solanaKeypair.publicKey.toBase58();
+        }
       } catch (error) {
-        console.error("Failed to initialize Solana treasury:", error);
+        console.warn("[Treasury] Local Solana secret keypair not parsed (Privy mode preferred):", error);
       }
     }
   }
 
-  private initializeBscAddress() {
-    this.bscTreasuryAddress = process.env.TREASURY_BSC_WALLET_ADDRESS || null;
-    // Note: BSC private key handling would transition to an EVM provider setup
-  }
-
   public isConfigured(chain: TreasuryChain): boolean {
     if (chain === "solana") {
-      return this.solanaKeypair !== null && this.solanaConnection !== null;
+      // Configured if Privy server wallet ID exists OR local keypair exists
+      const hasPrivy = privyTreasuryClient.isConfigured() && !!this.privySolanaWalletId;
+      const hasKeypair = !!(this.solanaKeypair && this.solanaTreasuryAddress);
+      return hasPrivy || hasKeypair;
+    }
+
+    if (chain === "bsc") {
+      // Configured if Privy BSC wallet ID and address exist
+      return privyTreasuryClient.isConfigured() && !!this.privyBscWalletId;
+    }
+
+    return false;
+  }
+
+  public getProvider(chain: TreasuryChain): "privy" | "keypair" | "none" {
+    if (chain === "solana") {
+      if (privyTreasuryClient.isConfigured() && this.privySolanaWalletId) return "privy";
+      if (this.solanaKeypair) return "keypair";
     }
     if (chain === "bsc") {
-      return this.bscTreasuryAddress !== null;
+      if (privyTreasuryClient.isConfigured() && this.privyBscWalletId) return "privy";
     }
-    return false;
+    return "none";
   }
 
   public getTreasuryAddress(chain: TreasuryChain): string | null {
@@ -57,16 +84,21 @@ class TreasuryManager {
   }
 
   public async getTreasuryBalance(chain: TreasuryChain): Promise<number> {
-    if (chain === "solana" && this.solanaConnection && this.solanaKeypair) {
-      try {
-        const balance = await this.solanaConnection.getBalance(this.solanaKeypair.publicKey);
-        return balance / LAMPORTS_PER_SOL;
-      } catch (error) {
-        console.error("Error fetching Solana balance:", error);
-        return 0;
+    try {
+      if (chain === "solana" && this.solanaTreasuryAddress && this.solanaConnection) {
+        const balanceLamports = await this.solanaConnection.getBalance(new PublicKey(this.solanaTreasuryAddress));
+        return balanceLamports / LAMPORTS_PER_SOL;
       }
+
+      if (chain === "bsc" && this.bscTreasuryAddress) {
+        const bscRpc = process.env.BSC_RPC_URL || "https://bsc-dataseed.binance.org";
+        const provider = new ethers.JsonRpcProvider(bscRpc, 56, { staticNetwork: true });
+        const balanceWei = await provider.getBalance(this.bscTreasuryAddress);
+        return parseFloat(ethers.formatEther(balanceWei));
+      }
+    } catch (error) {
+      console.warn(`[Treasury] Failed to fetch live balance for ${chain}:`, error);
     }
-    // BSC balance implementation would go here
     return 0;
   }
 
@@ -74,28 +106,63 @@ class TreasuryManager {
     chain: TreasuryChain,
     recipient: string,
     amount: number,
-    admin: string
+    adminWallet: string
   ): Promise<{ success: boolean; signature?: string; error?: string }> {
+    // 1. Privy Server Wallet Path (Recommended & Default)
+    if (privyTreasuryClient.isConfigured()) {
+      const walletId = chain === "solana" ? this.privySolanaWalletId : this.privyBscWalletId;
 
-    if (chain === "solana") {
-      if (!this.solanaKeypair || !this.solanaConnection) {
-        return { success: false, error: "Solana treasury not configured" };
+      if (!walletId) {
+        return { success: false, error: `Privy ${chain.toUpperCase()} wallet ID not configured` };
       }
 
+      const result = await privyTreasuryClient.transfer({
+        walletId,
+        chain,
+        recipient,
+        amount,
+      });
+
+      // If successful, log transfer into Supabase
+      if (result.success && result.signature) {
+        await this.logTransferRecord({
+          chain,
+          from_wallet: this.getTreasuryAddress(chain) || walletId,
+          to_wallet: recipient,
+          amount_native: amount,
+          signature: result.signature,
+          fee_type: "manual_withdrawal",
+          status: "confirmed",
+          reason: `Admin withdrawal executed by ${adminWallet}`,
+        });
+      }
+
+      return result;
+    }
+
+    // 2. Local Solana Keypair Fallback (Legacy)
+    if (chain === "solana" && this.solanaKeypair && this.solanaConnection) {
       try {
         const transaction = new Transaction().add(
           SystemProgram.transfer({
             fromPubkey: this.solanaKeypair.publicKey,
             toPubkey: new PublicKey(recipient),
-            lamports: amount * LAMPORTS_PER_SOL,
+            lamports: Math.floor(amount * LAMPORTS_PER_SOL),
           })
         );
 
-        const signature = await sendAndConfirmTransaction(
-          this.solanaConnection,
-          transaction,
-          [this.solanaKeypair]
-        );
+        const signature = await sendAndConfirmTransaction(this.solanaConnection, transaction, [this.solanaKeypair]);
+
+        await this.logTransferRecord({
+          chain: "solana",
+          from_wallet: this.solanaKeypair.publicKey.toBase58(),
+          to_wallet: recipient,
+          amount_native: amount,
+          signature,
+          fee_type: "manual_withdrawal",
+          status: "confirmed",
+          reason: `Admin withdrawal executed by ${adminWallet}`,
+        });
 
         return { success: true, signature };
       } catch (error: any) {
@@ -103,16 +170,51 @@ class TreasuryManager {
       }
     }
 
-    if (chain === "bsc") {
-      // BSC withdrawal logic using ethers.js or web3.js would be implemented here
-      return { success: false, error: "BSC withdrawal not yet implemented" };
-    }
-
-    return { success: false, error: "Unsupported chain" };
+    return { success: false, error: `No withdrawal signing provider configured for ${chain.toUpperCase()}` };
   }
 
+  /**
+   * Log transfer record into Supabase treasury_transfers
+   */
+  private async logTransferRecord(record: {
+    chain: string;
+    from_wallet: string;
+    to_wallet: string;
+    amount_native: number;
+    signature: string;
+    fee_type: string;
+    status: string;
+    reason?: string;
+  }) {
+    try {
+      const supabase = createAdminSupabase();
+      await supabase.from("treasury_transfers").insert({
+        ...record,
+        confirmed_at: new Date().toISOString(),
+      });
+    } catch (err) {
+      console.warn("[Treasury] Could not write to treasury_transfers table:", err);
+    }
+  }
+
+  /**
+   * Fetch transfer history from database
+   */
   public async getTransfersHistory(): Promise<any[]> {
-    // Audit log or on-chain history retrieval
+    try {
+      const supabase = createAdminSupabase();
+      const { data, error } = await supabase
+        .from("treasury_transfers")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(50);
+
+      if (!error && data) {
+        return data;
+      }
+    } catch (err) {
+      console.warn("[Treasury] Error reading transfers history:", err);
+    }
     return [];
   }
 }

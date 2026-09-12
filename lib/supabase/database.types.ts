@@ -470,6 +470,55 @@ export interface Database {
           }
         ];
       };
+
+      treasury_transfers: {
+        Row: {
+          id: string;
+          chain: string;
+          from_wallet: string;
+          to_wallet: string;
+          amount_native: number;
+          amount_lamports: number | null;
+          signature: string | null;
+          fee_type: string;
+          status: string;
+          reason: string | null;
+          error_message: string | null;
+          created_at: string;
+          confirmed_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          chain: string;
+          from_wallet: string;
+          to_wallet: string;
+          amount_native: number;
+          amount_lamports?: number | null;
+          signature?: string | null;
+          fee_type: string;
+          status?: string;
+          reason?: string | null;
+          error_message?: string | null;
+          created_at?: string;
+          confirmed_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          chain?: string;
+          from_wallet?: string;
+          to_wallet?: string;
+          amount_native?: number;
+          amount_lamports?: number | null;
+          signature?: string | null;
+          fee_type?: string;
+          status?: string;
+          reason?: string | null;
+          error_message?: string | null;
+          created_at?: string;
+          confirmed_at?: string | null;
+        };
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;

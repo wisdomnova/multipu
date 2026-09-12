@@ -43,11 +43,13 @@ export async function GET(request: Request) {
           configured: solanaConfigured,
           address: treasuryManager.getTreasuryAddress("solana"),
           balanceSol: solanaBalance,
+          provider: treasuryManager.getProvider("solana"),
         },
         bsc: {
           configured: bscConfigured,
           address: treasuryManager.getTreasuryAddress("bsc"),
           balanceBnb: bscBalance,
+          provider: treasuryManager.getProvider("bsc"),
         },
         transfers,
       },
@@ -75,7 +77,11 @@ export async function POST(request: Request) {
   }
 
   const body = await request.json();
-  const { action, chain, recipientAddress, amountNative } = body;
+  const action = body.action || "withdraw";
+  const chain = (body.chain || "solana").toLowerCase() as TreasuryChain;
+  const recipient = body.recipientAddress || body.recipient;
+  const rawAmount = body.amountNative ?? body.amountSol ?? body.amount;
+  const amount = typeof rawAmount === "string" ? parseFloat(rawAmount) : Number(rawAmount);
 
   // Only withdraw action is supported via POST
   if (action !== "withdraw") {
@@ -84,34 +90,36 @@ export async function POST(request: Request) {
 
   // Validate chain
   if (!["solana", "bsc"].includes(chain)) {
-    return Response.json({ error: "Invalid chain" }, { status: 400 });
+    return Response.json({ error: "Invalid chain. Must be solana or bsc" }, { status: 400 });
   }
 
   // Validate inputs
-  if (!recipientAddress || typeof recipientAddress !== "string") {
+  if (!recipient || typeof recipient !== "string" || !recipient.trim()) {
     return Response.json({ error: "Invalid recipient address" }, { status: 400 });
   }
 
-  if (!amountNative || typeof amountNative !== "number" || amountNative <= 0) {
-    return Response.json({ error: "Invalid amount" }, { status: 400 });
+  if (isNaN(amount) || amount <= 0) {
+    return Response.json({ error: "Invalid amount. Must be greater than 0" }, { status: 400 });
   }
 
   try {
-    // Execute withdrawal (server-side signed!)
+    // Execute withdrawal (server-side signed via Privy Server Wallets or Keypair)
     const result = await treasuryManager.executeWithdrawal(
-      chain as TreasuryChain,
-      recipientAddress,
-      amountNative,
-      "admin-password"
+      chain,
+      recipient.trim(),
+      amount,
+      "admin"
     );
 
+    const currencySymbol = chain === "solana" ? "SOL" : "BNB";
+
     if (!result.success) {
-      await logAdminAudit("admin-password", "suspicious_activity", {
+      await logAdminAudit("admin", "suspicious_activity", {
         action: "treasury_withdrawal_failed",
         chain,
         reason: result.error,
-        recipient: recipientAddress,
-        amount: amountNative,
+        recipient: recipient.trim(),
+        amount: `${amount} ${currencySymbol}`,
       }, ip);
 
       return Response.json(
@@ -121,22 +129,21 @@ export async function POST(request: Request) {
     }
 
     // Log successful withdrawal
-    const currencySymbol = chain === "solana" ? "SOL" : "BNB";
-    await logAdminAudit("admin-password", "update_launch_controls", {
+    await logAdminAudit("admin", "update_launch_controls", {
       action: "treasury_withdrawal",
       chain,
-      recipient: recipientAddress,
-      amount: `${amountNative} ${currencySymbol}`,
+      recipient: recipient.trim(),
+      amount: `${amount} ${currencySymbol}`,
       signature: result.signature,
     }, ip);
 
     return Response.json({
       ok: true,
       signature: result.signature,
-      message: `Withdrew ${amountNative} ${currencySymbol} to ${recipientAddress}`,
+      message: `Successfully transferred ${amount} ${currencySymbol} to ${recipient.trim()}`,
     });
-  } catch (err) {
+  } catch (err: any) {
     console.error("[API] Treasury POST error:", err);
-    return Response.json({ error: "Internal server error" }, { status: 500 });
+    return Response.json({ error: err.message || "Internal server error" }, { status: 500 });
   }
 }
