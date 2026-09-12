@@ -60,7 +60,11 @@ export function NotificationsPopup({
   // Handle outside click to close
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (popupRef.current && !popupRef.current.contains(e.target as Node)) {
+      const target = e.target as HTMLElement;
+      if (target.closest('[data-notification-trigger="true"]')) {
+        return;
+      }
+      if (popupRef.current && !popupRef.current.contains(target)) {
         onClose();
       }
     };
@@ -125,11 +129,11 @@ export function NotificationsPopup({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 sm:hidden"
+            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[95] sm:hidden"
             onClick={onClose}
           />
 
-          {/* Spacious Floating Popup Card */}
+          {/* Spacious Floating Responsive Popup Card with Full Opacity and High z-index */}
           <motion.div
             ref={popupRef}
             initial={{ opacity: 0, y: 8, scale: 0.98 }}
@@ -137,36 +141,37 @@ export function NotificationsPopup({
             exit={{ opacity: 0, y: 8, scale: 0.98 }}
             transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
             className={cn(
-              "fixed sm:absolute top-16 sm:top-full right-3 sm:right-0 sm:mt-2.5 z-50",
-              "w-[calc(100vw-24px)] sm:w-[500px] md:w-[540px] max-w-[560px]",
-              "bg-[#0c0c0e]/95 backdrop-blur-2xl",
-              "border border-white/[0.08]",
-              "shadow-[0_24px_60px_-12px_rgba(0,0,0,0.9)]",
+              "fixed sm:absolute top-18 sm:top-full inset-x-3 sm:inset-x-auto sm:right-0 sm:mt-2.5 z-[100]",
+              "w-auto sm:w-[500px] md:w-[540px] max-w-[560px]",
+              "bg-[#0c0c0e] opacity-100",
+              "border border-white/[0.12]",
+              "shadow-[0_24px_70px_rgba(0,0,0,0.95)]",
               "rounded-2xl sm:rounded-3xl",
-              "overflow-hidden flex flex-col font-[family-name:var(--font-geist-sans)]"
+              "overflow-hidden flex flex-col font-[family-name:var(--font-geist-sans)]",
+              "max-h-[calc(100dvh-5.5rem)] sm:max-h-[640px]"
             )}
           >
             {/* Header */}
-            <div className="px-6 pt-5 pb-3.5 border-b border-white/[0.05] flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <h3 className="text-base sm:text-lg font-bold text-white tracking-tight font-[family-name:var(--font-geist-sans)]">
+            <div className="px-4 sm:px-6 pt-4 sm:pt-5 pb-3 sm:pb-3.5 border-b border-white/[0.06] flex items-center justify-between">
+              <div className="flex items-center gap-2.5 sm:gap-3">
+                <h3 className="text-sm sm:text-lg font-bold text-white tracking-tight font-[family-name:var(--font-geist-sans)]">
                   Notifications
                 </h3>
                 {unreadCount > 0 && (
-                  <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold font-[family-name:var(--font-geist-mono)] bg-purple-500/15 text-purple-300">
+                  <span className="px-2 sm:px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-semibold font-[family-name:var(--font-geist-mono)] bg-purple-500/15 text-purple-300">
                     {unreadCount} unread
                   </span>
                 )}
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5 sm:gap-2">
                 {unreadCount > 0 && (
                   <button
                     onClick={markAllAsRead}
-                    className="text-xs font-medium text-neutral-400 hover:text-white transition-colors flex items-center gap-1.5 px-2.5 py-1 rounded-lg hover:bg-white/[0.05] cursor-pointer"
+                    className="text-[11px] sm:text-xs font-medium text-neutral-400 hover:text-white transition-colors flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1 rounded-lg hover:bg-white/[0.05] cursor-pointer"
                     title="Mark all as read"
                   >
-                    <IconChecks size={15} className="text-purple-400" />
+                    <IconChecks size={14} className="text-purple-400 sm:w-[15px] sm:h-[15px]" />
                     <span>Mark all read</span>
                   </button>
                 )}
@@ -196,11 +201,11 @@ export function NotificationsPopup({
             </div>
 
             {/* Filter Navigation Tabs */}
-            <div className="px-6 pt-3 pb-2.5 flex items-center gap-2 border-b border-white/[0.04] overflow-x-auto scrollbar-none">
+            <div className="px-4 sm:px-6 pt-2.5 sm:pt-3 pb-2 sm:pb-2.5 flex items-center gap-1.5 sm:gap-2 border-b border-white/[0.05] overflow-x-auto scrollbar-none touch-pan-x">
               <button
                 onClick={() => setActiveTab("ALL")}
                 className={cn(
-                  "px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap cursor-pointer",
+                  "px-3 sm:px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap cursor-pointer",
                   activeTab === "ALL"
                     ? "bg-white/[0.08] text-white font-semibold"
                     : "text-neutral-400 hover:text-neutral-200 hover:bg-white/[0.03]"
@@ -215,7 +220,7 @@ export function NotificationsPopup({
               <button
                 onClick={() => setActiveTab("UNREAD")}
                 className={cn(
-                  "px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer",
+                  "px-3 sm:px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer",
                   activeTab === "UNREAD"
                     ? "bg-white/[0.08] text-white font-semibold"
                     : "text-neutral-400 hover:text-neutral-200 hover:bg-white/[0.03]"
@@ -230,7 +235,7 @@ export function NotificationsPopup({
               <button
                 onClick={() => setActiveTab("LAUNCHES")}
                 className={cn(
-                  "px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap cursor-pointer",
+                  "px-3 sm:px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap cursor-pointer",
                   activeTab === "LAUNCHES"
                     ? "bg-white/[0.08] text-white font-semibold"
                     : "text-neutral-400 hover:text-neutral-200 hover:bg-white/[0.03]"
@@ -245,7 +250,7 @@ export function NotificationsPopup({
               <button
                 onClick={() => setActiveTab("SIGNALS")}
                 className={cn(
-                  "px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap cursor-pointer",
+                  "px-3 sm:px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap cursor-pointer",
                   activeTab === "SIGNALS"
                     ? "bg-white/[0.08] text-white font-semibold"
                     : "text-neutral-400 hover:text-neutral-200 hover:bg-white/[0.03]"
@@ -259,9 +264,9 @@ export function NotificationsPopup({
             </div>
 
             {/* Notification Items List - Clean, Icon-free & Spacious */}
-            <div className="max-h-[440px] sm:max-h-[480px] overflow-y-auto divide-y divide-white/[0.03] p-3 sm:p-4">
+            <div className="max-h-[calc(100dvh-13.5rem)] sm:max-h-[480px] overflow-y-auto divide-y divide-white/[0.03] p-2.5 sm:p-4">
               {filteredNotifications.length === 0 ? (
-                <div className="py-16 px-6 flex flex-col items-center justify-center text-center">
+                <div className="py-12 sm:py-16 px-4 sm:px-6 flex flex-col items-center justify-center text-center">
                   <h4 className="text-sm font-semibold text-white">All caught up</h4>
                   <p className="text-xs text-neutral-400 mt-1 max-w-[260px] leading-relaxed">
                     {activeTab === "UNREAD"
@@ -277,9 +282,9 @@ export function NotificationsPopup({
                     <div
                       onClick={() => markSingleAsRead(item.id)}
                       className={cn(
-                        "group relative flex items-start justify-between gap-4 p-4 rounded-xl transition-all cursor-pointer",
+                        "group relative flex items-start justify-between gap-3 sm:gap-4 p-3 sm:p-4 rounded-xl transition-all cursor-pointer",
                         isUnread
-                          ? "bg-white/[0.025] hover:bg-white/[0.05]"
+                          ? "bg-white/[0.035] hover:bg-white/[0.06]"
                           : "hover:bg-white/[0.02]"
                       )}
                     >
@@ -288,7 +293,7 @@ export function NotificationsPopup({
                         <div className="flex items-center gap-2">
                           <h4
                             className={cn(
-                              "text-sm font-semibold tracking-tight truncate",
+                              "text-xs sm:text-sm font-semibold tracking-tight truncate",
                               isUnread ? "text-white" : "text-neutral-300"
                             )}
                           >
@@ -296,14 +301,14 @@ export function NotificationsPopup({
                           </h4>
                         </div>
 
-                        <p className="text-xs text-neutral-400 leading-relaxed mt-1 font-[family-name:var(--font-geist-sans)]">
+                        <p className="text-[11px] sm:text-xs text-neutral-400 leading-relaxed mt-1 font-[family-name:var(--font-geist-sans)] line-clamp-2 sm:line-clamp-none">
                           {item.detail}
                         </p>
 
                         {/* Metric Badge */}
                         {item.metric && (
-                          <div className="mt-2 flex items-center gap-2">
-                            <span className="px-2 py-0.5 rounded text-[11px] font-mono font-medium bg-white/[0.04] text-neutral-300">
+                          <div className="mt-1.5 sm:mt-2 flex items-center gap-2">
+                            <span className="px-2 py-0.5 rounded text-[10px] sm:text-[11px] font-mono font-medium bg-white/[0.05] text-neutral-300">
                               {item.metric}
                             </span>
                           </div>
@@ -311,8 +316,8 @@ export function NotificationsPopup({
                       </div>
 
                       {/* Right Column: Time & Unread Status */}
-                      <div className="shrink-0 flex flex-col items-end gap-2 pt-0.5">
-                        <span className="text-xs text-neutral-400 font-mono whitespace-nowrap">
+                      <div className="shrink-0 flex flex-col items-end gap-1.5 sm:gap-2 pt-0.5">
+                        <span className="text-[10px] sm:text-xs text-neutral-400 font-mono whitespace-nowrap">
                           {item.timeAgo}
                         </span>
 
@@ -353,7 +358,7 @@ export function NotificationsPopup({
             </div>
 
             {/* Simple Minimalist Footer Bar */}
-            <div className="px-6 py-3 border-t border-white/[0.05] bg-white/[0.01] flex items-center justify-end text-xs">
+            <div className="px-4 sm:px-6 py-2.5 sm:py-3 border-t border-white/[0.06] bg-white/[0.01] flex items-center justify-end text-xs">
               <Link
                 href="/dashboard/explore"
                 onClick={onClose}

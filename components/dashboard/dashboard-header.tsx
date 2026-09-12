@@ -91,7 +91,12 @@ export function DashboardHeader({
 
   return (
     <>
-      <header className="sticky top-0 z-30 w-full h-16 flex-shrink-0 shrink-0 border-b border-white/[0.06] bg-[#121212]/95 backdrop-blur-md flex items-center">
+      <header
+        className={cn(
+          "sticky top-0 w-full h-16 flex-shrink-0 shrink-0 border-b border-white/[0.06] bg-[#121212]/95 backdrop-blur-md flex items-center transition-all",
+          isPopupOpen ? "z-[100]" : "z-30"
+        )}
+      >
         <div className="flex items-center justify-between w-full px-4 sm:px-8 gap-3">
           {/* Left section: Mobile hamburger & logo + Supported Chain Balances */}
           <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
@@ -162,6 +167,7 @@ export function DashboardHeader({
           <div className="relative flex items-center gap-2 flex-shrink-0">
             <button
               onClick={handleToggleNotifications}
+              data-notification-trigger="true"
               className={cn(
                 "relative p-2 rounded-xl transition-all cursor-pointer",
                 isPopupOpen

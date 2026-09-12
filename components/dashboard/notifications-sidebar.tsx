@@ -12,7 +12,7 @@ interface NotificationsSidebarProps {
  */
 export function NotificationsSidebar({ isOpen, onClose }: NotificationsSidebarProps) {
   return (
-    <div className="fixed top-16 right-4 z-[70]">
+    <div className="fixed top-16 right-4 z-[100]">
       <NotificationsPopup isOpen={isOpen} onClose={onClose} />
     </div>
   );
