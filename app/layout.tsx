@@ -63,14 +63,14 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <head>
-        <SitelinksJsonLd />
-      </head>
-      <body className="min-h-full flex flex-col bg-background text-foreground">
-        <Script
-          strategy="afterInteractive"
+        <script
+          defer
           src="https://triangle-analytics.vercel.app/tracker.js"
           data-site-id="tri_819416"
         />
+        <SitelinksJsonLd />
+      </head>
+      <body className="min-h-full flex flex-col bg-background text-foreground">
         {/* Google tag (gtag.js) */}
         <Script
           strategy="afterInteractive"
