@@ -64,6 +64,11 @@ export default function RootLayout({
     >
       <head>
         <SitelinksJsonLd />
+        <script
+          defer
+          src="https://triangle-analytics.vercel.app/tracker.js"
+          data-site-id="tri_819416"
+        />
       </head>
       <body className="min-h-full flex flex-col bg-background text-foreground">
         {/* Google tag (gtag.js) */}
