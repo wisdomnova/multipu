@@ -6,6 +6,9 @@ import Image from "next/image";
 import { motion } from "@/components/motion";
 import { useAuth } from "@/hooks/use-auth";
 import { SignInModal } from "@/components/signin-modal";
+import { useConfirm } from "@/components/ui/custom-confirm";
+import { toast } from "sonner";
+import { IconLogout } from "@tabler/icons-react";
 
 interface Particle {
   baseX: number;
@@ -34,6 +37,7 @@ export function HeroStatus() {
     isHovering: false,
   });
 
+  const confirm = useConfirm();
   const { session, signOut } = useAuth();
   const [showSignInModal, setShowSignInModal] = useState(false);
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
@@ -41,6 +45,31 @@ export function HeroStatus() {
   const shortAddress = session.isLoggedIn
     ? `${session.walletAddress.slice(0, 4)}...${session.walletAddress.slice(-4)}`
     : null;
+
+  const handleConfirmDisconnect = async () => {
+    setAccountMenuOpen(false);
+    const confirmed = await confirm({
+      title: "Disconnect Wallet",
+      message: "Are you sure you want to end your active session? You will need to sign in again to access the dashboard or launch tokens.",
+      variant: "danger",
+      confirmText: "Disconnect",
+      cancelText: "Stay Connected",
+      icon: <IconLogout size={22} className="text-rose-400" />,
+      details: session.isLoggedIn ? (
+        <div className="flex items-center justify-between font-mono text-xs">
+          <span className="text-neutral-400 capitalize">{session.walletKind}</span>
+          <span className="text-white">{session.walletAddress.slice(0, 6)}...{session.walletAddress.slice(-4)}</span>
+        </div>
+      ) : undefined,
+    });
+    if (!confirmed) return;
+    try {
+      await signOut();
+      toast.success("Wallet session ended");
+    } catch {
+      toast.error("Failed to disconnect");
+    }
+  };
 
   // Interactive background grain canvas with cursor physics & concentric wave distortion
   useEffect(() => {
@@ -403,10 +432,7 @@ export function HeroStatus() {
                           Open Dashboard
                         </Link>
                         <button
-                          onClick={async () => {
-                            setAccountMenuOpen(false);
-                            await signOut();
-                          }}
+                          onClick={handleConfirmDisconnect}
                           className="w-full px-2 py-1.5 text-xs font-mono text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg transition-colors text-left cursor-pointer"
                         >
                           Disconnect

@@ -19,6 +19,8 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+import { ConfirmProvider } from "@/components/ui/custom-confirm";
+
 export const metadata: Metadata = {
   metadataBase: new URL("https://multipu.fun"),
   title: "Multipu - Deploy Once, Launch Everywhere",
@@ -82,7 +84,9 @@ export default function RootLayout({
           }}
         />
         <SolanaProvider>
-          <AuthProvider>{children}</AuthProvider>
+          <AuthProvider>
+            <ConfirmProvider>{children}</ConfirmProvider>
+          </AuthProvider>
         </SolanaProvider>
         <Toaster
           theme="dark"

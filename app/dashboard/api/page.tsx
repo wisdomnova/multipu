@@ -16,6 +16,7 @@ import {
 import { fadeUp, stagger } from "@/components/motion";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
+import { useConfirm } from "@/components/ui/custom-confirm";
 
 interface ApiKeyData {
   id: string;
@@ -27,6 +28,7 @@ interface ApiKeyData {
 
 export default function ApiKeysPage() {
   const { session } = useAuth();
+  const confirm = useConfirm();
   const [keys, setKeys] = useState<ApiKeyData[]>([]);
   const [loading, setLoading] = useState(true);
   const [newKeyName, setNewKeyName] = useState("");
@@ -89,9 +91,14 @@ export default function ApiKeysPage() {
   };
 
   const handleRevokeKey = async (id: string) => {
-    const confirmed = confirm(
-      "Are you sure you want to revoke this API key? This action is permanent and cannot be undone."
-    );
+    const keyToRevoke = keys.find((k) => k.id === id);
+    const confirmed = await confirm({
+      title: "Revoke API Key",
+      message: `Are you sure you want to revoke "${keyToRevoke?.name || "this API key"}"? Any automated trading bots or MCP sidecars using this key will immediately lose access.`,
+      variant: "danger",
+      confirmText: "Revoke Key",
+      cancelText: "Keep Active",
+    });
     if (!confirmed) return;
 
     try {

@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { IconX, IconLogout, IconLoader2 } from "@tabler/icons-react";
-import { scaleIn } from "@/components/motion";
 
 interface DisconnectModalProps {
   isOpen: boolean;
@@ -66,52 +65,46 @@ export function DisconnectModal({
 
           {/* Modal Card */}
           <motion.div
-            variants={scaleIn}
-            initial="hidden"
-            animate="visible"
-            exit="hidden"
-            className="relative z-10 w-full max-w-md border border-border bg-[#0a0a0a] rounded-sm p-6 shadow-2xl"
+            initial={{ opacity: 0, scale: 0.95, y: 8 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 8 }}
+            transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+            className="relative z-10 w-full max-w-[420px] bg-[#0c0c0e]/95 backdrop-blur-2xl border border-white/[0.08] shadow-[0_24px_60px_-12px_rgba(0,0,0,0.9)] rounded-2xl sm:rounded-3xl p-6 sm:p-7 overflow-hidden font-[family-name:var(--font-geist-sans)] select-none"
           >
             {/* Close Button */}
             <button
               onClick={onClose}
               disabled={isDisconnecting}
-              className="absolute top-4 right-4 p-1.5 text-text-dim hover:text-text-primary hover:bg-white/[0.05] rounded-sm transition-colors cursor-pointer disabled:opacity-50"
+              className="absolute top-5 right-5 p-1.5 text-neutral-400 hover:text-white hover:bg-white/[0.06] rounded-lg transition-colors cursor-pointer disabled:opacity-50"
               aria-label="Close modal"
             >
-              <IconX size={18} />
+              <IconX size={16} />
             </button>
 
-            {/* Header */}
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-9 h-9 rounded-sm bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-400">
-                <IconLogout size={18} />
-              </div>
-              <div>
-                <h3 className="text-base font-semibold text-text-primary tracking-tight">
-                  Disconnect Session
-                </h3>
-                <p className="text-xs text-text-dim">
-                  Confirm ending your active session
-                </p>
-              </div>
+            {/* Header Icon */}
+            <div className="w-12 h-12 rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-400 mb-4">
+              <IconLogout size={22} />
             </div>
 
+            <h3 className="text-base sm:text-lg font-bold text-white tracking-tight leading-snug">
+              Disconnect Session
+            </h3>
+
             {/* Content & Account Summary */}
-            <p className="text-xs text-text-secondary leading-relaxed mb-4">
+            <p className="text-xs sm:text-sm text-neutral-400 leading-relaxed mt-2 font-[family-name:var(--font-geist-sans)]">
               Are you sure you want to disconnect? Your session will be invalidated and you will be redirected to the home page.
             </p>
 
             {formattedAddress && (
-              <div className="flex items-center justify-between p-3 bg-white/[0.02] border border-border rounded-sm mb-6">
+              <div className="flex items-center justify-between p-3 bg-white/[0.03] border border-white/[0.06] rounded-xl my-4">
                 <div className="flex items-center gap-2 min-w-0">
-                  <div className="w-2 h-2 rounded-full bg-success flex-shrink-0" />
-                  <span className="font-mono text-xs text-text-primary truncate">
+                  <div className="w-2 h-2 rounded-full bg-emerald-400 flex-shrink-0 animate-pulse" />
+                  <span className="font-mono text-xs text-white truncate font-medium">
                     {formattedAddress}
                   </span>
                 </div>
                 {walletKind && (
-                  <span className="font-mono text-[10px] text-text-muted uppercase tracking-wider bg-white/[0.04] px-2 py-0.5 rounded-sm">
+                  <span className="font-mono text-[10px] text-neutral-400 uppercase tracking-wider bg-white/[0.04] px-2 py-0.5 rounded-md border border-white/[0.04]">
                     {walletKind}
                   </span>
                 )}
@@ -119,12 +112,12 @@ export function DisconnectModal({
             )}
 
             {/* Actions */}
-            <div className="flex items-center justify-end gap-2.5">
+            <div className="mt-6 flex items-center justify-end gap-2.5">
               <button
                 type="button"
                 onClick={onClose}
                 disabled={isDisconnecting}
-                className="px-4 py-2 text-xs font-mono border border-border text-text-secondary hover:text-text-primary hover:bg-white/[0.04] rounded-sm transition-colors cursor-pointer disabled:opacity-50"
+                className="px-4 py-2.5 rounded-xl border border-white/[0.08] bg-white/[0.03] hover:bg-white/[0.06] text-neutral-300 hover:text-white font-medium text-xs transition-colors cursor-pointer disabled:opacity-50 font-[family-name:var(--font-geist-sans)]"
               >
                 Cancel
               </button>
@@ -132,11 +125,11 @@ export function DisconnectModal({
                 type="button"
                 onClick={handleConfirm}
                 disabled={isDisconnecting}
-                className="inline-flex items-center gap-2 px-4 py-2 text-xs font-mono font-semibold bg-red-500/15 hover:bg-red-500/25 text-red-400 border border-red-500/30 rounded-sm transition-colors cursor-pointer disabled:opacity-50"
+                className="px-4.5 py-2.5 rounded-xl font-semibold text-xs bg-rose-600 hover:bg-rose-500 text-white shadow-lg shadow-rose-600/20 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer disabled:opacity-50 flex items-center gap-1.5 font-[family-name:var(--font-geist-sans)]"
               >
                 {isDisconnecting ? (
                   <>
-                    <IconLoader2 size={14} className="animate-spin" />
+                    <IconLoader2 size={13} className="animate-spin" />
                     Disconnecting...
                   </>
                 ) : (

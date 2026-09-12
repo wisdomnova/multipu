@@ -22,6 +22,7 @@ import { ListSkeleton } from "@/components/skeleton";
 import { DataError } from "@/components/error-boundary";
 import { toast } from "sonner";
 import { useState, useMemo, useCallback } from "react";
+import { useConfirm } from "@/components/ui/custom-confirm";
 
 interface Token {
   id: string;
@@ -57,6 +58,7 @@ function timeAgo(dateStr: string) {
 }
 
 export default function TokensPage() {
+  const confirm = useConfirm();
   const { data, loading, error, refetch } =
     useApi<TokensResponse>("/api/tokens");
   const [search, setSearch] = useState("");
@@ -176,7 +178,14 @@ export default function TokensPage() {
   };
 
   const handleDeleteDraft = async (tokenId: string) => {
-    if (!confirm("Are you sure you want to delete this draft token?")) return;
+    const ok = await confirm({
+      title: "Delete Draft Token",
+      message: "Are you sure you want to delete this draft token? Unconfirmed deployment configurations will be permanently removed.",
+      variant: "danger",
+      confirmText: "Delete Draft",
+      cancelText: "Keep Token",
+    });
+    if (!ok) return;
     setIsDeleting(tokenId);
     try {
       const res = await fetch(`/api/tokens?id=${tokenId}`, {

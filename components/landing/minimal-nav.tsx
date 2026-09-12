@@ -6,6 +6,9 @@ import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
 import { SignInModal } from "@/components/signin-modal";
+import { useConfirm } from "@/components/ui/custom-confirm";
+import { toast } from "sonner";
+import { IconLogout } from "@tabler/icons-react";
 
 const navLinks = [
   { href: "#hero", label: "Overview" },
@@ -15,6 +18,7 @@ const navLinks = [
 ];
 
 export function MinimalNav() {
+  const confirm = useConfirm();
   const { session, signOut } = useAuth();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -30,6 +34,32 @@ export function MinimalNav() {
   const shortAddress = session.isLoggedIn
     ? `${session.walletAddress.slice(0, 4)}...${session.walletAddress.slice(-4)}`
     : null;
+
+  const handleConfirmDisconnect = async () => {
+    setAccountMenuOpen(false);
+    setMobileOpen(false);
+    const confirmed = await confirm({
+      title: "Disconnect Wallet",
+      message: "Are you sure you want to end your active session? You will need to sign in again to access the dashboard or launch tokens.",
+      variant: "danger",
+      confirmText: "Disconnect",
+      cancelText: "Stay Connected",
+      icon: <IconLogout size={22} className="text-rose-400" />,
+      details: session.isLoggedIn ? (
+        <div className="flex items-center justify-between font-mono text-xs">
+          <span className="text-neutral-400 capitalize">{session.walletKind}</span>
+          <span className="text-white">{session.walletAddress.slice(0, 6)}...{session.walletAddress.slice(-4)}</span>
+        </div>
+      ) : undefined,
+    });
+    if (!confirmed) return;
+    try {
+      await signOut();
+      toast.success("Wallet session ended");
+    } catch {
+      toast.error("Failed to disconnect");
+    }
+  };
 
   return (
     <>
@@ -110,10 +140,7 @@ export function MinimalNav() {
                             Open Dashboard
                           </Link>
                           <button
-                            onClick={async () => {
-                              setAccountMenuOpen(false);
-                              await signOut();
-                            }}
+                            onClick={handleConfirmDisconnect}
                             className="w-full px-3 py-2 text-xs font-mono text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-xl transition-colors text-left cursor-pointer"
                           >
                             Disconnect
@@ -182,10 +209,7 @@ export function MinimalNav() {
                     <span className="font-mono text-xs text-white">{shortAddress}</span>
                   </div>
                   <button
-                    onClick={async () => {
-                      setMobileOpen(false);
-                      await signOut();
-                    }}
+                    onClick={handleConfirmDisconnect}
                     className="text-xs font-mono text-red-400 hover:text-red-300 cursor-pointer"
                   >
                     Disconnect

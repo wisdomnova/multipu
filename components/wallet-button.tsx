@@ -7,6 +7,7 @@ import { IconWallet, IconLogout, IconLoader2, IconChevronDown } from "@tabler/ic
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { SignInModal } from "@/components/signin-modal";
+import { useConfirm } from "@/components/ui/custom-confirm";
  
 /**
  * Wallet connect / auth button.
@@ -17,6 +18,7 @@ import { SignInModal } from "@/components/signin-modal";
  * 3. Signed in → shows truncated address with dropdown to disconnect
  */
 export function WalletButton({ className }: { className?: string }) {
+  const confirm = useConfirm();
   const { select, wallets, publicKey, connected, connecting, disconnect } =
     useWallet();
   const { session, isLoading, signIn, signOut, evmAddress, evmConnected, connectEvmWallet } = useAuth();
@@ -84,9 +86,29 @@ export function WalletButton({ className }: { className?: string }) {
               <button
                 onClick={async () => {
                   setShowMenu(false);
-                  await signOut();
+                  const ok = await confirm({
+                    title: "Disconnect Session",
+                    message: "Are you sure you want to end your active wallet session? You will need to reconnect to execute trades or multi-chain launches.",
+                    variant: "danger",
+                    confirmText: "Disconnect",
+                    cancelText: "Stay Connected",
+                    icon: <IconLogout size={22} className="text-rose-400" />,
+                    details: (
+                      <div className="flex items-center justify-between font-mono text-xs">
+                        <span className="text-neutral-400 capitalize">{session.walletKind}</span>
+                        <span className="text-white">{addr.slice(0, 6)}...{addr.slice(-4)}</span>
+                      </div>
+                    ),
+                  });
+                  if (!ok) return;
+                  try {
+                    await signOut();
+                    toast.success("Wallet session ended");
+                  } catch {
+                    toast.error("Failed to disconnect");
+                  }
                 }}
-                className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-text-secondary hover:text-text-primary hover:bg-elevated transition-colors"
+                className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-text-secondary hover:text-text-primary hover:bg-elevated transition-colors cursor-pointer"
               >
                 <IconLogout size={14} />
                 Disconnect
