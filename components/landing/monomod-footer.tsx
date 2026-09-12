@@ -59,7 +59,6 @@ export function MonomodFooter() {
             </div>
 
             <div className="mt-6 sm:mt-8 flex items-center gap-2 text-xs font-mono text-neutral-500">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
               <span>Solana, BNB, Robinhood live</span>
             </div>
           </div>
