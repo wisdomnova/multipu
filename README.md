@@ -1,80 +1,111 @@
 # Multipu
 
-Multipu is a multi-chain token launch orchestrator and real-time DEX trading terminal: create a token once, launch across multiple platforms (Solana, BNB Chain, Robinhood), trade live meme tokens, and monitor multi-chain balances from a unified dashboard.
+Multipu is an open-source multi-chain token launch orchestrator, algorithmic trading terminal, and real-time decentralized exchange interface. It enables creators and traders to deploy once, launch across multiple platforms simultaneously, monitor live market signals, and manage cross-chain liquidity from a unified dashboard.
+
+---
 
 ## Features
 
-- **Multi-Chain Token Orchestrator**: One-click dispatch to launchpads across Solana (Pump.fun, Raydium, Meteora, Bags), BNB Chain (Four.meme), and Robinhood Chain (Pons).
-- **Terminal Trading & Live Explorer**: Real-time DEX data, bonding curve progress tracker, candlestick charts, and instant snipes.
-- **Unified Multi-Chain Balances**: Live balance monitoring for Solana (SOL), BNB Chain (BNB), and Robinhood Chain (ETH) directly on the dashboard header.
-- **Developer API & Webhooks**: Programmatic token deployments, portfolio tracking, and analytics endpoints.
-- **Web3 Wallet Sign-In**: Non-custodial authentication with Sign-In with Solana (SIWS) and Sign-In with EVM / Binance (SIWB).
+- **Multi-Chain Token Orchestrator**: Deploy bonding curves and liquidity pools simultaneously across Solana (Pump.fun, Meteora, Bags), BNB Chain (Four.meme), and Robinhood Chain (Pons).
+- **Trading Terminal & DEX Explorer**: Real-time bonding curve trackers, candlestick charts, liquidity monitors, and order execution.
+- **Autonomous Strategy Signals**: Algorithmic momentum scoring, volume surge alerts, and KeeperHub cross-chain arbitrage signals.
+- **Unified Multi-Chain Balances**: Live balance monitoring for Solana (SOL), BNB Chain (BNB), and Robinhood Chain (ETH).
+- **Non-Custodial Web3 Authentication**: Sign-In with Solana (SIWS) and Sign-In with Blockchain (SIWB) session verification via cryptographically signed challenges.
+- **Programmatic Treasury Management**: Dual-chain automated fee routing powered by Privy Server Wallets without storing raw private keys on the server.
+- **Developer API & MCP Integration**: REST endpoints and Model Context Protocol sidecars for autonomous agent trading and portfolio automation.
 
-## Supported Chains & Launchpads
+---
 
-| Chain | Native Gas | Supported Protocols |
+## Supported Ecosystems
+
+| Network | Native Asset | Supported Protocols |
 | :--- | :--- | :--- |
-| **Solana** | `SOL` | Pump.fun, Raydium, Meteora, Bags |
-| **BNB Chain (BSC)** | `BNB` | Four.meme, PancakeSwap |
+| **Solana** | `SOL` | Pump.fun, Meteora, Bags, Raydium |
+| **BNB Smart Chain (BSC)** | `BNB` | Four.meme, PancakeSwap |
 | **Robinhood Chain** | `ETH` | Pons DEX & Launchpad |
 
-## Setup & Local Development
+---
 
-1. Install dependencies:
+## Architecture Overview
+
+```
+multipu/
+├── app/                  # Next.js App Router routes & API endpoints
+│   ├── admin/            # Admin controls, launchpad settings & treasury dashboard
+│   ├── api/              # Secure REST APIs (auth, launches, trades, treasury, signals)
+│   ├── dashboard/        # Main trading terminal, explorer, token manager & API keys
+│   └── launch/           # Unified multi-chain token launch wizard
+├── components/           # UI components, modals, canvas hero & design system
+├── hooks/                # React hooks for auth, wallet balances, and API queries
+├── lib/                  # Core modules (Solana/EVM clients, Treasury, Privy, Supabase)
+└── sql/                  # PostgreSQL / Supabase schema definitions
+```
+
+---
+
+## Quick Start
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/wisdomnova/multipu.git
+cd multipu
+```
+
+### 2. Install dependencies
 
 ```bash
 npm install
 ```
 
-2. Copy `.env.example` to `.env.local` and fill in secrets:
+### 3. Configure environment variables
+
+Copy the template configuration file:
 
 ```bash
 cp .env.example .env.local
 ```
 
-3. Run `sql/schema.sql` in Supabase SQL Editor.
+Open `.env.local` and configure your credentials:
+- `SESSION_SECRET`: A secure random 32+ character string.
+- `NEXT_PUBLIC_SUPABASE_URL` & `NEXT_PUBLIC_SUPABASE_ANON_KEY`: Your Supabase database credentials.
+- `SUPABASE_SERVICE_KEY`: Service role key for admin operations.
+- `PRIVY_APP_ID` & `PRIVY_APP_SECRET`: For programmatic treasury management.
 
-4. Start the development server:
+### 4. Initialize the database
+
+Execute `sql/schema.sql` inside your Supabase project's SQL Editor to set up the necessary tables, indexes, and row-level policies.
+
+### 5. Run the development server
 
 ```bash
 npm run dev
 ```
 
-## Environment Safety Controls
+The application will be available at `http://localhost:3000`.
 
-Multipu ships with a mainnet safety lock for testnet rollout phases:
+---
 
-- `NEXT_PUBLIC_SOLANA_NETWORK`: Solana cluster (`devnet`, `testnet`, `mainnet-beta`)
-- `NEXT_PUBLIC_APP_PHASE`: deployment phase (`testnet` or `mainnet`)
-- `NEXT_PUBLIC_ENABLE_MAINNET_LAUNCHES`: client-side gate for launch UI
-- `ENABLE_MAINNET_LAUNCHES`: server-side hard gate for launch APIs
-- `ENABLE_EVM_LAUNCH_ADAPTERS`: server-side gate for EVM launch verification paths
-- `NEXT_PUBLIC_ENABLE_EVM_LAUNCH_ADAPTERS`: client-side gate for EVM launch execution
-- `NEXT_PUBLIC_BSC_RPC_URL`: BNB Smart Chain RPC endpoint
-- `NEXT_PUBLIC_ROBINHOOD_RPC_URL`: Robinhood Chain RPC endpoint
-- `NEXT_PUBLIC_FOURMEME_LAUNCHER_ADDRESS`: launcher contract used by wallet tx for Four.meme
-- `ADMIN_WALLETS`: comma-separated wallet addresses allowed to access admin controls
+## Production Build
 
-Mainnet launches are only allowed when both phase and gate flags are explicitly enabled.
+To test and produce an optimized production bundle:
 
-## Environment Data Isolation
+```bash
+npm run build
+npm run start
+```
 
-`tokens`, `launches`, and `earnings` are scoped by `network` and `app_phase`. API reads/writes are filtered by current runtime scope, so testnet and mainnet records stay separated.
-
-## Admin Controls API
-
-Use `GET` / `PATCH` on `/api/admin/settings` (admin wallets only) to manage launch controls:
-
-- Global pause (`launchesPaused`)
-- Allowlist mode (`allowlistMode`, `allowedWallets`)
-- Per-launchpad enablement (`launchpadsEnabled`)
+---
 
 ## Security Model
 
-- Wallet signature authentication (nonce challenge + verification)
-- SIWS (`/api/auth/challenge` + `/api/auth/verify`) and SIWB backend (`/api/auth/challenge-evm` + `/api/auth/verify-evm`)
-- EVM launch verification (signer, target contract, and function selector)
-- HttpOnly encrypted sessions (`iron-session`)
-- Same-origin validation on mutating API routes
-- IP rate limiting
-- On-chain transaction verification before token/launch state is marked successful
+- **Non-Custodial Keys**: No private keys are held for user accounts. Transactions are signed directly by connected wallets or isolated inside secure MPC hardware enclaves (Privy).
+- **Cryptographic Challenge-Response**: Nonce generation on server, wallet signature verification, and httpOnly encrypted session cookies (`iron-session`).
+- **CSRF & Rate Limiting**: Request origin validation and IP-based rate limiting on mutating API endpoints.
+- **Rollout Phase Gates**: Explicit network and environment gates (`testnet` vs `mainnet`) to prevent accidental mainnet transactions during development.
+
+---
+
+## License
+
+This project is licensed under the MIT License.
