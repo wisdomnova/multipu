@@ -14,21 +14,6 @@ import type { NextRequest } from "next/server";
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // ─── Admin Guard (password session cookie) ─────────
-  const isAdminLogin = pathname === "/admin/login";
-  const isAdminArea = pathname.startsWith("/admin");
-  const adminSessionCookie = request.cookies.get("multipu_admin_session");
-
-  if (isAdminArea && !isAdminLogin && !adminSessionCookie?.value) {
-    const loginUrl = new URL("/admin/login", request.url);
-    return NextResponse.redirect(loginUrl);
-  }
-
-  if (isAdminLogin && adminSessionCookie?.value) {
-    const adminUrl = new URL("/admin", request.url);
-    return NextResponse.redirect(adminUrl);
-  }
-
   // ─── Request Tracing & Security Headers ───────────
   const response = NextResponse.next();
 
