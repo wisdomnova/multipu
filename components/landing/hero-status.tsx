@@ -316,7 +316,7 @@ export function HeroStatus() {
   }, []);
 
   return (
-    <section className="relative w-full pt-2 sm:pt-4 pb-12 sm:pb-16 px-3 sm:px-6 md:px-10 overflow-hidden">
+    <section id="hero" className="relative w-full pt-2 sm:pt-4 pb-12 sm:pb-16 px-3 sm:px-6 md:px-10 overflow-hidden scroll-mt-24">
       {/* Hero Framed Stage Container */}
       <div
         ref={containerRef}
@@ -345,17 +345,17 @@ export function HeroStatus() {
 
           {/* Nav Links */}
           <nav className="hidden md:flex items-center gap-8 lg:gap-10 text-xs sm:text-sm font-medium text-neutral-400">
-            <Link href="/launch" className="hover:text-white transition-colors">
-              Launch
+            <Link href="#hero" className="hover:text-white transition-colors">
+              Overview
             </Link>
-            <Link href="/dashboard/explore" className="hover:text-white transition-colors">
-              Trade
+            <Link href="#architecture" className="hover:text-white transition-colors">
+              Architecture
             </Link>
-            <Link href="/dashboard/launches" className="hover:text-white transition-colors">
+            <Link href="#launchpads" className="hover:text-white transition-colors">
               Launchpads
             </Link>
-            <Link href="/dashboard/api" className="hover:text-white transition-colors">
-              Docs
+            <Link href="#terminal" className="hover:text-white transition-colors">
+              Terminal
             </Link>
           </nav>
 

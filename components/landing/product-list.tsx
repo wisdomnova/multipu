@@ -37,11 +37,12 @@ const launchpads = [
 export function ProductList() {
   return (
     <motion.section
+      id="launchpads"
       initial="hidden"
       whileInView="visible"
       viewport={{ once: true, margin: "-80px" }}
       variants={stagger}
-      className="py-16 sm:py-24 md:py-36 px-4 sm:px-6 md:px-12 max-w-[1360px] mx-auto"
+      className="py-16 sm:py-24 md:py-36 px-4 sm:px-6 md:px-12 max-w-[1360px] mx-auto scroll-mt-24"
     >
       {/* Lilac product list container */}
       <motion.div variants={fadeUp} className="rounded-3xl sm:rounded-[40px] bg-[#aba6d8] text-[#140e28] p-6 sm:p-10 md:p-14 lg:p-20 overflow-hidden">

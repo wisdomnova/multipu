@@ -6,11 +6,12 @@ import { motion, fadeUp, stagger, scaleIn } from "@/components/motion";
 export function KeyboardTerminal() {
   return (
     <motion.section
+      id="terminal"
       initial="hidden"
       whileInView="visible"
       viewport={{ once: true, margin: "-80px" }}
       variants={stagger}
-      className="py-16 sm:py-24 md:py-36 px-4 sm:px-6 md:px-12 max-w-[1360px] mx-auto"
+      className="py-16 sm:py-24 md:py-36 px-4 sm:px-6 md:px-12 max-w-[1360px] mx-auto scroll-mt-24"
     >
       {/* Outer Forest Green Container matching Screenshot 3 */}
       <motion.div variants={fadeUp} className="rounded-3xl sm:rounded-[40px] bg-[#1a2d24] text-white p-6 sm:p-10 md:p-14 lg:p-20 overflow-hidden flex flex-col items-center">

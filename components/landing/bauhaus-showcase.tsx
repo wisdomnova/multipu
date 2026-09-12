@@ -8,11 +8,12 @@ import { motion, fadeUp, stagger, scaleIn, slideInLeft } from "@/components/moti
 export function BauhausShowcase() {
   return (
     <motion.section
+      id="architecture"
       initial="hidden"
       whileInView="visible"
       viewport={{ once: true, margin: "-80px" }}
       variants={stagger}
-      className="py-12 sm:py-16 md:py-24 px-4 sm:px-6 md:px-12 max-w-[1360px] mx-auto"
+      className="py-12 sm:py-16 md:py-24 px-4 sm:px-6 md:px-12 max-w-[1360px] mx-auto scroll-mt-24"
     >
       {/* Outer rounded dark canvas */}
       <motion.div variants={fadeUp} className="relative w-full rounded-3xl sm:rounded-[40px] bg-neutral-950 p-6 sm:p-10 md:p-12 lg:p-16 overflow-hidden">

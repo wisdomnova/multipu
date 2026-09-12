@@ -8,10 +8,10 @@ import { useAuth } from "@/hooks/use-auth";
 import { SignInModal } from "@/components/signin-modal";
 
 const navLinks = [
-  { href: "/launch", label: "Launch" },
-  { href: "/dashboard/explore", label: "Trade" },
-  { href: "/dashboard/launches", label: "Launchpads" },
-  { href: "/dashboard/api", label: "Docs" },
+  { href: "#hero", label: "Overview" },
+  { href: "#architecture", label: "Architecture" },
+  { href: "#launchpads", label: "Launchpads" },
+  { href: "#terminal", label: "Terminal" },
 ];
 
 export function MinimalNav() {
@@ -57,10 +57,9 @@ export function MinimalNav() {
                 <Link
                   key={link.label}
                   href={link.href}
-                  className="text-sm font-medium text-neutral-400 hover:text-white transition-colors flex items-center gap-1"
+                  className="text-sm font-medium text-neutral-400 hover:text-white transition-colors"
                 >
-                  <span>{link.label}</span>
-                  <span className="text-[10px] text-neutral-500 font-mono">⌵</span>
+                  {link.label}
                 </Link>
               ))}
             </div>
