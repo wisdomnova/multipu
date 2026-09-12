@@ -32,15 +32,25 @@ class PrivyTreasuryClient {
     this.appSecret = process.env.PRIVY_APP_SECRET || null;
   }
 
+  public getAppId(): string | null {
+    return process.env.PRIVY_APP_ID || this.appId;
+  }
+
+  public getAppSecret(): string | null {
+    return process.env.PRIVY_APP_SECRET || this.appSecret;
+  }
+
   public isConfigured(): boolean {
-    return !!(this.appId && this.appSecret);
+    return !!(this.getAppId() && this.getAppSecret());
   }
 
   private getAuthHeader(): string {
-    if (!this.appId || !this.appSecret) {
+    const id = this.getAppId();
+    const secret = this.getAppSecret();
+    if (!id || !secret) {
       throw new Error("Privy credentials not configured");
     }
-    const token = Buffer.from(`${this.appId}:${this.appSecret}`).toString("base64");
+    const token = Buffer.from(`${id}:${secret}`).toString("base64");
     return `Basic ${token}`;
   }
 
@@ -54,7 +64,7 @@ class PrivyTreasuryClient {
       const res = await fetch(`${this.baseUrl}/v1/wallets/${walletId}`, {
         method: "GET",
         headers: {
-          "privy-app-id": this.appId!,
+          "privy-app-id": this.getAppId()!,
           Authorization: this.getAuthHeader(),
           "Content-Type": "application/json",
         },
@@ -105,7 +115,7 @@ class PrivyTreasuryClient {
         const res = await fetch(`${this.baseUrl}/v1/wallets/${params.walletId}/transfer`, {
           method: "POST",
           headers: {
-            "privy-app-id": this.appId!,
+            "privy-app-id": this.getAppId()!,
             Authorization: this.getAuthHeader(),
             "Content-Type": "application/json",
           },
@@ -154,7 +164,7 @@ class PrivyTreasuryClient {
         const res = await fetch(`${this.baseUrl}/v1/wallets/${params.walletId}/rpc`, {
           method: "POST",
           headers: {
-            "privy-app-id": this.appId!,
+            "privy-app-id": this.getAppId()!,
             Authorization: this.getAuthHeader(),
             "Content-Type": "application/json",
           },

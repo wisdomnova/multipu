@@ -52,17 +52,46 @@ class TreasuryManager {
     }
   }
 
+  public getSolanaTreasuryAddress(): string | null {
+    return process.env.TREASURY_SOLANA_WALLET_ADDRESS || this.solanaTreasuryAddress;
+  }
+
+  public getBscTreasuryAddress(): string | null {
+    return process.env.TREASURY_BSC_WALLET_ADDRESS || this.bscTreasuryAddress;
+  }
+
+  public getPrivySolanaWalletId(): string | null {
+    return process.env.PRIVY_SOLANA_WALLET_ID || this.privySolanaWalletId;
+  }
+
+  public getPrivyBscWalletId(): string | null {
+    return process.env.PRIVY_BSC_WALLET_ID || this.privyBscWalletId;
+  }
+
+  public getSolanaConnection(): Connection {
+    if (!this.solanaConnection) {
+      const rpcUrl =
+        process.env.NEXT_PUBLIC_SOLANA_RPC_URL ||
+        process.env.SOLANA_RPC_URL ||
+        (process.env.NEXT_PUBLIC_SOLANA_NETWORK === "mainnet-beta"
+          ? "https://api.mainnet-beta.solana.com"
+          : "https://api.devnet.solana.com");
+      this.solanaConnection = new Connection(rpcUrl, "confirmed");
+    }
+    return this.solanaConnection;
+  }
+
   public isConfigured(chain: TreasuryChain): boolean {
     if (chain === "solana") {
       // Configured if Privy server wallet ID exists OR local keypair exists
-      const hasPrivy = privyTreasuryClient.isConfigured() && !!this.privySolanaWalletId;
-      const hasKeypair = !!(this.solanaKeypair && this.solanaTreasuryAddress);
+      const hasPrivy = privyTreasuryClient.isConfigured() && !!this.getPrivySolanaWalletId();
+      const hasKeypair = !!(this.solanaKeypair && this.getSolanaTreasuryAddress());
       return hasPrivy || hasKeypair;
     }
 
     if (chain === "bsc") {
-      // Configured if Privy BSC wallet ID and address exist
-      return privyTreasuryClient.isConfigured() && !!this.privyBscWalletId;
+      // Configured if Privy BSC wallet ID exists
+      return privyTreasuryClient.isConfigured() && !!this.getPrivyBscWalletId();
     }
 
     return false;
@@ -70,31 +99,38 @@ class TreasuryManager {
 
   public getProvider(chain: TreasuryChain): "privy" | "keypair" | "none" {
     if (chain === "solana") {
-      if (privyTreasuryClient.isConfigured() && this.privySolanaWalletId) return "privy";
+      if (privyTreasuryClient.isConfigured() && this.getPrivySolanaWalletId()) return "privy";
       if (this.solanaKeypair) return "keypair";
     }
     if (chain === "bsc") {
-      if (privyTreasuryClient.isConfigured() && this.privyBscWalletId) return "privy";
+      if (privyTreasuryClient.isConfigured() && this.getPrivyBscWalletId()) return "privy";
     }
     return "none";
   }
 
   public getTreasuryAddress(chain: TreasuryChain): string | null {
-    return chain === "solana" ? this.solanaTreasuryAddress : this.bscTreasuryAddress;
+    return chain === "solana" ? this.getSolanaTreasuryAddress() : this.getBscTreasuryAddress();
   }
 
   public async getTreasuryBalance(chain: TreasuryChain): Promise<number> {
     try {
-      if (chain === "solana" && this.solanaTreasuryAddress && this.solanaConnection) {
-        const balanceLamports = await this.solanaConnection.getBalance(new PublicKey(this.solanaTreasuryAddress));
-        return balanceLamports / LAMPORTS_PER_SOL;
+      if (chain === "solana") {
+        const address = this.getSolanaTreasuryAddress();
+        if (address) {
+          const conn = this.getSolanaConnection();
+          const balanceLamports = await conn.getBalance(new PublicKey(address));
+          return balanceLamports / LAMPORTS_PER_SOL;
+        }
       }
 
-      if (chain === "bsc" && this.bscTreasuryAddress) {
-        const bscRpc = process.env.BSC_RPC_URL || "https://bsc-dataseed.binance.org";
-        const provider = new ethers.JsonRpcProvider(bscRpc, 56, { staticNetwork: true });
-        const balanceWei = await provider.getBalance(this.bscTreasuryAddress);
-        return parseFloat(ethers.formatEther(balanceWei));
+      if (chain === "bsc") {
+        const address = this.getBscTreasuryAddress();
+        if (address) {
+          const bscRpc = process.env.BSC_RPC_URL || "https://bsc-dataseed.binance.org";
+          const provider = new ethers.JsonRpcProvider(bscRpc, 56, { staticNetwork: true });
+          const balanceWei = await provider.getBalance(address);
+          return parseFloat(ethers.formatEther(balanceWei));
+        }
       }
     } catch (error) {
       console.warn(`[Treasury] Failed to fetch live balance for ${chain}:`, error);
