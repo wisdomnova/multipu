@@ -17,60 +17,63 @@ export default function GlobalError({
 
   return (
     <html lang="en">
-      <body className="min-h-screen flex flex-col justify-between bg-[#040507] text-white selection:bg-accent/30 selection:text-white px-6 py-10 antialiased">
+      <body className="min-h-screen flex flex-col justify-between bg-black text-white px-6 sm:px-12 py-8 sm:py-12 selection:bg-purple-600 selection:text-white font-sans antialiased">
         {/* Top Header */}
-        <div className="mx-auto w-full max-w-[1200px] flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2.5">
+        <header className="w-full max-w-[1280px] mx-auto flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-2.5 group">
             <div className="relative w-7 h-7 flex-shrink-0">
               <Image src="/logo.png" alt="Multipu" fill sizes="28px" className="object-contain" />
             </div>
-            <span className="text-base font-bold tracking-tight text-white font-mono">
-              Multipu
+            <span className="text-base sm:text-lg font-bold tracking-tight text-white group-hover:text-neutral-200 transition-colors">
+              multipu
             </span>
           </Link>
-          <span className="font-mono text-[11px] text-error uppercase tracking-widest">
-            Critical Failure
+          <span className="font-mono text-xs text-neutral-500 uppercase tracking-wider">
+            Critical Error
           </span>
-        </div>
+        </header>
 
         {/* Center Content */}
-        <div className="mx-auto w-full max-w-2xl py-20 text-center">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded bg-error/10 border border-error/20 mb-8">
-            <span className="w-1.5 h-1.5 rounded-full bg-error" />
-            <span className="font-mono text-[11px] uppercase tracking-widest text-error">
-              Root Level Exception
-            </span>
+        <main className="w-full max-w-2xl mx-auto py-20 text-center flex flex-col items-center">
+          <div className="text-xs font-mono uppercase tracking-widest text-neutral-500 mb-6">
+            03 / System Fault
           </div>
 
-          <h1 className="text-3xl md:text-5xl font-bold tracking-tight text-white leading-tight mb-4">
+          <h1 className="text-4xl sm:text-6xl md:text-7xl font-bold tracking-tight text-white leading-[1.05] select-none">
             System initialization fault.
           </h1>
 
-          <p className="text-sm md:text-base text-text-secondary leading-relaxed font-normal max-w-lg mx-auto mb-8">
-            A root-level runtime crash occurred. You can reload the application state or return to the main dashboard.
+          <p className="text-sm sm:text-base text-neutral-400 font-normal max-w-md mx-auto mt-5 mb-8 leading-relaxed">
+            A root-level runtime crash occurred. You can reboot the application runtime or return home.
           </p>
 
-          <div className="flex flex-wrap items-center justify-center gap-4 font-mono text-xs">
+          {error.digest && (
+            <div className="mb-8 px-4 py-2 rounded-xl bg-neutral-900 font-mono text-xs text-neutral-400">
+              Digest: {error.digest}
+            </div>
+          )}
+
+          <div className="flex flex-wrap items-center justify-center gap-3">
             <button
               onClick={() => reset()}
-              className="px-6 py-3 rounded bg-accent text-white font-medium hover:bg-accent-hover transition-colors cursor-pointer"
+              className="px-6 py-2.5 rounded-full bg-white text-black hover:bg-neutral-200 font-semibold text-xs tracking-tight transition-colors cursor-pointer"
             >
-              Reboot Runtime &gt;
+              Reboot Runtime →
             </button>
             <a
               href="/"
-              className="px-6 py-3 rounded bg-white/[0.04] border border-white/[0.08] text-white hover:bg-white/[0.08] transition-colors"
+              className="px-6 py-2.5 rounded-full bg-neutral-900 text-neutral-300 hover:text-white hover:bg-neutral-800 font-medium text-xs tracking-tight transition-colors"
             >
               Reload Application
             </a>
           </div>
-        </div>
+        </main>
 
-        {/* Bottom Telemetry Bar */}
-        <div className="mx-auto w-full max-w-[1200px] pt-6 border-t border-white/[0.06] flex items-center justify-between font-mono text-[11px] text-text-dim">
-          <div>Global Error Boundary</div>
-          <div>Multipu 0.1.0</div>
-        </div>
+        {/* Bottom Footer Telemetry */}
+        <footer className="w-full max-w-[1280px] mx-auto flex items-center justify-between font-mono text-xs text-neutral-500">
+          <div>Multipu Protocol</div>
+          <div>Root Boundary Active</div>
+        </footer>
       </body>
     </html>
   );

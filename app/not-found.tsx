@@ -3,75 +3,68 @@ import Image from "next/image";
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen flex flex-col justify-between bg-[#040507] text-white selection:bg-accent/30 selection:text-white px-6 py-10">
-      
+    <div className="min-h-screen flex flex-col justify-between bg-black text-white px-6 sm:px-12 py-8 sm:py-12 selection:bg-purple-600 selection:text-white font-[family-name:var(--font-geist-sans)]">
       {/* Top Header */}
-      <div className="mx-auto w-full max-w-[1200px] flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2.5">
+      <header className="w-full max-w-[1280px] mx-auto flex items-center justify-between">
+        <Link href="/" className="flex items-center gap-2.5 group">
           <div className="relative w-7 h-7 flex-shrink-0">
             <Image src="/logo.png" alt="Multipu" fill sizes="28px" className="object-contain" />
           </div>
-          <span className="text-base font-bold tracking-tight text-white font-mono">
-            Multipu
+          <span className="text-base sm:text-lg font-bold tracking-tight text-white group-hover:text-neutral-200 transition-colors">
+            multipu
           </span>
         </Link>
-        <span className="font-mono text-[11px] text-text-dim uppercase tracking-widest">
-          HTTP Status: 404
+        <span className="font-mono text-xs text-neutral-500 uppercase tracking-wider">
+          404 Not Found
         </span>
-      </div>
+      </header>
 
       {/* Center 404 Hero */}
-      <div className="mx-auto w-full max-w-2xl py-20 text-center">
-        
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded bg-white/[0.03] border border-white/[0.08] mb-8">
-          <span className="w-1.5 h-1.5 rounded-full bg-accent" />
-          <span className="font-mono text-[11px] uppercase tracking-widest text-text-secondary">
-            404 Not Found
-          </span>
+      <main className="w-full max-w-2xl mx-auto py-20 text-center flex flex-col items-center">
+        <div className="text-xs font-mono uppercase tracking-widest text-neutral-500 mb-6">
+          01 / Page Not Found
         </div>
 
-        <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-white leading-tight mb-4">
-          Route does not exist on-chain.
+        <h1 className="text-4xl sm:text-6xl md:text-7xl font-bold tracking-tight text-white leading-[1.05] select-none">
+          Page not found.
         </h1>
 
-        <p className="text-sm md:text-base text-text-secondary leading-relaxed font-normal max-w-lg mx-auto mb-10">
-          The requested coordinate or transaction view could not be resolved in the multi-chain registry.
+        <p className="text-sm sm:text-base text-neutral-400 font-normal max-w-md mx-auto mt-5 mb-10 leading-relaxed">
+          The requested coordinate or view could not be resolved in the multi-chain registry.
         </p>
 
         {/* Action Buttons */}
-        <div className="flex flex-wrap items-center justify-center gap-4 font-mono text-xs">
+        <div className="flex flex-wrap items-center justify-center gap-3">
           <Link
             href="/"
-            className="px-6 py-3 rounded bg-accent text-white font-medium hover:bg-accent-hover transition-colors"
+            className="px-6 py-2.5 rounded-full bg-white text-black hover:bg-neutral-200 font-semibold text-xs tracking-tight transition-colors"
           >
-            Return Home &gt;
+            Return Home →
           </Link>
           <Link
-            href="/dashboard/explore"
-            className="px-6 py-3 rounded bg-white/[0.04] border border-white/[0.08] text-white hover:bg-white/[0.08] transition-colors"
+            href="/dashboard"
+            className="px-6 py-2.5 rounded-full bg-neutral-900 text-neutral-300 hover:text-white hover:bg-neutral-800 font-medium text-xs tracking-tight transition-colors"
           >
-            Explore Tokens
+            Dashboard
           </Link>
           <Link
             href="/launch"
-            className="px-6 py-3 rounded bg-white/[0.04] border border-white/[0.08] text-white hover:bg-white/[0.08] transition-colors"
+            className="px-6 py-2.5 rounded-full bg-neutral-900 text-neutral-300 hover:text-white hover:bg-neutral-800 font-medium text-xs tracking-tight transition-colors"
           >
-            Launch Token
+            Launch App
           </Link>
         </div>
+      </main>
 
-      </div>
-
-      {/* Bottom Telemetry Bar */}
-      <div className="mx-auto w-full max-w-[1200px] pt-6 border-t border-white/[0.06] flex flex-col sm:flex-row items-center justify-between gap-4 font-mono text-[11px] text-text-dim">
+      {/* Bottom Footer Telemetry */}
+      <footer className="w-full max-w-[1280px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 font-mono text-xs text-neutral-500">
         <div>
-          Cluster Verification: Active
+          Multipu Protocol
         </div>
         <div>
-          Multipu Network Node 0.1.0
+          Cluster Status: Active
         </div>
-      </div>
-
+      </footer>
     </div>
   );
 }
