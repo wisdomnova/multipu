@@ -6,7 +6,7 @@ import Image from "next/image";
 import { IconRefresh, IconBell, IconMenu2 } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 import { useWalletBalances } from "@/hooks/use-wallet-balances";
-import { NotificationsSidebar } from "@/components/dashboard/notifications-sidebar";
+import { NotificationsPopup } from "@/components/dashboard/notifications-popup";
 
 function formatBalance(val: number) {
   if (val === 0) return "0.00";
@@ -17,19 +17,25 @@ function formatBalance(val: number) {
 }
 
 interface DashboardHeaderProps {
+  notificationsOpen?: boolean;
   onOpenNotifications?: () => void;
+  onCloseNotifications?: () => void;
   hasUnreadNotifications?: boolean;
   onOpenMobileMenu?: () => void;
 }
 
 export function DashboardHeader({
+  notificationsOpen: controlledOpen,
   onOpenNotifications,
+  onCloseNotifications,
   hasUnreadNotifications,
   onOpenMobileMenu,
 }: DashboardHeaderProps) {
   const { balances, isLoading, refresh } = useWalletBalances();
-  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
   const [internalHasUnread, setInternalHasUnread] = useState(true);
+
+  const isPopupOpen = controlledOpen !== undefined ? controlledOpen : internalOpen;
 
   useEffect(() => {
     fetch("/api/notifications")
@@ -47,13 +53,19 @@ export function DashboardHeader({
       ? hasUnreadNotifications
       : internalHasUnread;
 
-  const handleOpenNotifications = () => {
-    if (onOpenNotifications) {
-      onOpenNotifications();
+  const handleToggleNotifications = () => {
+    if (isPopupOpen) {
+      if (onCloseNotifications) onCloseNotifications();
+      else setInternalOpen(false);
     } else {
-      setNotificationsOpen(true);
-      setInternalHasUnread(false);
+      if (onOpenNotifications) onOpenNotifications();
+      else setInternalOpen(true);
     }
+  };
+
+  const handleCloseNotifications = () => {
+    if (onCloseNotifications) onCloseNotifications();
+    else setInternalOpen(false);
   };
 
   const chains = [
@@ -146,11 +158,16 @@ export function DashboardHeader({
             </div>
           </div>
 
-          {/* Activity Stream Notification Button - On the right */}
-          <div className="flex items-center gap-2 flex-shrink-0">
+          {/* Activity Stream Notification Button & Floating Popup */}
+          <div className="relative flex items-center gap-2 flex-shrink-0">
             <button
-              onClick={handleOpenNotifications}
-              className="relative p-2 text-neutral-400 hover:text-white hover:bg-white/[0.06] rounded-xl transition-colors cursor-pointer"
+              onClick={handleToggleNotifications}
+              className={cn(
+                "relative p-2 rounded-xl transition-all cursor-pointer",
+                isPopupOpen
+                  ? "bg-white/[0.08] text-white"
+                  : "text-neutral-400 hover:text-white hover:bg-white/[0.06]"
+              )}
               title="Activity Stream & Notifications"
               aria-label="Activity Stream & Notifications"
             >
@@ -159,17 +176,18 @@ export function DashboardHeader({
                 <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-accent animate-pulse" />
               )}
             </button>
+
+            {/* Redesigned Floating Notifications Popup */}
+            <NotificationsPopup
+              isOpen={isPopupOpen}
+              onClose={handleCloseNotifications}
+              onUnreadChange={(unreadRemaining) => {
+                setInternalHasUnread(unreadRemaining);
+              }}
+            />
           </div>
         </div>
       </header>
-
-      {/* Notifications Sidebar (Internal Fallback) */}
-      {!onOpenNotifications && (
-        <NotificationsSidebar
-          isOpen={notificationsOpen}
-          onClose={() => setNotificationsOpen(false)}
-        />
-      )}
     </>
   );
 }

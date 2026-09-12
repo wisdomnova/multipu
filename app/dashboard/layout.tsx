@@ -21,7 +21,6 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
 import { WalletButton } from "@/components/wallet-button";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
-import { NotificationsSidebar } from "@/components/dashboard/notifications-sidebar";
 import { TradingAgentCopilot } from "@/components/dashboard/trading-agent-copilot";
 import { DisconnectModal } from "@/components/dashboard/disconnect-modal";
 import { toast } from "sonner";
@@ -313,12 +312,16 @@ export default function DashboardLayout({
 
         {/* Main content */}
         <main className="flex-1 h-full overflow-y-auto min-w-0 flex flex-col">
-          {/* Unified Header with Balances on Mobile and Desktop */}
+          {/* Unified Header with Balances and Floating Notifications on Mobile and Desktop */}
           <DashboardHeader
             onOpenMobileMenu={() => setMobileOpen(true)}
+            notificationsOpen={notificationsOpen}
             onOpenNotifications={() => {
-              setNotificationsOpen(true);
+              setNotificationsOpen((prev) => !prev);
               setHasUnread(false);
+            }}
+            onCloseNotifications={() => {
+              setNotificationsOpen(false);
             }}
             hasUnreadNotifications={hasUnread}
           />
@@ -328,12 +331,6 @@ export default function DashboardLayout({
           </div>
         </main>
       </div>
-
-      {/* Global Notifications Sidebar */}
-      <NotificationsSidebar
-        isOpen={notificationsOpen}
-        onClose={() => setNotificationsOpen(false)}
-      />
 
       {/* Live AI Trading Agent Copilot */}
       <TradingAgentCopilot />
